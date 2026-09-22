@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanh AI Desktop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --sidebar-bg: #161b22;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent: #3b82f6;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- MÀN HÌNH INTRO --- */
+        #intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: hideIntroScreen 0.1s ease 3.2s forwards;
+        }
+
+        @keyframes hideIntroScreen {
+            to { display: none; visibility: hidden; opacity: 0; pointer-events: none; }
+        }
+
+        .intro-title {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: textNitroAnim 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes textNitroAnim {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            30% { opacity: 1; transform: scale(1); filter: blur(0); }
+            70% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1); filter: blur(10px); }
+        }
+
+        .intro-dot {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: #3b82f6;
+            border-radius: 50%;
+            top: -30px;
+            opacity: 0;
+            animation: nitroDropAndGlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2s forwards;
+        }
+
+        @keyframes nitroDropAndGlow {
+            0% { top: -30px; opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            50% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            60% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 100px 50px rgba(59, 130, 246, 0.7), 0 0 200px 100px rgba(147, 51, 234, 0.5); transform: scale(1.5); }
+            100% { top: calc(50% - 7px); opacity: 0; box-shadow: 0 0 300px 200px rgba(59, 130, 246, 0); transform: scale(4); }
+        }
+
+        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 17, 23, 0.98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            animation: fadeInAuth 0.5s ease 3.2s forwards;
+        }
+
+        @keyframes fadeInAuth { to { opacity: 1; } }
+
+        .auth-box {
+            background: #1e2530;
+            padding: 35px 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .auth-box h2 { margin-bottom: 6px; font-size: 1.5rem; color: white; text-align: center; }
+        .auth-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; text-align: center; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            background: #151a21;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .form-group input:focus { border-color: var(--accent); }
+
+        .auth-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .auth-btn:hover { background: #2563eb; }
+
+        .switch-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+        .switch-text span { color: var(--accent); cursor: pointer; font-weight: 500; }
+
+        /* --- GIAO DIỆN CHÍNH --- */
+        .app-container { display: flex; width: 100%; height: 100%; }
+
+        sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .new-chat-btn {
+            background: #21262d;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .new-chat-btn:hover { background: #30363d; }
+
+        .history-section {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin: 10px 0 4px 4px;
+        }
+
+        .history-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .history-item:hover { background: #21262d; }
+
+        .user-profile-box {
+            background: #1e2530;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .user-info-row { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.85rem; color: white;
+        }
+        .user-name { font-size: 0.9rem; font-weight: 500; color: white; }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .logout-btn:hover { background: #ef4444; color: white; }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f1117;
+        }
+
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .welcome-text {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #e6edf3;
+        }
+
+        /* --- HIỆU ỨNG NITRO VẼ KHUNG CHAT --- */
+        @keyframes drawBoxNitro {
+            0% { width: 0px; height: 0px; border-color: transparent; opacity: 0; }
+            50% { width: 100%; height: 0px; border-color: var(--accent); opacity: 1; }
+            100% {
+                width: 100%;
+                height: 54px;
+                border-color: var(--border-color);
+                background: rgba(30, 35, 45, 0.9);
+                opacity: 1;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            }
+        }
+
+        .draw-input-box {
+            width: 100%;
+            max-width: 680px;
+            height: 54px;
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            overflow: hidden;
+            position: relative;
+            animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            backdrop-filter: blur(10px);
+        }
+
+        .draw-input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.6s forwards;
+        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
+
+        .send-icon {
+            background: var(--accent);
+            color: white;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .send-icon:hover { transform: scale(1.1); background: #2563eb; }
+
+        #chat-messages {
+            width: 100%;
+            max-width: 750px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            display: none;
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        .msg.user { background: #2b313b; align-self: flex-end; }
+        .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình Intro Nitro Animation -->
+    <div id="intro-screen">
+        <div class="intro-title">VanhAI</div>
+        <div class="intro-dot"></div>
+    </div>
+
+    <!-- Màn hình Đăng nhập -->
+    <div id="auth-screen" style="display: none;">
+        <div class="auth-box">
+            <div id="login-form">
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng bạn quay lại với Vanh AI</p>
+                <div class="form-group">
+                    <label>Tài khoản</label>
+                    <input type="text" id="login-username" placeholder="Nhập tài khoản...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="login-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleLogin()">Đăng nhập</button>
+                <div class="switch-text">Chưa có tài khoản? <span onclick="switchTab('register')">Đăng ký ngay</span></div>
+            </div>
+
+            <div id="register-form" style="display: none;">
+                <h2>Đăng ký</h2>
+                <p>Tạo tài khoản mới</p>
+                <div class="form-group">
+                    <label>Tên hiển thị</label>
+                    <input type="text" id="reg-name" placeholder="Nhập tên...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="reg-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleRegister()">Đăng ký</button>
+                <div class="switch-text">Đã có tài khoản? <span onclick="switchTab('login')">Đăng nhập</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Giao diện chính -->
+    <div class="app-container" id="app-main" style="display: none;">
+        <sidebar>
+            <div class="sidebar-header">⚡ Vanh AI Desktop</div>
+            <button class="new-chat-btn" onclick="startNewChat()">+ Cuộc trò chuyện mới</button>
+            <div class="history-section" id="history-list">
+                <div class="history-title">Gần đây</div>
+            </div>
+            <div class="user-profile-box">
+                <div class="user-info-row">
+                    <div class="user-avatar" id="user-avatar-initial">V</div>
+                    <div class="user-name" id="user-display-name">User</div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </sidebar>
+
+        <div class="main-chat">
+            <div class="chat-body">
+                <div class="welcome-text" id="welcome-msg">Chào Vanh AI, tiếp theo mình làm gì?</div>
+                <div id="chat-messages"></div>
+                <!-- Khung chat có hiệu ứng vẽ viền nitro -->
+                <div class="draw-input-box" id="chatInputBox">
+                    <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button class="send-icon" onclick="sendMessage()">➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GEMINI_API_KEY = "AIzaSyAGr-_Jc8kPpKV0_ustOdfb1ksKgrofxi4";
+        let isFirstMessage = true;
+
+        window.onload = function() {
+            const currentUser = localStorage.getItem('vanh_ai_current_user');
+            if (currentUser) {
+                setTimeout(() => { openApp(currentUser); }, 3200);
+            } else {
+                setTimeout(() => { document.getElementById('auth-screen').style.display = 'flex'; }, 3200);
+            }
+        };
+
+        function switchTab(tab) {
+            if (tab === 'register') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            } else {
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            }
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const pass = document.getElementById('reg-password').value.trim();
+            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
+            if (localStorage.getItem('vanh_ai_user_' + name)) { alert('Tài khoản đã tồn tại!'); return; }
+            localStorage.setItem('vanh_ai_user_' + name, pass);
+            alert('Đăng ký thành công!');
+            switchTab('login');
+        }
+
+        function handleLogin() {
+            const name = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
+            const savedPass = localStorage.getItem('vanh_ai_user_' + name);
+            if (savedPass === null) { alert('Tài khoản không tồn tại!'); return; }
+            if (savedPass !== pass) { alert('Sai mật khẩu!'); return; }
+            localStorage.setItem('vanh_ai_current_user', name);
+            openApp(name);
+        }
+
+        function openApp(username) {
+            document.getElementById('user-display-name').innerText = username;
+            document.getElementById('user-avatar-initial').innerText = username.charAt(0).toUpperCase();
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-main').style.display = 'flex';
+            loadHistory();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('vanh_ai_current_user');
+            location.reload();
+        }
+
+        function getHistoryKey() {
+            return 'vanh_ai_history_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('history-list');
+            let savedHistory = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+            let itemsHtml = '<div class="history-title">Gần đây</div>';
+            savedHistory.forEach(text => { itemsHtml += `<div class="history-item">${text}</div>`; });
+            historyList.innerHTML = itemsHtml;
+        }
+
+        function saveHistoryItem(text) {
+            let historyKey = getHistoryKey();
+            let savedHistory = JSON.parse(localStorage.getItem(historyKey)) || [];
+            if (savedHistory[0] !== text) {
+                savedHistory.unshift(text);
+                if (savedHistory.length > 20) savedHistory.pop();
+                localStorage.setItem(historyKey, JSON.stringify(savedHistory));
+                loadHistory();
+            }
+        }
+
+        function startNewChat() {
+            document.getElementById('chat-messages').style.display = 'none';
+            document.getElementById('welcome-msg').style.display = 'block';
+            document.getElementById('chat-messages').innerHTML = '';
+            isFirstMessage = true;
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const text = inputField.value.trim();
+            if (!text) return;
+
+            if (isFirstMessage) {
+                saveHistoryItem(text);
+                isFirstMessage = false;
+            }
+
+            document.getElementById('welcome-msg').style.display = 'none';
+            const chatMsgs = document.getElementById('chat-messages');
+            chatMsgs.style.display = 'flex';
+            chatMsgs.innerHTML += `<div class="msg user">${text}</div>`;
+            inputField.value = '';
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang trả lời...</div>`;
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            let aiReply = "";
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text }] }]
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    aiReply = data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Không thể lấy phản hồi từ API");
+                }
+            } catch (err) {
+                aiReply = "Đã xảy ra lỗi khi kết nối tới AI. Vui lòng thử lại sau!";
+            }
+
+            document.getElementById(loadingId).remove();
+            chatMsgs.innerHTML += `<div class="msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -523,8 +523,8 @@
 
             let aiReply = "";
             try {
-                // Đã cập nhật lại endpoint chuẩn v1beta với model flash-latest
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+                // Đã cập nhật chuẩn endpoint model gemini-1.5-flash
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -537,6 +537,7 @@
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     aiReply = data.candidates[0].content.parts[0].text;
                 } else {
+                    console.error("API Response Error:", data);
                     throw new Error("Không thể lấy phản hồi từ API");
                 }
             } catch (err) {

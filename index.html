@@ -150,7 +150,7 @@
             align-items: center;
         }
 
-        /* Phần chữ mở đầu lấp lánh (nitro) */
+        /* Hiệu ứng chữ nitro mở đầu */
         .welcome-msg {
             margin-top: 20vh;
             font-size: 36px;
@@ -260,10 +260,10 @@
         </div>
         <div class="user-panel">
             <div class="user-info">
-                <div class="avatar">T</div>
-                <span>Trần Việt Anh</span>
+                <div class="avatar" id="user-avatar">V</div>
+                <span id="user-name-display">Trần Việt Anh</span>
             </div>
-            <button class="logout-btn">Đăng xuất</button>
+            <button class="logout-btn" onclick="handleLogout()">Đăng xuất / Đổi tên</button>
         </div>
     </div>
 
@@ -272,8 +272,7 @@
         <div class="top-bar">Vanh AI Desktop</div>
         
         <div class="chat-container" id="chat-container">
-            <!-- Dòng chữ nitro chào mừng đã quay trở lại -->
-            <div class="welcome-msg" id="welcome-msg">Chào Việt Anh, bạn đang nghĩ gì...</div>
+            <div class="welcome-msg" id="welcome-msg">Chào bạn, bạn đang nghĩ gì...</div>
             <div class="chat-messages" id="chat-messages">
                 <!-- Nội dung tin nhắn chat -->
             </div>
@@ -291,8 +290,33 @@
         const GEMINI_API_KEY = "AIzaSyD... (Điền API Key của Vanh vào đây)"; // Thay Key của Vanh vào đây
         let isFirstMessage = true;
 
+        // Quản lý tên người dùng
+        function getCurrentUser() {
+            let user = localStorage.getItem('vanh_ai_current_user');
+            if (!user) {
+                user = prompt("Nhập tên hiển thị của bạn:") || "Trần Việt Anh";
+                localStorage.setItem('vanh_ai_current_user', user);
+            }
+            return user;
+        }
+
+        let currentUserName = getCurrentUser();
+
+        function updateUserInfoUI() {
+            document.getElementById('user-name-display').innerText = currentUserName;
+            document.getElementById('user-avatar').innerText = currentUserName.charAt(0).toUpperCase();
+            document.getElementById('welcome-msg').innerText = `Chào ${currentUserName}, bạn đang nghĩ gì...`;
+        }
+
+        function handleLogout() {
+            if (confirm("Bạn có muốn đăng xuất và đổi tên hiển thị khác không?")) {
+                localStorage.removeItem('vanh_ai_current_user');
+                location.reload();
+            }
+        }
+
         function getHistoryKey() {
-            return 'vanh_ai_history_list_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
+            return 'vanh_ai_history_list_' + currentUserName;
         }
 
         function startNewChat() {
@@ -372,7 +396,6 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             try {
-                // Đã cập nhật chuẩn model mới nhất: gemini-3.6-flash
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
                 const response = await fetch(url, {
@@ -410,6 +433,7 @@
         }
 
         window.onload = function() {
+            updateUserInfoUI();
             loadHistory();
         };
     </script>

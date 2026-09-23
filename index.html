@@ -150,12 +150,11 @@
             align-items: center;
         }
 
-        /* Hiệu ứng chữ nitro mở đầu */
         .welcome-msg {
             margin-top: 20vh;
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 600;
-            background: linear-gradient(to right, #9bbbf0, #c48b9f, #f2b8b5);
+            background: linear-gradient(to right, #9bbbf0, #c48b9f);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
@@ -260,10 +259,10 @@
         </div>
         <div class="user-panel">
             <div class="user-info">
-                <div class="avatar" id="user-avatar">V</div>
-                <span id="user-name-display">Trần Việt Anh</span>
+                <div class="avatar">T</div>
+                <span>Trần Việt Anh</span>
             </div>
-            <button class="logout-btn" onclick="handleLogout()">Đăng xuất / Đổi tên</button>
+            <button class="logout-btn">Đăng xuất</button>
         </div>
     </div>
 
@@ -272,7 +271,7 @@
         <div class="top-bar">Vanh AI Desktop</div>
         
         <div class="chat-container" id="chat-container">
-            <div class="welcome-msg" id="welcome-msg">Chào bạn, bạn đang nghĩ gì...</div>
+            <div class="welcome-msg" id="welcome-msg">Chào Việt Anh, bạn đang nghĩ gì...</div>
             <div class="chat-messages" id="chat-messages">
                 <!-- Nội dung tin nhắn chat -->
             </div>
@@ -290,33 +289,8 @@
         const GEMINI_API_KEY = "AIzaSyD... (Điền API Key của Vanh vào đây)"; // Thay Key của Vanh vào đây
         let isFirstMessage = true;
 
-        // Quản lý tên người dùng
-        function getCurrentUser() {
-            let user = localStorage.getItem('vanh_ai_current_user');
-            if (!user) {
-                user = prompt("Nhập tên hiển thị của bạn:") || "Trần Việt Anh";
-                localStorage.setItem('vanh_ai_current_user', user);
-            }
-            return user;
-        }
-
-        let currentUserName = getCurrentUser();
-
-        function updateUserInfoUI() {
-            document.getElementById('user-name-display').innerText = currentUserName;
-            document.getElementById('user-avatar').innerText = currentUserName.charAt(0).toUpperCase();
-            document.getElementById('welcome-msg').innerText = `Chào ${currentUserName}, bạn đang nghĩ gì...`;
-        }
-
-        function handleLogout() {
-            if (confirm("Bạn có muốn đăng xuất và đổi tên hiển thị khác không?")) {
-                localStorage.removeItem('vanh_ai_current_user');
-                location.reload();
-            }
-        }
-
         function getHistoryKey() {
-            return 'vanh_ai_history_list_' + currentUserName;
+            return 'vanh_ai_history_list_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
         }
 
         function startNewChat() {
@@ -391,12 +365,14 @@
             inputElem.value = '';
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
+            // Hiển thị trạng thái đang đợi phản hồi
             const loadingId = 'loading-' + Date.now();
             chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}">Đang suy nghĩ...</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
+                // Đã cập nhật đúng endpoint model mới (gemini-2.5-flash)
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -420,6 +396,7 @@
                 chatMsgs.innerHTML += `<div class="msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
                 chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
+                // Tự động lưu cuộc trò chuyện dựa vào câu hỏi đầu tiên của user
                 let firstUserMsg = chatMsgs.querySelector('.msg.user');
                 if (firstUserMsg) {
                     saveCurrentChat(firstUserMsg.innerText, chatMsgs.innerHTML);
@@ -432,8 +409,8 @@
             }
         }
 
+        // Tải lịch sử khi vừa mở trang
         window.onload = function() {
-            updateUserInfoUI();
             loadHistory();
         };
     </script>

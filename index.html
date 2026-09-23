@@ -258,7 +258,6 @@
             color: #e6edf3;
         }
 
-        /* --- HIỆU ỨNG NITRO VẼ KHUNG CHAT --- */
         @keyframes drawBoxNitro {
             0% { width: 0px; height: 0px; border-color: transparent; opacity: 0; }
             50% { width: 100%; height: 0px; border-color: var(--accent); opacity: 1; }
@@ -353,7 +352,7 @@
         <div class="auth-box">
             <div id="login-form">
                 <h2>Đăng nhập</h2>
-                <p>Chào mừng bạn quay lại với Vanh AI</p>
+                <p>Kết nối SheetDB Database</p>
                 <div class="form-group">
                     <label>Tài khoản</label>
                     <input type="text" id="login-username" placeholder="Nhập tài khoản...">
@@ -368,10 +367,10 @@
 
             <div id="register-form" style="display: none;">
                 <h2>Đăng ký</h2>
-                <p>Tạo tài khoản mới</p>
+                <p>Tạo tài khoản lưu lên Sheet</p>
                 <div class="form-group">
-                    <label>Tên hiển thị</label>
-                    <input type="text" id="reg-name" placeholder="Nhập tên...">
+                    <label>Tên hiển thị / Tài khoản</label>
+                    <input type="text" id="reg-name" placeholder="Nhập tài khoản...">
                 </div>
                 <div class="form-group">
                     <label>Mật khẩu</label>
@@ -404,7 +403,6 @@
             <div class="chat-body">
                 <div class="welcome-text" id="welcome-msg">Chào Vanh AI, tiếp theo mình làm gì?</div>
                 <div id="chat-messages"></div>
-                <!-- Khung chat có hiệu ứng vẽ viền nitro -->
                 <div class="draw-input-box" id="chatInputBox">
                     <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì..." onkeydown="if(event.key==='Enter') sendMessage()">
                     <button class="send-icon" onclick="sendMessage()">➔</button>
@@ -415,6 +413,7 @@
 
     <script>
         const GEMINI_API_KEY = "AIzaSyAGr-_Jc8kPpKV0_ustOdfb1ksKgrofxi4";
+        const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
         let isFirstMessage = true;
 
         window.onload = function() {
@@ -436,25 +435,56 @@
             }
         }
 
-        function handleRegister() {
+        // ĐĂNG KÝ: Gửi dữ liệu qua SheetDB để thêm dòng mới vào Google Sheet
+        async function handleRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const pass = document.getElementById('reg-password').value.trim();
             if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
-            if (localStorage.getItem('vanh_ai_user_' + name)) { alert('Tài khoản đã tồn tại!'); return; }
-            localStorage.setItem('vanh_ai_user_' + name, pass);
-            alert('Đăng ký thành công!');
-            switchTab('login');
+
+            try {
+                const checkRes = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}`);
+                const existing = await checkRes.json();
+                if (existing.length > 0) {
+                    alert('Tài khoản này đã tồn tại trên hệ thống!');
+                    return;
+                }
+
+                const response = await fetch(SHEETDB_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: { username: name, password: pass } })
+                });
+
+                if (response.ok) {
+                    alert('Đăng ký thành công!');
+                    switchTab('login');
+                } else {
+                    throw new Error('Lỗi từ SheetDB');
+                }
+            } catch (err) {
+                alert('Đăng ký thất bại, vui lòng kiểm tra lại kết nối!');
+            }
         }
 
-        function handleLogin() {
+        // ĐĂNG NHẬP: Truy vấn qua SheetDB để đối chiếu tài khoản & mật khẩu
+        async function handleLogin() {
             const name = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value.trim();
             if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
-            const savedPass = localStorage.getItem('vanh_ai_user_' + name);
-            if (savedPass === null) { alert('Tài khoản không tồn tại!'); return; }
-            if (savedPass !== pass) { alert('Sai mật khẩu!'); return; }
-            localStorage.setItem('vanh_ai_current_user', name);
-            openApp(name);
+
+            try {
+                const response = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}&password=${encodeURIComponent(pass)}`);
+                const users = await response.json();
+
+                if (users.length > 0) {
+                    localStorage.setItem('vanh_ai_current_user', name);
+                    openApp(name);
+                } else {
+                    alert('Sai tài khoản hoặc mật khẩu!');
+                }
+            } catch (err) {
+                alert('Không thể kết nối đến cơ sở dữ liệu!');
+            }
         }
 
         function openApp(username) {
@@ -500,6 +530,7 @@
             isFirstMessage = true;
         }
 
+        // CHAT GEMINI
         async function sendMessage() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
@@ -523,7 +554,6 @@
 
             let aiReply = "";
             try {
-                // Đã cập nhật chuẩn endpoint model gemini-1.5-flash
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 const response = await fetch(url, {
                     method: 'POST',
@@ -537,8 +567,7 @@
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     aiReply = data.candidates[0].content.parts[0].text;
                 } else {
-                    console.error("API Response Error:", data);
-                    throw new Error("Không thể lấy phản hồi từ API");
+                    throw new Error("Lỗi API");
                 }
             } catch (err) {
                 aiReply = "Đã xảy ra lỗi khi kết nối tới AI. Vui lòng thử lại sau!";

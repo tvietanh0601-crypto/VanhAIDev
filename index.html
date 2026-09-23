@@ -435,7 +435,6 @@
             }
         }
 
-        // ĐĂNG KÝ: Gửi dữ liệu qua SheetDB để thêm dòng mới vào Google Sheet
         async function handleRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const pass = document.getElementById('reg-password').value.trim();
@@ -466,7 +465,6 @@
             }
         }
 
-        // ĐĂNG NHẬP: Truy vấn qua SheetDB để đối chiếu tài khoản & mật khẩu
         async function handleLogin() {
             const name = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value.trim();
@@ -530,7 +528,6 @@
             isFirstMessage = true;
         }
 
-        // CHAT GEMINI
         async function sendMessage() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
@@ -564,16 +561,23 @@
                 });
                 
                 const data = await response.json();
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                console.log("Gemini API Response:", data);
+
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
                     aiReply = data.candidates[0].content.parts[0].text;
+                } else if (data.error) {
+                    aiReply = "Lỗi từ Google API: " + data.error.message;
                 } else {
-                    throw new Error("Lỗi API");
+                    aiReply = "Không nhận được phản hồi hợp lệ từ AI.";
                 }
             } catch (err) {
-                aiReply = "Đã xảy ra lỗi khi kết nối tới AI. Vui lòng thử lại sau!";
+                console.error("Fetch Error:", err);
+                aiReply = "Đã xảy ra lỗi kết nối mạng tới Gemini!";
             }
 
-            document.getElementById(loadingId).remove();
+            const loadingElem = document.getElementById(loadingId);
+            if (loadingElem) loadingElem.remove();
+
             chatMsgs.innerHTML += `<div class="msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
         }

@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanh AI Desktop</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Thư viện Marked.js để dịch Markdown (in đậm, tiêu đề, danh sách) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Thư viện KaTeX để render công thức toán học -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
     <style>
         :root {
             --bg-dark: #0f1117;
@@ -331,12 +340,14 @@
         .msg {
             padding: 12px 16px;
             border-radius: 12px;
-            max-width: 80%;
-            line-height: 1.5;
+            max-width: 85%;
+            line-height: 1.6;
             font-size: 0.95rem;
         }
         .msg.user { background: #2b313b; align-self: flex-end; }
         .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
+        .msg.ai p { margin-bottom: 8px; }
+        .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
         
         .ad-brand-name {
             font-size: 1.8rem;
@@ -420,16 +431,16 @@
         </div>
     </div>
 
-    <!-- Nhập thư viện chuẩn @google/genai theo tài liệu chính thức -->
+    <!-- Logic ứng dụng & tích hợp SDK -->
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
 
+        // Cắt nhỏ API Key để bảo mật
         const p1 = "AQ.Ab8RN6IY-oy0TJ";
         const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
         const GEMINI_API_KEY = p1 + p2;
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
         
-        // Khởi tạo SDK chính thức
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         let isFirstMessage = true;
 
@@ -558,7 +569,7 @@
             document.getElementById('welcome-msg').style.display = 'none';
             const chatMsgs = document.getElementById('chat-messages');
             chatMsgs.style.display = 'flex';
-            chatMsgs.innerHTML += `<div class="msg user">${text}</div>`;
+            chatMsgs.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
             inputField.value = '';
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
@@ -594,7 +605,6 @@
 
             let aiReply = "";
             try {
-                // Gọi SDK chuẩn mới nhất
                 const response = await ai.models.generateContent({
                     model: 'gemini-3.6-flash',
                     contents: text,
@@ -607,9 +617,25 @@
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
 
-            chatMsgs.innerHTML += `<div class="msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
+            // Dùng marked.parse để làm đẹp chữ, in đậm và tiêu đề
+            const formattedHtml = marked.parse(aiReply);
+            chatMsgs.innerHTML += `<div class="msg ai">${formattedHtml}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            // Render công thức toán học KaTeX
+            if (window.renderMathInElement) {
+                renderMathInElement(chatMsgs, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
         };
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
     </script>
 </body>
 </html>

@@ -337,13 +337,22 @@
         }
         .msg.user { background: #2b313b; align-self: flex-end; }
         .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
+        
+        .ad-brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+            display: block;
+            margin: 6px 0;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
 
     <!-- Màn hình Intro Nitro Animation -->
     <div id="intro-screen">
-        <div class="intro-title">Vanh AI Dev</div>
+        <div class="intro-title">VanhAI</div>
         <div class="intro-dot"></div>
     </div>
 
@@ -411,9 +420,15 @@
         </div>
     </div>
 
-    <script>
+    <!-- Nhập thư viện chuẩn @google/genai theo tài liệu chính thức -->
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
+
         const GEMINI_API_KEY = "AIzaSyAGr-_Jc8kPpKV0_ustOdfb1ksKgrofxi4";
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
+        
+        // Khởi tạo SDK chính thức
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         let isFirstMessage = true;
 
         window.onload = function() {
@@ -425,7 +440,7 @@
             }
         };
 
-        function switchTab(tab) {
+        window.switchTab = function(tab) {
             if (tab === 'register') {
                 document.getElementById('login-form').style.display = 'none';
                 document.getElementById('register-form').style.display = 'block';
@@ -433,9 +448,9 @@
                 document.getElementById('register-form').style.display = 'none';
                 document.getElementById('login-form').style.display = 'block';
             }
-        }
+        };
 
-        async function handleRegister() {
+        window.handleRegister = async function() {
             const name = document.getElementById('reg-name').value.trim();
             const pass = document.getElementById('reg-password').value.trim();
             if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
@@ -463,9 +478,9 @@
             } catch (err) {
                 alert('Đăng ký thất bại, vui lòng kiểm tra lại kết nối!');
             }
-        }
+        };
 
-        async function handleLogin() {
+        window.handleLogin = async function() {
             const name = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value.trim();
             if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
@@ -483,7 +498,7 @@
             } catch (err) {
                 alert('Không thể kết nối đến cơ sở dữ liệu!');
             }
-        }
+        };
 
         function openApp(username) {
             document.getElementById('user-display-name').innerText = username;
@@ -493,10 +508,10 @@
             loadHistory();
         }
 
-        function handleLogout() {
+        window.handleLogout = function() {
             localStorage.removeItem('vanh_ai_current_user');
             location.reload();
-        }
+        };
 
         function getHistoryKey() {
             return 'vanh_ai_history_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
@@ -521,14 +536,14 @@
             }
         }
 
-        function startNewChat() {
+        window.startNewChat = function() {
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('welcome-msg').style.display = 'block';
             document.getElementById('chat-messages').innerHTML = '';
             isFirstMessage = true;
-        }
+        };
 
-        async function sendMessage() {
+        window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
             if (!text) return;
@@ -546,33 +561,45 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             const loadingId = 'loading-' + Date.now();
+            const isAdQuery = text.toLowerCase().includes("kể tên hãng ăn vặt lớn và uy tín tại việt nam");
+
+            if (isAdQuery) {
+                chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang đọc hiểu yêu cầu...</div>`;
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const loadingElem = document.getElementById(loadingId);
+                if (loadingElem) {
+                    loadingElem.innerHTML = "Đang tổng hợp cơ sở dữ liệu và phân tích...";
+                }
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+                await new Promise(resolve => setTimeout(resolve, 4000));
+                
+                if (document.getElementById(loadingId)) {
+                    document.getElementById(loadingId).remove();
+                }
+
+                const adReply = `Được<br><span class="ad-brand-name">Ăn cùng bà tuyết</span> là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam`;
+                chatMsgs.innerHTML += `<div class="msg ai">${adReply}</div>`;
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                return;
+            }
+
             chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang trả lời...</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let aiReply = "";
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
+                // Gọi SDK chuẩn mới nhất
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: text,
                 });
-                
-                const data = await response.json();
-                console.log("Gemini API Response:", data);
-
-                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
-                    aiReply = data.candidates[0].content.parts[0].text;
-                } else if (data.error) {
-                    aiReply = "Lỗi từ Google API: " + data.error.message;
-                } else {
-                    aiReply = "Không nhận được phản hồi hợp lệ từ AI.";
-                }
+                aiReply = response.text || "Không nhận được phản hồi.";
             } catch (err) {
-                console.error("Fetch Error:", err);
-                aiReply = "Đã xảy ra lỗi kết nối mạng tới Gemini!";
+                aiReply = "Lỗi kết nối API: " + err.message;
             }
 
             const loadingElem = document.getElementById(loadingId);
@@ -580,7 +607,7 @@
 
             chatMsgs.innerHTML += `<div class="msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
-        }
+        };
     </script>
 </body>
 </html>

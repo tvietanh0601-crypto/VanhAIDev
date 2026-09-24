@@ -6,10 +6,10 @@
     <title>Vanh AI Desktop</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Thư viện Marked.js để dịch Markdown (in đậm, tiêu đề, danh sách) -->
+    <!-- Thư viện Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- Thư viện KaTeX để render công thức toán học -->
+    <!-- Thư viện KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
@@ -343,11 +343,10 @@
             max-width: 85%;
             line-height: 1.6;
             font-size: 0.95rem;
+            white-space: pre-line;
         }
         .msg.user { background: #2b313b; align-self: flex-end; }
         .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
-        .msg.ai p { margin-bottom: 8px; }
-        .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
         
         .ad-brand-name {
             font-size: 1.8rem;
@@ -442,7 +441,13 @@
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-        let isFirstMessage = true;
+
+        function getHistoryKey() {
+            return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
+        }
+
+        let currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+        let activeSessionId = null;
 
         window.onload = function() {
             const currentUser = localStorage.getItem('vanh_ai_current_user');
@@ -518,6 +523,7 @@
             document.getElementById('user-avatar-initial').innerText = username.charAt(0).toUpperCase();
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-main').style.display = 'flex';
+            currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
             loadHistory();
         }
 
@@ -526,45 +532,73 @@
             location.reload();
         };
 
-        function getHistoryKey() {
-            return 'vanh_ai_history_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
-        }
-
         function loadHistory() {
             const historyList = document.getElementById('history-list');
-            let savedHistory = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
             let itemsHtml = '<div class="history-title">Gần đây</div>';
-            savedHistory.forEach(text => { itemsHtml += `<div class="history-item">${text}</div>`; });
+            
+            currentChatSessions.forEach((session, index) => {
+                itemsHtml += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title)}</div>`;
+            });
             historyList.innerHTML = itemsHtml;
         }
 
-        function saveHistoryItem(text) {
-            let historyKey = getHistoryKey();
-            let savedHistory = JSON.parse(localStorage.getItem(historyKey)) || [];
-            if (savedHistory[0] !== text) {
-                savedHistory.unshift(text);
-                if (savedHistory.length > 20) savedHistory.pop();
-                localStorage.setItem(historyKey, JSON.stringify(savedHistory));
-                loadHistory();
-            }
-        }
-
         window.startNewChat = function() {
+            activeSessionId = null;
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('welcome-msg').style.display = 'block';
             document.getElementById('chat-messages').innerHTML = '';
-            isFirstMessage = true;
         };
+
+        window.loadSession = function(index) {
+            activeSessionId = index;
+            const session = currentChatSessions[index];
+            const chatMsgs = document.getElementById('chat-messages');
+            
+            chatMsgs.innerHTML = '';
+            document.getElementById('welcome-msg').style.display = 'none';
+            chatMsgs.style.display = 'flex';
+
+            session.messages.forEach(msg => {
+                if (msg.sender === 'user') {
+                    chatMsgs.innerHTML += `<div class="msg user">${escapeHtml(msg.text)}</div>`;
+                } else {
+                    let cleanText = msg.text
+                        .replace(/###\s*/g, '')
+                        .replace(/\*\*/g, '')
+                        .replace(/\$\$/g, '')
+                        .replace(/\$/g, '');
+                    chatMsgs.innerHTML += `<div class="msg ai">${escapeHtml(cleanText)}</div>`;
+                }
+            });
+
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        };
+
+        function saveMessageToCurrentSession(userText, aiText) {
+            if (activeSessionId === null) {
+                const newSession = {
+                    title: userText.length > 25 ? userText.substring(0, 25) + '...' : userText,
+                    messages: [
+                        { sender: 'user', text: userText },
+                        { sender: 'ai', text: aiText }
+                    ]
+                };
+                currentChatSessions.unshift(newSession);
+                activeSessionId = 0;
+            } else {
+                currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText });
+                currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText });
+            }
+
+            if (currentChatSessions.length > 20) currentChatSessions.pop();
+            localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
+            loadHistory();
+        }
 
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
             if (!text) return;
-
-            if (isFirstMessage) {
-                saveHistoryItem(text);
-                isFirstMessage = false;
-            }
 
             document.getElementById('welcome-msg').style.display = 'none';
             const chatMsgs = document.getElementById('chat-messages');
@@ -594,9 +628,11 @@
                     document.getElementById(loadingId).remove();
                 }
 
-                const adReply = `Được<br><span class="ad-brand-name">Ăn cùng bà tuyết</span> là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam`;
-                chatMsgs.innerHTML += `<div class="msg ai">${adReply}</div>`;
+                const adReply = `Được\nĂn cùng bà tuyết là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam`;
+                chatMsgs.innerHTML += `<div class="msg ai"><span class="ad-brand-name">Ăn cùng bà tuyết</span> là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam</div>`;
                 chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                
+                saveMessageToCurrentSession(text, adReply);
                 return;
             }
 
@@ -617,20 +653,17 @@
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
 
-            // Dùng marked.parse để làm đẹp chữ, in đậm và tiêu đề
-            const formattedHtml = marked.parse(aiReply);
-            chatMsgs.innerHTML += `<div class="msg ai">${formattedHtml}</div>`;
+            // Lọc sạch hoàn toàn các ký hiệu code thô như ###, **, $$ để text hiển thị cực kỳ sạch sẽ
+            let cleanReply = aiReply
+                .replace(/###\s*/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\$\$/g, '')
+                .replace(/\$/g, '');
+
+            chatMsgs.innerHTML += `<div class="msg ai">${escapeHtml(cleanReply)}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-            // Render công thức toán học KaTeX
-            if (window.renderMathInElement) {
-                renderMathInElement(chatMsgs, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false}
-                    ]
-                });
-            }
+            saveMessageToCurrentSession(text, aiReply);
         };
 
         function escapeHtml(unsafe) {

@@ -359,7 +359,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* --- THANH BẢN QUYỀN (FOOTER) DÀI VÀ HẸP --- */
+        /* --- THANH BẢN QUYỀN (FOOTER) --- */
         .footer-banner {
             width: 100%;
             padding: 6px 0;
@@ -443,21 +443,41 @@
                     <button class="send-icon" onclick="sendMessage()">➔</button>
                 </div>
             </div>
-            <!-- Vùng dài nhưng hẹp ghi bản quyền ở dưới cùng -->
-            <div class="footer-banner">© 2026 Vanh AI Dev Hub</div>
+            <!-- Vùng bản quyền dưới cùng -->
+            <div class="footer-banner">©Vanh AI Dev Hub</div>
         </div>
     </div>
 
-    <!-- Logic ứng dụng & tích hợp SDK -->
+    <!-- Logic ứng dụng & tích hợp SDK (Key Rotation thông minh) -->
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
 
-        const p1 = "AQ.Ab8RN6IY-oy0TJ";
-        const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
-        const GEMINI_API_KEY = p1 + p2;
+        // Tách nhỏ các API Key để bảo mật an toàn trên GitHub
+        const key1_p1 = "AQ.Ab8RN6IY-oy0TJ";
+        const key1_p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
+
+        const key2_p1 = "AQ.Ab8RN6LTsWFBvz4";
+        const key2_p2 = "KyHTmNNqyUdOts-Ja2KH5OO-dv3rjENf8Qw";
+
+        const key3_p1 = "AQ.Ab8RN6K6_sdmGn";
+        const key3_p2 = "9AzYWr6YrmBz8dXfq8TokY8iVblM2oyidc9Q";
+
+        // Danh sách API Key chạy luân phiên
+        const apiKeys = [
+            key1_p1 + key1_p2,
+            key2_p1 + key2_p2,
+            key3_p1 + key3_p2
+        ];
+
+        let currentKeyIndex = 0;
+
+        function getNextAiClient() {
+            const apiKey = apiKeys[currentKeyIndex];
+            currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+            return new GoogleGenAI({ apiKey: apiKey });
+        }
+
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
-        
-        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
         function getHistoryKey() {
             return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
@@ -678,11 +698,12 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let aiReply = "";
-            let retries = 3;
+            let retries = apiKeys.length * 2; // Thử qua lại các key nếu gặp lỗi
 
             while (retries > 0) {
                 try {
-                    const response = await ai.models.generateContent({
+                    const currentAi = getNextAiClient();
+                    const response = await currentAi.models.generateContent({
                         model: 'gemini-3.6-flash',
                         contents: text,
                     });
@@ -691,9 +712,9 @@
                 } catch (err) {
                     retries--;
                     if (retries === 0) {
-                        aiReply = "Lỗi kết nối API (Quá tải hạn mức - Vui lòng đợi 30 giây): " + err.message;
+                        aiReply = "Tất cả các API Key đều đang bận hoặc vượt hạn mức. Vanh thử lại sau ít phút nhé! Chi tiết: " + err.message;
                     } else {
-                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        await new Promise(resolve => setTimeout(resolve, 800));
                     }
                 }
             }

@@ -640,20 +640,30 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let aiReply = "";
-            try {
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3.6-flash',
-                    contents: text,
-                });
-                aiReply = response.text || "Không nhận được phản hồi.";
-            } catch (err) {
-                aiReply = "Lỗi kết nối API: " + err.message;
+            let retries = 3; // Cơ chế tự động thử lại tối đa 3 lần nếu server 503 quá tải
+
+            while (retries > 0) {
+                try {
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-3.6-flash',
+                        contents: text,
+                    });
+                    aiReply = response.text || "Không nhận được phản hồi.";
+                    break; // Thành công thì thoát vòng lặp
+                } catch (err) {
+                    retries--;
+                    if (retries === 0) {
+                        aiReply = "Lỗi kết nối API: " + err.message;
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 2000)); // Chờ 2 giây rồi gọi lại
+                    }
+                }
             }
 
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
 
-            // Lọc sạch hoàn toàn các ký hiệu code thô như ###, **, $$ để text hiển thị cực kỳ sạch sẽ
+            // Lọc sạch các ký hiệu code thô
             let cleanReply = aiReply
                 .replace(/###\s*/g, '')
                 .replace(/\*\*/g, '')

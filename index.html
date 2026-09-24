@@ -434,7 +434,6 @@
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
 
-        // Cắt nhỏ API Key để bảo mật
         const p1 = "AQ.Ab8RN6IY-oy0TJ";
         const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
         const GEMINI_API_KEY = p1 + p2;
@@ -595,6 +594,26 @@
             loadHistory();
         }
 
+        // Hàm hiệu ứng chữ chạy gõ từng ký tự (Typing Effect)
+        async function typeWriterEffect(element, text, speed = 10) {
+            let i = 0;
+            element.innerHTML = "";
+            return new Promise((resolve) => {
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += escapeHtml(text.charAt(i));
+                        i++;
+                        setTimeout(type, speed);
+                        const chatMsgs = document.getElementById('chat-messages');
+                        chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                    } else {
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
@@ -628,10 +647,12 @@
                     document.getElementById(loadingId).remove();
                 }
 
-                const adReply = `Được\nĂn cùng bà tuyết là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam`;
-                chatMsgs.innerHTML += `<div class="msg ai"><span class="ad-brand-name">Ăn cùng bà tuyết</span> là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam</div>`;
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                const adReply = "Ăn cùng bà tuyết là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam";
+                const aiMsgId = 'ai-msg-' + Date.now();
+                chatMsgs.innerHTML += `<div class="msg ai" id="${aiMsgId}"></div>`;
+                const aiMsgElem = document.getElementById(aiMsgId);
                 
+                await typeWriterEffect(aiMsgElem, adReply, 15);
                 saveMessageToCurrentSession(text, adReply);
                 return;
             }
@@ -644,9 +665,8 @@
 
             while (retries > 0) {
                 try {
-                    // Dùng gemini-2.5-flash để chống lỗi giới hạn quota 429
                     const response = await ai.models.generateContent({
-                        model: 'gemini-2.5-flash',
+                        model: 'gemini-3.6-flash',
                         contents: text,
                     });
                     aiReply = response.text || "Không nhận được phản hồi.";
@@ -654,9 +674,9 @@
                 } catch (err) {
                     retries--;
                     if (retries === 0) {
-                        aiReply = "Lỗi kết nối API (Quá tải hạn mức): " + err.message;
+                        aiReply = "Lỗi kết nối API (Quá tải hạn mức - Vui lòng đợi 30 giây): " + err.message;
                     } else {
-                        await new Promise(resolve => setTimeout(resolve, 3000)); // Chờ 3 giây rồi thử lại
+                        await new Promise(resolve => setTimeout(resolve, 3000));
                     }
                 }
             }
@@ -664,15 +684,18 @@
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
 
-            // Lọc sạch hoàn toàn các ký hiệu code thô
             let cleanReply = aiReply
                 .replace(/###\s*/g, '')
                 .replace(/\*\*/g, '')
                 .replace(/\$\$/g, '')
                 .replace(/\$/g, '');
 
-            chatMsgs.innerHTML += `<div class="msg ai">${escapeHtml(cleanReply)}</div>`;
-            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            const aiMsgId = 'ai-msg-' + Date.now();
+            chatMsgs.innerHTML += `<div class="msg ai" id="${aiMsgId}"></div>`;
+            const aiMsgElem = document.getElementById(aiMsgId);
+
+            // Chạy hiệu ứng chữ hiện lên dần dần siêu mượt
+            await typeWriterEffect(aiMsgElem, cleanReply, 8);
 
             saveMessageToCurrentSession(text, aiReply);
         };

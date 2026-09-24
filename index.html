@@ -640,22 +640,23 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let aiReply = "";
-            let retries = 3; // Cơ chế tự động thử lại tối đa 3 lần nếu server 503 quá tải
+            let retries = 3;
 
             while (retries > 0) {
                 try {
+                    // Dùng gemini-2.5-flash để chống lỗi giới hạn quota 429
                     const response = await ai.models.generateContent({
-                        model: 'gemini-3.6-flash',
+                        model: 'gemini-2.5-flash',
                         contents: text,
                     });
                     aiReply = response.text || "Không nhận được phản hồi.";
-                    break; // Thành công thì thoát vòng lặp
+                    break;
                 } catch (err) {
                     retries--;
                     if (retries === 0) {
-                        aiReply = "Lỗi kết nối API: " + err.message;
+                        aiReply = "Lỗi kết nối API (Quá tải hạn mức): " + err.message;
                     } else {
-                        await new Promise(resolve => setTimeout(resolve, 2000)); // Chờ 2 giây rồi gọi lại
+                        await new Promise(resolve => setTimeout(resolve, 3000)); // Chờ 3 giây rồi thử lại
                     }
                 }
             }
@@ -663,7 +664,7 @@
             const loadingElem = document.getElementById(loadingId);
             if (loadingElem) loadingElem.remove();
 
-            // Lọc sạch các ký hiệu code thô
+            // Lọc sạch hoàn toàn các ký hiệu code thô
             let cleanReply = aiReply
                 .replace(/###\s*/g, '')
                 .replace(/\*\*/g, '')

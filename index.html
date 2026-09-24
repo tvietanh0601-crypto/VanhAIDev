@@ -247,6 +247,7 @@
             display: flex;
             flex-direction: column;
             background: #0f1117;
+            position: relative;
         }
 
         .chat-body {
@@ -294,6 +295,7 @@
             position: relative;
             animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             backdrop-filter: blur(10px);
+            margin-bottom: 8px;
         }
 
         .draw-input-box input {
@@ -355,6 +357,20 @@
             display: block;
             margin: 6px 0;
             letter-spacing: 0.5px;
+        }
+
+        /* --- THANH BẢN QUYỀN (FOOTER) DÀI VÀ HẸP --- */
+        .footer-banner {
+            width: 100%;
+            padding: 6px 0;
+            background: #12161f;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.8s forwards;
         }
     </style>
 </head>
@@ -427,6 +443,8 @@
                     <button class="send-icon" onclick="sendMessage()">➔</button>
                 </div>
             </div>
+            <!-- Vùng dài nhưng hẹp ghi bản quyền ở dưới cùng -->
+            <div class="footer-banner">© 2026 Vanh AI Dev Hub</div>
         </div>
     </div>
 
@@ -594,8 +612,7 @@
             loadHistory();
         }
 
-        // Hàm hiệu ứng chữ chạy gõ từng ký tự (Typing Effect)
-        async function typeWriterEffect(element, text, speed = 10) {
+        async function typeWriterEffect(element, text, speed = 8) {
             let i = 0;
             element.innerHTML = "";
             return new Promise((resolve) => {
@@ -694,9 +711,7 @@
             chatMsgs.innerHTML += `<div class="msg ai" id="${aiMsgId}"></div>`;
             const aiMsgElem = document.getElementById(aiMsgId);
 
-            // Chạy hiệu ứng chữ hiện lên dần dần siêu mượt
             await typeWriterEffect(aiMsgElem, cleanReply, 8);
-
             saveMessageToCurrentSession(text, aiReply);
         };
 

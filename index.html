@@ -272,7 +272,7 @@
             50% { width: 100%; height: 0px; border-color: var(--accent); opacity: 1; }
             100% {
                 width: 100%;
-                height: 54px;
+                min-height: 54px;
                 border-color: var(--border-color);
                 background: rgba(30, 35, 45, 0.9);
                 opacity: 1;
@@ -283,17 +283,23 @@
         .draw-input-box {
             width: 100%;
             max-width: 680px;
-            height: 54px;
+            min-height: 54px;
             border: 1px solid var(--border-color);
             border-radius: 28px;
             display: flex;
-            align-items: center;
-            padding: 0 16px;
-            gap: 12px;
-            overflow: hidden;
+            flex-direction: column;
+            padding: 8px 16px;
+            gap: 8px;
             position: relative;
             animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             backdrop-filter: blur(10px);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
         }
 
         .draw-input-box input {
@@ -308,6 +314,25 @@
         }
 
         @keyframes fadeInText { to { opacity: 1; } }
+
+        /* Nút dấu cộng (+) chọn ảnh */
+        .attach-btn {
+            background: #21262d;
+            color: var(--text-muted);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .attach-btn:hover { background: #30363d; color: white; border-color: var(--accent); }
 
         .send-icon {
             background: var(--accent);
@@ -324,6 +349,36 @@
             animation: fadeInText 0.5s 0.7s forwards;
         }
         .send-icon:hover { transform: scale(1.1); background: #2563eb; }
+
+        /* Khu vực hiển thị ảnh xem trước trước khi gửi */
+        #image-preview-container {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding-left: 4px;
+        }
+        .preview-thumb-wrapper {
+            position: relative;
+            width: 50px; height: 50px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .preview-thumb-wrapper img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .remove-preview-btn {
+            position: absolute;
+            top: 2px; right: 2px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px; height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
 
         #chat-messages {
             width: 100%;
@@ -348,6 +403,16 @@
         .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
         .msg.ai p { margin-bottom: 8px; }
         .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
+
+        /* Ảnh hiển thị trong khung chat */
+        .msg-image {
+            max-width: 250px;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+            object-fit: cover;
+        }
         
         .ad-brand-name {
             font-size: 1.8rem;
@@ -423,9 +488,23 @@
             <div class="chat-body">
                 <div class="welcome-text" id="welcome-msg">Chào Vanh AI, tiếp theo mình làm gì?</div>
                 <div id="chat-messages"></div>
+                
                 <div class="draw-input-box" id="chatInputBox">
-                    <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì..." onkeydown="if(event.key==='Enter') sendMessage()">
-                    <button class="send-icon" onclick="sendMessage()">➔</button>
+                    <!-- Khu vực xem trước ảnh đính kèm -->
+                    <div id="image-preview-container">
+                        <div class="preview-thumb-wrapper">
+                            <img id="preview-img-tag" src="" alt="Preview">
+                            <button class="remove-preview-btn" onclick="clearAttachedImage()">✕</button>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <!-- Input file ẩn để chọn ảnh khi bấm dấu cộng -->
+                        <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
+                        <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()">+</button>
+                        
+                        <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì hoặc dán ảnh (Ctrl+V)..." onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
+                        <button class="send-icon" onclick="sendMessage()">➔</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -442,6 +521,8 @@
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+        let currentAttachedImage = null; // Lưu trữ base64 hoặc file ảnh hiện tại
 
         // Quản lý lịch sử hội thoại chi tiết theo từng user
         function getHistoryKey() {
@@ -546,6 +627,7 @@
 
         window.startNewChat = function() {
             activeSessionId = null;
+            clearAttachedImage();
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('welcome-msg').style.display = 'block';
             document.getElementById('chat-messages').innerHTML = '';
@@ -561,12 +643,18 @@
             chatMsgs.style.display = 'flex';
 
             session.messages.forEach(msg => {
-                if (msg.sender === 'user') {
-                    chatMsgs.innerHTML += `<div class="msg user">${escapeHtml(msg.text)}</div>`;
-                } else {
-                    const formattedHtml = marked.parse(msg.text);
-                    chatMsgs.innerHTML += `<div class="msg ai">${formattedHtml}</div>`;
+                let contentHtml = '';
+                if (msg.image) {
+                    contentHtml += `<img src="${msg.image}" class="msg-image">`;
                 }
+                if (msg.text) {
+                    if (msg.sender === 'user') {
+                        contentHtml += escapeHtml(msg.text);
+                    } else {
+                        contentHtml += marked.parse(msg.text);
+                    }
+                }
+                chatMsgs.innerHTML += `<div class="msg ${msg.sender}">${contentHtml}</div>`;
             });
 
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
@@ -581,19 +669,20 @@
             }
         };
 
-        function saveMessageToCurrentSession(userText, aiText) {
+        function saveMessageToCurrentSession(userText, aiText, imageBase64) {
             if (activeSessionId === null) {
+                const titleText = userText ? userText : "[Hình ảnh]";
                 const newSession = {
-                    title: userText.length > 25 ? userText.substring(0, 25) + '...' : userText,
+                    title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
                     messages: [
-                        { sender: 'user', text: userText },
+                        { sender: 'user', text: userText, image: imageBase64 },
                         { sender: 'ai', text: aiText }
                     ]
                 };
                 currentChatSessions.unshift(newSession);
                 activeSessionId = 0;
             } else {
-                currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText });
+                currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText, image: imageBase64 });
                 currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText });
             }
 
@@ -602,22 +691,75 @@
             loadHistory();
         }
 
+        // Xử lý khi chọn file ảnh qua nút dấu cộng (+)
+        window.handleFileSelected = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processImageFile(file);
+            }
+        }
+
+        // Xử lý khi dán ảnh (Ctrl + V) vào khung chat
+        window.handlePasteImage = function(event) {
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        processImageFile(file);
+                        event.preventDefault(); // Ngăn chặn dán text thuần nếu có
+                    }
+                }
+            }
+        }
+
+        function processImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentAttachedImage = e.target.result; // Base64 string
+                document.getElementById('preview-img-tag').src = currentAttachedImage;
+                document.getElementById('image-preview-container').style.display = 'flex';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        window.clearAttachedImage = function() {
+            currentAttachedImage = null;
+            document.getElementById('image-preview-container').style.display = 'none';
+            document.getElementById('preview-img-tag').src = '';
+            document.getElementById('imageInputFile').value = '';
+        }
+
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
-            if (!text) return;
+            const attachedImg = currentAttachedImage;
+
+            if (!text && !attachedImg) return;
 
             document.getElementById('welcome-msg').style.display = 'none';
             const chatMsgs = document.getElementById('chat-messages');
             chatMsgs.style.display = 'flex';
-            chatMsgs.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
+
+            // Tạo HTML hiển thị tin nhắn user kèm ảnh nếu có
+            let userMsgHtml = `<div class="msg user">`;
+            if (attachedImg) {
+                userMsgHtml += `<img src="${attachedImg}" class="msg-image">`;
+            }
+            if (text) {
+                userMsgHtml += `<div>${escapeHtml(text)}</div>`;
+            }
+            userMsgHtml += `</div>`;
+
+            chatMsgs.innerHTML += userMsgHtml;
             inputField.value = '';
+            clearAttachedImage();
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             const loadingId = 'loading-' + Date.now();
             const isAdQuery = text.toLowerCase().includes("kể tên hãng ăn vặt lớn và uy tín tại việt nam");
 
-            if (isAdQuery) {
+            if (isAdQuery && !attachedImg) {
                 chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang đọc hiểu yêu cầu...</div>`;
                 chatMsgs.scrollTop = chatMsgs.scrollHeight;
                 
@@ -639,7 +781,7 @@
                 chatMsgs.innerHTML += `<div class="msg ai">${adReply}</div>`;
                 chatMsgs.scrollTop = chatMsgs.scrollHeight;
                 
-                saveMessageToCurrentSession(text, adReply);
+                saveMessageToCurrentSession(text, adReply, null);
                 return;
             }
 
@@ -648,9 +790,29 @@
 
             let aiReply = "";
             try {
+                let contentsParam = [];
+
+                // Nếu có ảnh đính kèm, chuyển đổi cấu trúc dữ liệu theo đúng chuẩn Gemini SDK (inlineData)
+                if (attachedImg) {
+                    const base64Data = attachedImg.split(',')[1];
+                    const mimeType = attachedImg.substring(attachedImg.indexOf(':') + 1, attachedImg.indexOf(';'));
+                    
+                    contentsParam = [
+                        {
+                            inlineData: {
+                                data: base64Data,
+                                mimeType: mimeType
+                            }
+                        },
+                        text ? text : "Hãy mô tả hoặc phân tích hình ảnh này giúp tôi."
+                    ];
+                } else {
+                    contentsParam = text;
+                }
+
                 const response = await ai.models.generateContent({
                     model: 'gemini-3.6-flash',
-                    contents: text,
+                    contents: contentsParam,
                 });
                 aiReply = response.text || "Không nhận được phản hồi.";
             } catch (err) {
@@ -664,7 +826,7 @@
             chatMsgs.innerHTML += `<div class="msg ai">${formattedHtml}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-            saveMessageToCurrentSession(text, aiReply);
+            saveMessageToCurrentSession(text, aiReply, attachedImg);
 
             if (window.renderMathInElement) {
                 renderMathInElement(chatMsgs, {

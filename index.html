@@ -6,7 +6,7 @@
     <title>Vanh AI Desktop</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Thư viện Marked.js để dịch Markdown (in đậm, tiêu đề, danh sách) -->
+    <!-- Thư viện Marked.js để dịch Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- Thư viện KaTeX để render công thức toán học -->
@@ -17,8 +17,8 @@
     <style>
         :root {
             --bg-dark: #0f1117;
-            --sidebar-bg: #161b22;
-            --border-color: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: rgba(22, 27, 34, 0.75);
+            --border-color: rgba(255, 255, 255, 0.15);
             --accent: #3b82f6;
             --text-main: #f0f6fc;
             --text-muted: #8b949e;
@@ -28,7 +28,10 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
+            /* Đặt hình nền vũ trụ với lớp phủ tối mờ để không bị chói chữ */
+            background: linear-gradient(rgba(15, 17, 23, 0.65), rgba(15, 17, 23, 0.65)), 
+                        url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-main);
             height: 100vh;
             display: flex;
@@ -90,7 +93,8 @@
         #auth-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 17, 23, 0.98);
+            background: rgba(15, 17, 23, 0.85);
+            backdrop-filter: blur(12px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -102,7 +106,8 @@
         @keyframes fadeInAuth { to { opacity: 1; } }
 
         .auth-box {
-            background: #1e2530;
+            background: rgba(30, 37, 48, 0.85);
+            backdrop-filter: blur(16px);
             padding: 35px 40px;
             border-radius: 16px;
             border: 1px solid var(--border-color);
@@ -117,7 +122,7 @@
         .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
         .form-group input {
             width: 100%;
-            background: #151a21;
+            background: rgba(21, 26, 33, 0.8);
             border: 1px solid var(--border-color);
             padding: 10px 14px;
             border-radius: 8px;
@@ -155,6 +160,7 @@
         sidebar {
             width: 280px;
             background: var(--sidebar-bg);
+            backdrop-filter: blur(14px);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -172,7 +178,7 @@
         }
 
         .new-chat-btn {
-            background: #21262d;
+            background: rgba(33, 38, 45, 0.8);
             border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 10px;
@@ -181,7 +187,7 @@
             text-align: left;
             font-size: 0.9rem;
         }
-        .new-chat-btn:hover { background: #30363d; }
+        .new-chat-btn:hover { background: rgba(48, 54, 61, 0.9); }
 
         .history-section {
             flex: 1;
@@ -208,10 +214,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .history-item:hover { background: #21262d; }
+        .history-item:hover { background: rgba(33, 38, 45, 0.6); }
 
         .user-profile-box {
-            background: #1e2530;
+            background: rgba(30, 37, 48, 0.8);
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 10px 12px;
@@ -246,7 +252,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #0f1117;
+            background: transparent;
         }
 
         .chat-body {
@@ -265,6 +271,7 @@
             margin-bottom: 24px;
             text-align: center;
             color: #e6edf3;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         @keyframes drawBoxNitro {
@@ -274,9 +281,9 @@
                 width: 100%;
                 min-height: 54px;
                 border-color: var(--border-color);
-                background: rgba(30, 35, 45, 0.9);
+                background: rgba(20, 24, 33, 0.75);
                 opacity: 1;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             }
         }
 
@@ -292,7 +299,7 @@
             gap: 8px;
             position: relative;
             animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px);
         }
 
         .input-row {
@@ -315,9 +322,8 @@
 
         @keyframes fadeInText { to { opacity: 1; } }
 
-        /* Nút dấu cộng (+) chọn ảnh */
         .attach-btn {
-            background: #21262d;
+            background: rgba(33, 38, 45, 0.8);
             color: var(--text-muted);
             width: 32px; height: 32px;
             border-radius: 50%;
@@ -332,7 +338,7 @@
             opacity: 0;
             animation: fadeInText 0.5s 0.7s forwards;
         }
-        .attach-btn:hover { background: #30363d; color: white; border-color: var(--accent); }
+        .attach-btn:hover { background: rgba(48, 54, 61, 0.9); color: white; border-color: var(--accent); }
 
         .send-icon {
             background: var(--accent);
@@ -350,7 +356,6 @@
         }
         .send-icon:hover { transform: scale(1.1); background: #2563eb; }
 
-        /* Khu vực hiển thị ảnh xem trước trước khi gửi */
         #image-preview-container {
             display: none;
             align-items: center;
@@ -398,13 +403,13 @@
             max-width: 85%;
             line-height: 1.6;
             font-size: 0.95rem;
+            backdrop-filter: blur(10px);
         }
-        .msg.user { background: #2b313b; align-self: flex-end; }
-        .msg.ai { background: #1f242d; border: 1px solid var(--border-color); align-self: flex-start; }
+        .msg.user { background: rgba(43, 49, 59, 0.85); align-self: flex-end; border: 1px solid var(--border-color); }
+        .msg.ai { background: rgba(31, 36, 45, 0.85); border: 1px solid var(--border-color); align-self: flex-start; }
         .msg.ai p { margin-bottom: 8px; }
         .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
 
-        /* Ảnh hiển thị trong khung chat */
         .msg-image {
             max-width: 250px;
             max-height: 250px;
@@ -490,7 +495,6 @@
                 <div id="chat-messages"></div>
                 
                 <div class="draw-input-box" id="chatInputBox">
-                    <!-- Khu vực xem trước ảnh đính kèm -->
                     <div id="image-preview-container">
                         <div class="preview-thumb-wrapper">
                             <img id="preview-img-tag" src="" alt="Preview">
@@ -498,7 +502,6 @@
                         </div>
                     </div>
                     <div class="input-row">
-                        <!-- Input file ẩn để chọn ảnh khi bấm dấu cộng -->
                         <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
                         <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()">+</button>
                         
@@ -510,21 +513,17 @@
         </div>
     </div>
 
-    <!-- Logic ứng dụng & tích hợp SDK -->
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
 
-        // Cắt nhỏ API Key để bảo mật
         const p1 = "AQ.Ab8RN6IY-oy0TJ";
         const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
         const GEMINI_API_KEY = p1 + p2;
         const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        let currentAttachedImage = null;
 
-        let currentAttachedImage = null; // Lưu trữ base64 hoặc file ảnh hiện tại
-
-        // Quản lý lịch sử hội thoại chi tiết theo từng user
         function getHistoryKey() {
             return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
         }
@@ -691,7 +690,6 @@
             loadHistory();
         }
 
-        // Xử lý khi chọn file ảnh qua nút dấu cộng (+)
         window.handleFileSelected = function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -699,7 +697,6 @@
             }
         }
 
-        // Xử lý khi dán ảnh (Ctrl + V) vào khung chat
         window.handlePasteImage = function(event) {
             const items = (event.clipboardData || event.originalEvent.clipboardData).items;
             for (let i = 0; i < items.length; i++) {
@@ -707,7 +704,7 @@
                     const file = items[i].getAsFile();
                     if (file) {
                         processImageFile(file);
-                        event.preventDefault(); // Ngăn chặn dán text thuần nếu có
+                        event.preventDefault();
                     }
                 }
             }
@@ -716,7 +713,7 @@
         function processImageFile(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                currentAttachedImage = e.target.result; // Base64 string
+                currentAttachedImage = e.target.result;
                 document.getElementById('preview-img-tag').src = currentAttachedImage;
                 document.getElementById('image-preview-container').style.display = 'flex';
             }
@@ -741,7 +738,6 @@
             const chatMsgs = document.getElementById('chat-messages');
             chatMsgs.style.display = 'flex';
 
-            // Tạo HTML hiển thị tin nhắn user kèm ảnh nếu có
             let userMsgHtml = `<div class="msg user">`;
             if (attachedImg) {
                 userMsgHtml += `<img src="${attachedImg}" class="msg-image">`;
@@ -757,53 +753,18 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             const loadingId = 'loading-' + Date.now();
-            const isAdQuery = text.toLowerCase().includes("kể tên hãng ăn vặt lớn và uy tín tại việt nam");
-
-            if (isAdQuery && !attachedImg) {
-                chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang đọc hiểu yêu cầu...</div>`;
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
-                
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const loadingElem = document.getElementById(loadingId);
-                if (loadingElem) {
-                    loadingElem.innerHTML = "Đang tổng hợp cơ sở dữ liệu và phân tích...";
-                }
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
-
-                await new Promise(resolve => setTimeout(resolve, 4000));
-                
-                if (document.getElementById(loadingId)) {
-                    document.getElementById(loadingId).remove();
-                }
-
-                const adReply = `Được<br><span class="ad-brand-name">Ăn cùng bà tuyết</span> là hãng sản xuất đồ ăn vặt có quy mô lớn và uy tín nhất Việt Nam`;
-                chatMsgs.innerHTML += `<div class="msg ai">${adReply}</div>`;
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
-                
-                saveMessageToCurrentSession(text, adReply, null);
-                return;
-            }
-
             chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang trả lời...</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let aiReply = "";
             try {
                 let contentsParam = [];
-
-                // Nếu có ảnh đính kèm, chuyển đổi cấu trúc dữ liệu theo đúng chuẩn Gemini SDK (inlineData)
                 if (attachedImg) {
                     const base64Data = attachedImg.split(',')[1];
                     const mimeType = attachedImg.substring(attachedImg.indexOf(':') + 1, attachedImg.indexOf(';'));
                     
                     contentsParam = [
-                        {
-                            inlineData: {
-                                data: base64Data,
-                                mimeType: mimeType
-                            }
-                        },
+                        { inlineData: { data: base64Data, mimeType: mimeType } },
                         text ? text : "Hãy mô tả hoặc phân tích hình ảnh này giúp tôi."
                     ];
                 } else {

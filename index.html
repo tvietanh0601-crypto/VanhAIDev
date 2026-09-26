@@ -98,7 +98,15 @@
             border-bottom: 1px solid var(--border-color); color: #fff;
             display: flex; justify-content: space-between; align-items: center;
         }
+        .user-badge-area { display: flex; align-items: center; gap: 8px; }
         .user-status { font-size: 0.75rem; background: rgba(168, 85, 247, 0.2); border: 1px solid var(--accent); padding: 3px 8px; border-radius: 10px; color: #d8b4fe; }
+        
+        .logout-btn {
+            background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #fda4af; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover { background: rgba(244, 63, 94, 0.3); color: #fff; border-color: #f43f5e; box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
 
         .new-chat-btn {
             background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4);
@@ -204,7 +212,10 @@
         <sidebar>
             <div class="sidebar-header">
                 <span>⚡ Vanh AI</span>
-                <span class="user-status" id="currentUserBadge">Trần Việt Anh</span>
+                <div class="user-badge-area">
+                    <span class="user-status" id="currentUserBadge">User</span>
+                    <button class="logout-btn" onclick="handleLogout()" title="Đăng xuất tài khoản">Đăng xuất</button>
+                </div>
             </div>
             <button class="new-chat-btn" onclick="startNewChat()">+ Cuộc trò chuyện mới</button>
             <div class="history-section" id="history-list">
@@ -215,8 +226,8 @@
         <div class="main-chat">
             <div class="chat-body">
                 <div class="welcome-container" id="welcomeContainer">
-                    <div class="welcome-text" id="welcomeUserText">Xin chào Trần Việt Anh!</div>
-                    <div class="welcome-sub">Hệ thống đối chiếu SheetDB và Nitro đã sẵn sàng. Bạn muốn trò chuyện gì với Diễm My hôm nay?</div>
+                    <div class="welcome-text" id="welcomeUserText">Xin chào!</div>
+                    <div class="welcome-sub">Bạn muốn trò chuyện gì với Vanh AI hôm nay?</div>
                 </div>
 
                 <div id="chat-messages"></div>
@@ -250,7 +261,6 @@
         let isRegisterMode = false;
         let loggedInUser = localStorage.getItem('nitro_logged_user') || null;
 
-        // Nếu đã đăng nhập trước đó thì vào thẳng app
         window.addEventListener('load', () => {
             if (loggedInUser) {
                 unlockApp(loggedInUser);
@@ -267,7 +277,6 @@
             document.getElementById('authError').innerText = "";
         }
 
-        // Xử lý đăng nhập / đăng ký đối chiếu trực tiếp qua SheetDB
         async function handleAuth() {
             const user = document.getElementById('authUsername').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
@@ -278,21 +287,19 @@
                 return;
             }
 
-            errorBox.innerText = "Đang kết nối Google Sheets...";
+            errorBox.innerText = "Đang kết nối ...";
 
             try {
                 const res = await fetch(SHEETDB_URL);
                 const data = await res.json();
 
                 if (isRegisterMode) {
-                    // Kiểm tra xem username đã tồn tại chưa
                     const exist = data.find(row => row.username === user);
                     if (exist) {
                         errorBox.innerText = "Tên đăng nhập này đã tồn tại trên Sheet!";
                         return;
                     }
 
-                    // Gửi tài khoản mới lên Google Sheets
                     await fetch(SHEETDB_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -303,10 +310,11 @@
                     toggleAuthMode();
                     errorBox.innerText = "";
                 } else {
-                    // Đối chiếu tài khoản đăng nhập với Sheet
                     const matched = data.find(row => row.username === user && row.password === pass);
                     if (matched) {
                         localStorage.setItem('nitro_logged_user', user);
+                        loggedInUser = user;
+                        sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions_' + loggedInUser)) || [];
                         unlockApp(user);
                     } else {
                         errorBox.innerText = "Sai tên đăng nhập hoặc mật khẩu trên Sheet!";
@@ -315,6 +323,17 @@
             } catch (err) {
                 errorBox.innerText = "Lỗi kết nối SheetDB: " + err.message;
             }
+        }
+
+        // Xử lý nút Đăng xuất
+        function handleLogout() {
+            localStorage.removeItem('nitro_logged_user');
+            loggedInUser = null;
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+            document.getElementById('authError').innerText = '';
         }
 
         function unlockApp(username) {
@@ -330,10 +349,9 @@
                 splash.style.visibility = 'hidden';
                 document.getElementById('appContainer').style.display = 'flex';
                 loadHistory();
-            }, 1200);
+            }, 1000);
         }
 
-        // Chat & Lịch sử
         let currentAttachedImage = null;
         let sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions_' + loggedInUser)) || [];
         let activeId = null;
@@ -415,7 +433,7 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let messagesPayload = [
-                { role: "system", content: `Bạn là trợ lý AI thông minh, thân thiện tên là Diễm My của người dùng ${loggedInUser}. Hôm nay là ngày 26 tháng 9 năm 2026.` }
+                { role: "system", content: `Bạn là trợ lý AI thông minh, thân thiện tên là Vanh AI của người dùng ${loggedInUser}.` }
             ];
 
             if (activeId !== null) {

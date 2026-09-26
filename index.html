@@ -464,7 +464,247 @@
             display: block;
             object-fit: cover;
         }
-    </style>
+    
+/* =========================================================
+   VANH AI — PREMIUM / ULTIMATE UI OVERHAUL
+   ========================================================= */
+:root{
+    --bg-dark:#070a12;
+    --sidebar-bg:rgba(8,12,22,.72);
+    --border-color:rgba(255,255,255,.09);
+    --border-bright:rgba(139,92,246,.35);
+    --accent:#6d5dfc;
+    --accent-2:#00d4ff;
+    --accent-3:#b86cff;
+    --text-main:#f7f8ff;
+    --text-muted:#8e96aa;
+    --glass:rgba(16,20,34,.72);
+    --shadow:0 24px 80px rgba(0,0,0,.45);
+}
+body{
+    background:
+      radial-gradient(circle at 72% 15%,rgba(109,93,252,.16),transparent 28%),
+      radial-gradient(circle at 20% 80%,rgba(0,212,255,.09),transparent 25%),
+      linear-gradient(rgba(5,8,15,.55),rgba(5,8,15,.72)),
+      url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop') center/cover fixed;
+}
+body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+    background:
+      radial-gradient(circle at 30% 20%,rgba(255,255,255,.035) 0 1px,transparent 1px) 0 0/32px 32px;
+    mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+button,input{font-family:inherit}
+
+/* AUTH */
+#auth-screen{
+    background:
+      radial-gradient(circle at 50% 35%,rgba(109,93,252,.18),transparent 32%),
+      rgba(3,6,13,.72);
+    backdrop-filter:blur(24px);
+}
+.auth-box{
+    position:relative;
+    width:min(430px,calc(100% - 32px));
+    padding:28px 30px 30px;
+    border-radius:28px;
+    background:linear-gradient(145deg,rgba(23,28,48,.92),rgba(10,14,25,.86));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 35px 100px rgba(0,0,0,.62),0 0 80px rgba(109,93,252,.12);
+    overflow:hidden;
+    isolation:isolate;
+}
+.auth-box::before{
+    content:"";position:absolute;inset:-2px;z-index:-2;border-radius:30px;
+    background:conic-gradient(from 180deg,transparent 0 32%,rgba(109,93,252,.65),rgba(0,212,255,.35),transparent 65%);
+    filter:blur(20px);opacity:.35;
+}
+.auth-box::after{
+    content:"";position:absolute;top:-120px;right:-100px;width:250px;height:250px;
+    background:radial-gradient(circle,rgba(109,93,252,.18),transparent 68%);z-index:-1;
+}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.auth-logo,.brand-mark,.ai-status-icon{
+    display:grid;place-items:center;border-radius:14px;
+    background:linear-gradient(135deg,#7c6cff,#2ccfff);
+    color:white;font-weight:800;box-shadow:0 8px 28px rgba(109,93,252,.35);
+}
+.auth-logo{width:46px;height:46px;font-size:20px}
+.auth-brand-title{font-size:18px;font-weight:750;letter-spacing:-.4px}
+.auth-brand-subtitle{font-size:11px;color:#7f89a1;margin-top:3px}
+.secure-pill{margin-left:auto;font-size:9px;letter-spacing:1px;color:#91f7c5;padding:6px 8px;border:1px solid rgba(145,247,197,.16);border-radius:999px;background:rgba(65,217,151,.06)}
+.secure-pill span{display:inline-block;width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 9px #52e7a1;margin-right:4px}
+.auth-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:0 -4px 24px;text-align:center}
+.auth-divider span{position:relative;top:-8px;background:#151b2c;padding:0 10px;color:#66718a;font-size:9px;letter-spacing:2px}
+.auth-form-kicker{font-size:9px;letter-spacing:2px;color:#7f89a1;margin-bottom:5px;text-align:center}
+.auth-box h2{font-size:25px;letter-spacing:-.7px;margin-bottom:7px}
+.auth-box p{font-size:12px;margin-bottom:22px}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:11px;color:#aab2c5;margin-bottom:7px}
+.form-group input{
+    height:46px;padding:0 14px;border-radius:13px;
+    background:rgba(4,8,17,.55);border:1px solid rgba(255,255,255,.09);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    transition:.25s;
+}
+.form-group input:hover{border-color:rgba(255,255,255,.16)}
+.form-group input:focus{border-color:rgba(109,93,252,.8);box-shadow:0 0 0 4px rgba(109,93,252,.1),0 0 30px rgba(109,93,252,.08)}
+.auth-btn{
+    height:46px;margin-top:8px;border-radius:13px;
+    background:linear-gradient(135deg,#7567ff,#4f8cff);
+    box-shadow:0 12px 28px rgba(80,100,255,.22);
+    transition:.25s;
+}
+.auth-btn:hover{background:linear-gradient(135deg,#887cff,#5aa0ff);transform:translateY(-1px);box-shadow:0 16px 34px rgba(80,100,255,.3)}
+.google-login-wrapper{margin-top:12px!important}
+.google-login-wrapper>div{display:flex;justify-content:center}
+.switch-text{font-size:11px;margin-top:18px}
+.switch-text span{color:#9a8fff}
+.switch-text span:hover{text-decoration:underline}
+
+/* SIDEBAR */
+sidebar{
+    width:292px;padding:14px;gap:10px;
+    background:linear-gradient(180deg,rgba(8,12,22,.88),rgba(8,11,19,.68));
+    border-right:1px solid rgba(255,255,255,.08);
+    box-shadow:12px 0 50px rgba(0,0,0,.18);
+}
+.sidebar-header{border:0;padding:5px 5px 14px;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:11px;font-size:15px}
+.brand-copy{display:flex;flex-direction:column;line-height:1.05}
+.brand-copy strong{font-size:14px;letter-spacing:-.2px}
+.brand-copy span{font-size:8px;color:#66718a;letter-spacing:2px;margin-top:5px}
+.online-dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#53e5a4;box-shadow:0 0 12px #53e5a4}
+.new-chat-btn{
+    display:flex;align-items:center;gap:9px;height:46px;padding:0 12px;
+    border-radius:14px;background:linear-gradient(135deg,rgba(109,93,252,.18),rgba(0,212,255,.06));
+    border:1px solid rgba(109,93,252,.24);font-size:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.16);transition:.22s
+}
+.new-chat-btn:hover{transform:translateY(-1px);border-color:rgba(109,93,252,.48);background:rgba(109,93,252,.18)}
+.new-chat-icon{font-size:19px;color:#bcb5ff}
+.new-chat-btn kbd{margin-left:auto;font-size:8px;color:#717b91;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:3px 5px;border-radius:5px}
+.history-tools{display:flex;gap:7px;margin-top:4px}
+.history-search-wrap{height:36px;flex:1;display:flex;align-items:center;gap:7px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.history-search-wrap>span{color:#69738a;font-size:17px}
+.history-search-wrap input{width:100%;border:0;outline:0;background:transparent;color:#e8ebf5;font-size:11px}
+.history-search-wrap input::placeholder{color:#687187}
+.history-clear-btn{width:36px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);color:#737e94;cursor:pointer}
+.history-clear-btn:hover{color:#ff7d8b;border-color:rgba(255,100,120,.3)}
+.history-section{gap:5px;padding-right:2px}
+.history-title{font-size:8px;letter-spacing:1.8px;color:#626d83;margin:12px 4px 5px}
+.history-item{
+    position:relative;padding:11px 11px 11px 34px;border-radius:11px;
+    font-size:11px;color:#aeb6c8;background:transparent;
+    border:1px solid transparent;transition:.2s
+}
+.history-item::before{content:"◷";position:absolute;left:11px;top:10px;color:#5e6a82;font-size:11px}
+.history-item:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);color:#eef1fa}
+.history-item.active{background:linear-gradient(90deg,rgba(109,93,252,.18),transparent);border-color:rgba(109,93,252,.18);color:#fff}
+.user-profile-box{
+    padding:10px;border-radius:15px;background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.08);box-shadow:0 15px 40px rgba(0,0,0,.2)
+}
+.user-info-row{padding:2px 2px 7px}
+.user-avatar{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#7b6cff,#31cfff);box-shadow:0 5px 16px rgba(80,100,255,.25)}
+.user-name{font-size:11px}
+.logout-btn{height:32px;border-radius:9px;font-size:10px;background:rgba(255,75,100,.06)}
+.logout-btn:hover{background:#ef4444}
+
+/* CHAT TOPBAR */
+.main-chat{position:relative}
+.chat-topbar{
+    height:64px;flex:0 0 64px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 22px;border-bottom:1px solid rgba(255,255,255,.065);
+    background:linear-gradient(180deg,rgba(8,12,21,.48),rgba(8,12,21,.18));backdrop-filter:blur(18px)
+}
+.chat-topbar-title{display:flex;align-items:center;gap:10px}
+.ai-status-icon{width:34px;height:34px;border-radius:11px;font-size:15px}
+.chat-topbar-title strong{display:block;font-size:12px}
+.chat-topbar-title span{display:block;font-size:9px;color:#69748b;margin-top:3px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.model-pill{height:32px;display:flex;align-items:center;gap:7px;padding:0 11px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);font-size:9px;color:#aeb7ca}
+.model-pill i{width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 8px #52e7a1}
+.model-pill span{color:#667188}
+.topbar-icon{width:32px;height:32px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.03);color:#78849a;cursor:pointer}
+.topbar-icon:hover{color:#fff;background:rgba(255,255,255,.07)}
+
+/* CHAT AREA */
+.chat-body{position:relative;padding:26px 20px 24px}
+.welcome-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;max-width:760px;margin:auto}
+.welcome-orb{
+    width:72px;height:72px;border-radius:24px;display:grid;place-items:center;margin-bottom:18px;
+    background:radial-gradient(circle at 30% 20%,#9d8fff,#5d52f3 48%,#13bce8);
+    box-shadow:0 18px 60px rgba(87,75,245,.35),0 0 90px rgba(0,212,255,.12);
+    font-size:30px;animation:floatOrb 4s ease-in-out infinite
+}
+@keyframes floatOrb{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+.welcome-text{font-size:29px;font-weight:700;letter-spacing:-1.2px;margin-bottom:8px}
+.welcome-subtext{max-width:520px;color:#7d879c;font-size:12px;line-height:1.7}
+.quick-prompts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
+.quick-prompts button{
+    padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.08);color:#aeb7c9;font-size:10px;cursor:pointer;transition:.2s
+}
+.quick-prompts button:hover{border-color:rgba(109,93,252,.4);background:rgba(109,93,252,.1);color:#fff;transform:translateY(-1px)}
+#chat-messages{
+    width:100%;max-width:900px;padding:8px 10px 20px;gap:14px;
+    scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent
+}
+.msg{
+    position:relative;padding:13px 16px 13px 18px;border-radius:18px;max-width:min(78%,760px);
+    line-height:1.72;font-size:13px;box-shadow:0 10px 35px rgba(0,0,0,.14);
+    border:1px solid rgba(255,255,255,.07)!important
+}
+.msg.user{
+    background:linear-gradient(135deg,rgba(91,78,220,.52),rgba(47,119,210,.42));
+    border-top-right-radius:5px!important
+}
+.msg.ai{
+    background:linear-gradient(145deg,rgba(20,26,42,.9),rgba(13,18,30,.86));
+    border-top-left-radius:5px!important
+}
+.msg.user::before,.msg.ai::before{
+    position:absolute;top:-9px;width:20px;height:20px;border-radius:7px;display:grid;place-items:center;
+    font-size:9px;font-weight:700;border:1px solid rgba(255,255,255,.1)
+}
+.msg.user::before{content:"U";right:9px;background:#5e54ed;color:#fff}
+.msg.ai::before{content:"✦";left:9px;background:linear-gradient(135deg,#7567ff,#22c7ee);color:#fff}
+.msg.ai p:last-child{margin-bottom:0}
+.msg-image{max-width:300px;max-height:300px;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+#chatInputBox{
+    max-width:860px;min-height:62px;border-radius:20px;padding:8px 10px;
+    background:rgba(9,13,24,.78);border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 70px rgba(0,0,0,.4),0 0 50px rgba(109,93,252,.07);
+    animation:none;transition:.25s
+}
+#chatInputBox:focus-within{border-color:rgba(109,93,252,.42);box-shadow:0 20px 70px rgba(0,0,0,.45),0 0 55px rgba(109,93,252,.12)}
+.draw-input-box input{font-size:12px;opacity:1;animation:none}
+.attach-btn{opacity:1;animation:none;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.045)}
+.attach-btn:hover{background:rgba(109,93,252,.14)}
+.send-icon{opacity:1;animation:none;width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7567ff,#2eaeff);box-shadow:0 7px 20px rgba(82,91,255,.3)}
+.send-icon:hover{transform:translateY(-1px) scale(1.03)}
+#image-preview-container{padding:3px 3px 0}
+.preview-thumb-wrapper{width:58px;height:58px;border-radius:12px}
+.remove-preview-btn{width:19px;height:19px}
+
+/* responsive */
+@media(max-width:800px){
+    sidebar{width:225px}
+    .model-pill{display:none}
+    .welcome-text{font-size:23px}
+    .msg{max-width:88%}
+}
+@media(max-width:640px){
+    sidebar{width:72px;padding:10px}
+    .brand-copy,.new-chat-btn span:not(.new-chat-icon),.new-chat-btn kbd,.history-tools,.history-title,.history-item{display:none}
+    .new-chat-btn{justify-content:center;padding:0}
+    .user-name,.logout-btn{display:none}
+    .user-info-row{justify-content:center}
+    .chat-topbar{padding:0 12px}
+}
+
+</style>
 </head>
 <body>
 
@@ -477,6 +717,15 @@
     <!-- Màn hình Đăng nhập -->
     <div id="auth-screen" style="display: none;">
         <div class="auth-box">
+            <div class="auth-brand">
+                <div class="auth-logo"><span>V</span></div>
+                <div>
+                    <div class="auth-brand-title">Vanh AI</div>
+                    <div class="auth-brand-subtitle">Your intelligent desktop assistant</div>
+                </div>
+                <div class="secure-pill"><span></span> SECURE</div>
+            </div>
+            <div class="auth-divider"><span>WELCOME BACK</span></div>
             <div id="login-form">
                 <h2>Đăng nhập</h2>
                 <p>Kết nối SheetDB Database</p>
@@ -496,6 +745,7 @@
             </div>
 
             <div id="register-form" style="display: none;">
+                <div class="auth-form-kicker">CREATE YOUR ACCOUNT</div>
                 <h2>Đăng ký</h2>
                 <p>Tạo tài khoản lưu lên Sheet</p>
                 <div class="form-group">
@@ -515,8 +765,26 @@
     <!-- Giao diện chính -->
     <div class="app-container" id="app-main" style="display: none;">
         <sidebar>
-            <div class="sidebar-header">⚡ Vanh AI Desktop</div>
-            <button class="new-chat-btn" onclick="startNewChat()">+ Cuộc trò chuyện mới</button>
+            <div class="sidebar-header">
+                <div class="brand-mark">✦</div>
+                <div class="brand-copy">
+                    <strong>Vanh AI</strong>
+                    <span>DESKTOP</span>
+                </div>
+                <div class="online-dot" title="Đang hoạt động"></div>
+            </div>
+            <button class="new-chat-btn" onclick="startNewChat()">
+                <span class="new-chat-icon">＋</span>
+                <span>Cuộc trò chuyện mới</span>
+                <kbd>Ctrl K</kbd>
+            </button>
+            <div class="history-tools">
+                <div class="history-search-wrap">
+                    <span>⌕</span>
+                    <input id="history-search" type="text" placeholder="Tìm cuộc trò chuyện..." oninput="filterHistory(this.value)">
+                </div>
+                <button class="history-clear-btn" onclick="clearAllHistory()" title="Xóa lịch sử">⌫</button>
+            </div>
             <div class="history-section" id="history-list">
                 <div class="history-title">Gần đây</div>
             </div>
@@ -530,8 +798,31 @@
         </sidebar>
 
         <div class="main-chat">
+            <div class="chat-topbar">
+                <div class="chat-topbar-title">
+                    <div class="ai-status-icon">✦</div>
+                    <div>
+                        <strong>Vanh AI</strong>
+                        <span>Trợ lý thông minh</span>
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
+                    <button class="topbar-icon" title="Giao diện">◐</button>
+                    <button class="topbar-icon" title="Thông tin">ⓘ</button>
+                </div>
+            </div>
             <div class="chat-body">
-                <div class="welcome-text" id="welcome-msg">Chào Vanh AI, tiếp theo mình làm gì?</div>
+                <div class="welcome-wrap" id="welcome-wrap">
+                    <div class="welcome-orb"><span>✦</span></div>
+                    <div class="welcome-text" id="welcome-msg">Chào bạn, hôm nay mình giúp gì được?</div>
+                    <div class="welcome-subtext">Hỏi bất cứ điều gì, phân tích hình ảnh hoặc bắt đầu một ý tưởng mới.</div>
+                    <div class="quick-prompts">
+                        <button onclick="usePrompt('Giải thích cho mình một chủ đề thật dễ hiểu')">✦ Giải thích dễ hiểu</button>
+                        <button onclick="usePrompt('Giúp mình lên ý tưởng cho một dự án')">⌁ Lên ý tưởng</button>
+                        <button onclick="usePrompt('Phân tích hình ảnh này giúp mình')">▣ Phân tích ảnh</button>
+                    </div>
+                </div>
                 <div id="chat-messages"></div>
                 
                 <div class="draw-input-box" id="chatInputBox">
@@ -589,12 +880,6 @@
                 document.getElementById('login-form').style.display = 'block';
             }
         };
-
-        // Đăng nhập Google cần cấu hình OAuth Client ID/Google Identity Services.
-        window.handleGoogleLogin = function() {
-            alert('Nút Google đã được thêm. Để đăng nhập Google thật, cần cấu hình Google OAuth Client ID cho website này.');
-        };
-
 
         // ================= GOOGLE SIGN-IN CONFIG =================
         // 1. Tạo OAuth 2.0 Client ID loại Web application trong Google Cloud.
@@ -672,6 +957,14 @@
 
         window.addEventListener("load", initGoogleSignIn);
         // ==========================================================
+
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                startNewChat();
+                document.getElementById('userInput')?.focus();
+            }
+        });
 
         window.handleRegister = async function() {
             const name = document.getElementById('reg-name').value.trim();
@@ -763,8 +1056,10 @@
             activeSessionId = null;
             clearAttachedImage();
             document.getElementById('chat-messages').style.display = 'none';
+            document.getElementById('welcome-wrap').style.display = 'flex';
             document.getElementById('welcome-msg').style.display = 'block';
             document.getElementById('chat-messages').innerHTML = '';
+            loadHistory();
         };
 
         window.loadSession = function(index) {
@@ -773,6 +1068,7 @@
             const chatMsgs = document.getElementById('chat-messages');
             
             chatMsgs.innerHTML = '';
+            document.getElementById('welcome-wrap').style.display = 'none';
             document.getElementById('welcome-msg').style.display = 'none';
             chatMsgs.style.display = 'flex';
 
@@ -792,6 +1088,7 @@
             });
 
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            loadHistory(document.getElementById('history-search')?.value || '');
 
             if (window.renderMathInElement) {
                 renderMathInElement(chatMsgs, {
@@ -869,6 +1166,7 @@
 
             if (!text && !attachedImg) return;
 
+            document.getElementById('welcome-wrap').style.display = 'none';
             document.getElementById('welcome-msg').style.display = 'none';
             const chatMsgs = document.getElementById('chat-messages');
             chatMsgs.style.display = 'flex';
@@ -907,7 +1205,7 @@
                 }
 
                 const response = await ai.models.generateContent({
-                    model: 'gemini-3.8-flash',
+                    model: 'gemini-3.6-flash',
                     contents: contentsParam,
                 });
                 aiReply = response.text || "Không nhận được phản hồi.";

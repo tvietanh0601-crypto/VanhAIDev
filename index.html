@@ -12,7 +12,7 @@
             --bg-deep: #060709;
             --sidebar-bg: rgba(14, 17, 23, 0.5);
             --border-color: rgba(255, 255, 255, 0.12);
-            --accent: #a855f7; /* Tím phong cách Nitro */
+            --accent: #a855f7; 
             --text-main: #f0f6fc;
             --text-muted: #8b949e;
             --user-bubble-border: rgba(59, 130, 246, 0.6);
@@ -36,13 +36,42 @@
             overflow: hidden;
         }
 
-        /* --- NITRO SPLASH SCREEN ANIMATION --- */
+        /* --- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ (SHEETDB) --- */
+        #auth-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(4, 5, 7, 0.88); backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .auth-box {
+            background: rgba(15, 17, 23, 0.8); border: 1px solid rgba(168, 85, 247, 0.5);
+            padding: 36px; border-radius: 24px; width: 100%; max-width: 400px;
+            display: flex; flex-direction: column; gap: 16px; text-align: center;
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.25);
+        }
+        .auth-title { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, #f43f5e, #a855f7, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .auth-input {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color);
+            padding: 12px 16px; border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none;
+            transition: 0.3s;
+        }
+        .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(168, 85, 247, 0.3); }
+        .auth-btn {
+            background: linear-gradient(135deg, #a855f7, #3b82f6); color: white;
+            border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        }
+        .auth-btn:hover { transform: scale(1.02); }
+        .auth-switch { font-size: 0.85rem; color: var(--text-muted); cursor: pointer; margin-top: 4px; }
+        .auth-switch span { color: var(--accent); font-weight: 600; }
+        .auth-error { color: #f43f5e; font-size: 0.82rem; min-height: 18px; }
+
+        /* --- MÀN HÌNH CHỜ NITRO INTRO ANIMATION --- */
         #nitro-splash {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #040507; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 9999;
             transition: opacity 0.6s ease, visibility 0.6s ease;
-            gap: 16px;
+            gap: 16px; display: none;
         }
         .splash-logo {
             font-size: 2.8rem; font-weight: 700;
@@ -56,104 +85,34 @@
         }
         .splash-sub { color: var(--text-muted); font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; }
 
-        /* --- AUTH MODAL --- */
-        #auth-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(4, 5, 7, 0.85); backdrop-filter: blur(10px);
-            display: flex; align-items: center; justify-content: center; z-index: 9998;
-        }
-        .auth-box {
-            width: 100%; max-width: 400px; padding: 30px; border-radius: 20px;
-            background: rgba(14, 17, 23, 0.7); border: 1px solid var(--accent);
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.3); display: flex; flex-direction: column; gap: 16px;
-        }
-        .auth-box h2 { text-align: center; color: #fff; font-size: 1.5rem; }
-        .auth-box input {
-            width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.05); color: #fff; outline: none; font-size: 0.95rem;
-        }
-        .auth-box input:focus { border-color: var(--accent); }
-        .auth-btn {
-            width: 100%; padding: 12px; border-radius: 10px; border: none; cursor: pointer;
-            background: linear-gradient(135deg, #a855f7, #3b82f6); color: white; font-weight: 600; font-size: 1rem;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-        }
-        .auth-btn:hover { opacity: 0.9; }
-
-        .app-container { display: flex; width: 100%; height: 100%; }
+        .app-container { display: flex; width: 100%; height: 100%; display: none; }
 
         /* --- SIDEBAR --- */
         sidebar {
-            width: 300px;
-            background: var(--sidebar-bg);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 16px;
-            z-index: 10;
+            width: 300px; background: var(--sidebar-bg); backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; padding: 20px; gap: 16px; z-index: 10;
         }
-
         .sidebar-header {
-            font-weight: 600;
-            font-size: 1.05rem;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-weight: 600; font-size: 1.05rem; padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color); color: #fff;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
         .user-status { font-size: 0.75rem; background: rgba(168, 85, 247, 0.2); border: 1px solid var(--accent); padding: 3px 8px; border-radius: 10px; color: #d8b4fe; }
 
         .new-chat-btn {
-            background: rgba(168, 85, 247, 0.15);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            color: var(--text-main);
-            padding: 12px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4);
+            color: var(--text-main); padding: 12px 16px; border-radius: 12px; cursor: pointer;
+            text-align: left; font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease;
         }
-        .new-chat-btn:hover { 
-            background: rgba(168, 85, 247, 0.3);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-        }
+        .new-chat-btn:hover { background: rgba(168, 85, 247, 0.3); border-color: var(--accent); box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
 
-        .history-section {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .history-title {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin: 12px 0 6px 4px;
-        }
-
+        .history-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .history-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 6px 4px; }
         .history-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            color: #c9d1d9;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid transparent;
-            transition: 0.2s;
+            padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; color: #c9d1d9; cursor: pointer;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent; transition: 0.2s;
         }
         .history-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--border-color); }
         .history-item.active { background: rgba(168, 85, 247, 0.2); border-color: var(--accent); }
@@ -162,9 +121,7 @@
         .main-chat { flex: 1; display: flex; flex-direction: column; background: transparent; position: relative; }
         .chat-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 24px; overflow: hidden; }
 
-        .welcome-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; gap: 16px;
-        }
+        .welcome-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; gap: 16px; }
         .welcome-text {
             font-size: 2.2rem; font-weight: 600;
             background: linear-gradient(135deg, #60a5fa, #a855f7, #f43f5e);
@@ -177,56 +134,40 @@
             display: flex; flex-direction: column; gap: 20px; padding: 20px 10px; display: none;
         }
 
-        /* --- CỤC CHAT TRONG SUỐT HOÀN TOÀN, CHỈ CÓ VIỀN PHÁT SÁNG --- */
         .msg {
             padding: 14px 18px; border-radius: 16px; max-width: 82%;
-            line-height: 1.6; font-size: 0.95rem;
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            background: rgba(0, 0, 0, 0.02) !important;
-            position: relative;
+            line-height: 1.6; font-size: 0.95rem; backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); background: rgba(0, 0, 0, 0.02) !important; position: relative;
         }
-
         .msg.user { 
-            align-self: flex-end; 
-            border: 1px solid var(--user-bubble-border) !important;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25), inset 0 0 10px rgba(59, 130, 246, 0.1);
-            color: #e2e8f0;
+            align-self: flex-end; border: 1px solid var(--user-bubble-border) !important;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25), inset 0 0 10px rgba(59, 130, 246, 0.1); color: #e2e8f0;
         }
-
         .msg.ai { 
-            align-self: flex-start; 
-            border: 1px solid var(--ai-bubble-border) !important;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25), inset 0 0 10px rgba(168, 85, 247, 0.1);
-            color: #f8fafc;
+            align-self: flex-start; border: 1px solid var(--ai-bubble-border) !important;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25), inset 0 0 10px rgba(168, 85, 247, 0.1); color: #f8fafc;
         }
-
         .msg.ai p { margin-bottom: 10px; }
         .msg.ai pre { background: rgba(0, 0, 0, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; }
         .msg-image { max-width: 240px; border-radius: 10px; margin-bottom: 8px; display: block; border: 1px solid var(--border-color); }
 
-        /* --- KHUNG NHẬP LIỆU TRONG SUỐT, VIỀN PHÁT SÁNG --- */
+        /* --- INPUT --- */
         .input-wrapper { width: 100%; display: flex; justify-content: center; padding-bottom: 10px; }
-
         .draw-input-box {
             width: 100%; max-width: 750px; min-height: 58px; border-radius: 28px;
             display: flex; flex-direction: column; padding: 10px 18px; gap: 8px; position: relative;
-            border: 1px solid rgba(168, 85, 247, 0.6);
-            background: rgba(15, 17, 23, 0.25);
+            border: 1px solid rgba(168, 85, 247, 0.6); background: rgba(15, 17, 23, 0.25);
             box-shadow: 0 0 25px rgba(168, 85, 247, 0.2), inset 0 0 12px rgba(168, 85, 247, 0.08);
             backdrop-filter: blur(14px);
         }
-
         .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
-
         .draw-input-box textarea {
             flex: 1; background: transparent; border: none; outline: none;
             color: var(--text-main); font-size: 0.98rem; resize: none; max-height: 120px; line-height: 1.5;
         }
-
         .send-btn {
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
-            color: white; width: 38px; height: 38px; border-radius: 50%;
-            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #a855f7, #3b82f6); color: white; width: 38px; height: 38px;
+            border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); flex-shrink: 0;
         }
         .send-btn:hover { transform: scale(1.06); }
@@ -240,26 +181,30 @@
 </head>
 <body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ĐỐI CHIẾU SHEETDB -->
     <div id="auth-modal">
         <div class="auth-box">
-            <h2>⚡ Đăng nhập Vanh AI</h2>
-            <input type="text" id="authUsername" placeholder="Nhập tên tài khoản của bạn...">
-            <button class="auth-btn" onclick="handleAuth()">Bắt đầu sử dụng</button>
+            <div class="auth-title" id="authTitle">Đăng Nhập</div>
+            <div class="auth-error" id="authError"></div>
+            <input type="text" id="authUsername" class="auth-input" placeholder="Tên đăng nhập (Username)...">
+            <input type="password" id="authPassword" class="auth-input" placeholder="Mật khẩu (Password)..." onkeydown="if(event.key==='Enter') handleAuth()">
+            <button class="auth-btn" id="authActionBtn" onclick="handleAuth()">Đăng Nhập</button>
+            <div class="auth-switch" onclick="toggleAuthMode()" id="authSwitchText">Chưa có tài khoản? <span>Đăng ký ngay</span></div>
         </div>
     </div>
 
     <!-- MÀN HÌNH CHỜ NITRO INTRO ANIMATION -->
     <div id="nitro-splash">
-        <div class="splash-logo">⚡ Vanh AI Dev</div>
+        <div class="splash-logo">⚡ Vanh AI Nitro</div>
         <div class="splash-sub">Khởi động hệ thống tuyệt đỉnh...</div>
     </div>
 
-    <div class="app-container">
+    <!-- GIAO DIỆN CHAT CHÍNH -->
+    <div class="app-container" id="appContainer">
         <sidebar>
             <div class="sidebar-header">
                 <span>⚡ Vanh AI</span>
-                <span class="user-status" id="displayUsername">Nitro Pro</span>
+                <span class="user-status" id="currentUserBadge">Trần Việt Anh</span>
             </div>
             <button class="new-chat-btn" onclick="startNewChat()">+ Cuộc trò chuyện mới</button>
             <div class="history-section" id="history-list">
@@ -271,7 +216,7 @@
             <div class="chat-body">
                 <div class="welcome-container" id="welcomeContainer">
                     <div class="welcome-text" id="welcomeUserText">Xin chào Trần Việt Anh!</div>
-                    <div class="welcome-sub">Hệ thống mở đầu Nitro đã sẵn sàng. Bạn muốn trò chuyện gì với Diễm My hôm nay?</div>
+                    <div class="welcome-sub">Hệ thống đối chiếu SheetDB và Nitro đã sẵn sàng. Bạn muốn trò chuyện gì với Diễm My hôm nay?</div>
                 </div>
 
                 <div id="chat-messages"></div>
@@ -287,7 +232,7 @@
                         <div class="input-row">
                             <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="processFile(event.target.files[0])">
                             <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">+</button>
-                            <textarea id="userInput" placeholder="Nhắn gì đó cho AI (Năm hiện tại: 2026)..." rows="1" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                            <textarea id="userInput" placeholder="Nhắn gì đó cho Diễm My (Năm hiện tại: 2026)..." rows="1" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
                             <button class="send-btn" onclick="sendMessage()">
                                 <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                             </button>
@@ -299,41 +244,98 @@
     </div>
 
     <script>
-        // Kiểm tra thông tin đăng nhập từ LocalStorage
-        let currentUser = localStorage.getItem('nitro_ai_user');
+        const SHEETDB_URL = "https://sheetdb.io/api/v1/67pirhj3ffh1w";
+        const OPENAI_API_KEY = "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";
+
+        let isRegisterMode = false;
+        let loggedInUser = localStorage.getItem('nitro_logged_user') || null;
+
+        // Nếu đã đăng nhập trước đó thì vào thẳng app
         window.addEventListener('load', () => {
-            if (currentUser) {
-                document.getElementById('auth-modal').style.display = 'none';
-                updateUserInterface(currentUser);
+            if (loggedInUser) {
+                unlockApp(loggedInUser);
             }
-            setTimeout(() => {
-                const splash = document.getElementById('nitro-splash');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-            }, 1500);
-            loadHistory();
         });
 
-        function handleAuth() {
-            const usernameInput = document.getElementById('authUsername').value.trim();
-            if (!usernameInput) return alert('Vui lòng nhập tên tài khoản!');
-            currentUser = usernameInput;
-            localStorage.setItem('nitro_ai_user', currentUser);
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('authTitle').innerText = isRegisterMode ? "Đăng Ký Tài Khoản" : "Đăng Nhập";
+            document.getElementById('authActionBtn').innerText = isRegisterMode ? "Đăng Ký" : "Đăng Nhập";
+            document.getElementById('authSwitchText').innerHTML = isRegisterMode ? 
+                "Đã có tài khoản? <span>Đăng nhập ngay</span>" : 
+                "Chưa có tài khoản? <span>Đăng ký ngay</span>";
+            document.getElementById('authError').innerText = "";
+        }
+
+        // Xử lý đăng nhập / đăng ký đối chiếu trực tiếp qua SheetDB
+        async function handleAuth() {
+            const user = document.getElementById('authUsername').value.trim();
+            const pass = document.getElementById('authPassword').value.trim();
+            const errorBox = document.getElementById('authError');
+
+            if (!user || !pass) {
+                errorBox.innerText = "Vui lòng nhập đầy đủ tên và mật khẩu!";
+                return;
+            }
+
+            errorBox.innerText = "Đang kết nối Google Sheets...";
+
+            try {
+                const res = await fetch(SHEETDB_URL);
+                const data = await res.json();
+
+                if (isRegisterMode) {
+                    // Kiểm tra xem username đã tồn tại chưa
+                    const exist = data.find(row => row.username === user);
+                    if (exist) {
+                        errorBox.innerText = "Tên đăng nhập này đã tồn tại trên Sheet!";
+                        return;
+                    }
+
+                    // Gửi tài khoản mới lên Google Sheets
+                    await fetch(SHEETDB_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: { username: user, password: pass } })
+                    });
+
+                    alert("Đăng ký thành công! Hãy đăng nhập ngay.");
+                    toggleAuthMode();
+                    errorBox.innerText = "";
+                } else {
+                    // Đối chiếu tài khoản đăng nhập với Sheet
+                    const matched = data.find(row => row.username === user && row.password === pass);
+                    if (matched) {
+                        localStorage.setItem('nitro_logged_user', user);
+                        unlockApp(user);
+                    } else {
+                        errorBox.innerText = "Sai tên đăng nhập hoặc mật khẩu trên Sheet!";
+                    }
+                }
+            } catch (err) {
+                errorBox.innerText = "Lỗi kết nối SheetDB: " + err.message;
+            }
+        }
+
+        function unlockApp(username) {
             document.getElementById('auth-modal').style.display = 'none';
-            updateUserInterface(currentUser);
+            const splash = document.getElementById('nitro-splash');
+            splash.style.display = 'flex';
+
+            document.getElementById('currentUserBadge').innerText = username;
+            document.getElementById('welcomeUserText').innerText = `Xin chào ${username}!`;
+
+            setTimeout(() => {
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+                document.getElementById('appContainer').style.display = 'flex';
+                loadHistory();
+            }, 1200);
         }
 
-        function updateUserInterface(name) {
-            document.getElementById('displayUsername').innerText = name;
-            document.getElementById('welcomeUserText').innerText = `Xin chào ${name}!`;
-        }
-
-        // OpenAI API Key & SheetDB Endpoint
-        const OPENAI_API_KEY = "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";
-        const SHEETDB_API_URL = "https://sheetdb.io/api/v1/YOUR_SHEETDB_ID"; // Thay bằng API URL của bạn từ SheetDB.io
-
+        // Chat & Lịch sử
         let currentAttachedImage = null;
-        let sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions')) || [];
+        let sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions_' + loggedInUser)) || [];
         let activeId = null;
 
         function loadHistory() {
@@ -387,27 +389,6 @@
             document.getElementById('imageInputFile').value = '';
         }
 
-        // Hàm đồng bộ dữ liệu lên Google Sheets thông qua SheetDB
-        async function syncToSheetDB(sessionTitle, userMsg, aiReply) {
-            try {
-                await fetch(SHEETDB_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        data: {
-                            User: currentUser || "Trần Việt Anh",
-                            SessionTitle: sessionTitle,
-                            UserMessage: userMsg,
-                            AIReply: aiReply,
-                            Timestamp: new Date().toISOString()
-                        }
-                    })
-                });
-            } catch (err) {
-                console.error("Lỗi đồng bộ SheetDB:", err);
-            }
-        }
-
         window.sendMessage = async function() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
@@ -434,7 +415,7 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
             let messagesPayload = [
-                { role: "system", content: `Bạn là trợ lý AI thông minh, thân thiện tên là Diễm My của người dùng ${currentUser || 'Trần Việt Anh'}. Hôm nay là ngày 26 tháng 9 năm 2026.` }
+                { role: "system", content: `Bạn là trợ lý AI thông minh, thân thiện tên là Diễm My của người dùng ${loggedInUser}. Hôm nay là ngày 26 tháng 9 năm 2026.` }
             ];
 
             if (activeId !== null) {
@@ -485,11 +466,8 @@
                 sessions[activeId].messages.push({ role: 'assistant', content: reply });
             }
 
-            localStorage.setItem('nitro_ai_sessions', JSON.stringify(sessions));
+            localStorage.setItem('nitro_ai_sessions_' + loggedInUser, JSON.stringify(sessions));
             loadHistory();
-
-            // Gửi dữ liệu ngầm lên Google Sheets qua SheetDB
-            syncToSheetDB(sessionTitle, text, reply);
         };
 
         function escapeHtml(str) {

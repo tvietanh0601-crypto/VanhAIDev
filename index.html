@@ -3,494 +3,803 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanh AI Dev</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Vanh AI Desktop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Thư viện Marked.js để dịch Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Thư viện KaTeX để render công thức toán học -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 
     <style>
         :root {
-            --bg-deep: #060709;
-            --sidebar-bg: rgba(14, 17, 23, 0.5);
-            --border-color: rgba(255, 255, 255, 0.12);
-            --accent: #a855f7; 
+            --bg-dark: #0f1117;
+            --sidebar-bg: rgba(22, 27, 34, 0.45);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --accent: #3b82f6;
             --text-main: #f0f6fc;
             --text-muted: #8b949e;
-            --user-bubble-border: rgba(59, 130, 246, 0.6);
-            --ai-bubble-border: rgba(168, 85, 247, 0.6);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-deep);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
-                url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop');
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(15, 17, 23, 0.65), rgba(15, 17, 23, 0.65)), 
+                        url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
             color: var(--text-main);
             height: 100vh;
             display: flex;
             overflow: hidden;
         }
 
-        /* --- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ (SHEETDB) --- */
-        #auth-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(4, 5, 7, 0.88); backdrop-filter: blur(20px);
-            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        /* --- MÀN HÌNH INTRO --- */
+        #intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: hideIntroScreen 0.1s ease 3.2s forwards;
         }
+
+        @keyframes hideIntroScreen {
+            to { display: none; visibility: hidden; opacity: 0; pointer-events: none; }
+        }
+
+        .intro-title {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: textNitroAnim 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes textNitroAnim {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            30% { opacity: 1; transform: scale(1); filter: blur(0); }
+            70% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1); filter: blur(10px); }
+        }
+
+        .intro-dot {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: #3b82f6;
+            border-radius: 50%;
+            top: -30px;
+            opacity: 0;
+            animation: nitroDropAndGlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2s forwards;
+        }
+
+        @keyframes nitroDropAndGlow {
+            0% { top: -30px; opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            50% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            60% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 100px 50px rgba(59, 130, 246, 0.7), 0 0 200px 100px rgba(147, 51, 234, 0.5); transform: scale(1.5); }
+            100% { top: calc(50% - 7px); opacity: 0; box-shadow: 0 0 300px 200px rgba(59, 130, 246, 0); transform: scale(4); }
+        }
+
+        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 17, 23, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            animation: fadeInAuth 0.5s ease 3.2s forwards;
+        }
+
+        @keyframes fadeInAuth { to { opacity: 1; } }
+
         .auth-box {
-            background: rgba(15, 17, 23, 0.8); border: 1px solid rgba(168, 85, 247, 0.5);
-            padding: 36px; border-radius: 24px; width: 100%; max-width: 400px;
-            display: flex; flex-direction: column; gap: 16px; text-align: center;
-            box-shadow: 0 0 35px rgba(168, 85, 247, 0.25);
+            background: rgba(30, 37, 48, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 35px 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .auth-title { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, #f43f5e, #a855f7, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .auth-input {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color);
-            padding: 12px 16px; border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none;
-            transition: 0.3s;
+
+        .auth-box h2 { margin-bottom: 6px; font-size: 1.5rem; color: white; text-align: center; }
+        .auth-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; text-align: center; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            background: rgba(21, 26, 33, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
         }
-        .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(168, 85, 247, 0.3); }
+        .form-group input:focus { border-color: var(--accent); }
+
         .auth-btn {
-            background: linear-gradient(135deg, #a855f7, #3b82f6); color: white;
-            border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
-            transition: 0.3s; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
         }
-        .auth-btn:hover { transform: scale(1.02); }
-        .auth-switch { font-size: 0.85rem; color: var(--text-muted); cursor: pointer; margin-top: 4px; }
-        .auth-switch span { color: var(--accent); font-weight: 600; }
-        .auth-error { color: #f43f5e; font-size: 0.82rem; min-height: 18px; }
+        .auth-btn:hover { background: #2563eb; }
 
-        /* --- MÀN HÌNH CHỜ NITRO INTRO ANIMATION --- */
-        #nitro-splash {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #040507; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-            gap: 16px; display: none;
+        .switch-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 20px;
         }
-        .splash-logo {
-            font-size: 2.8rem; font-weight: 700;
-            background: linear-gradient(135deg, #f43f5e, #a855f7, #3b82f6);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: nitroPulse 1.4s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes nitroPulse {
-            0% { transform: scale(0.96); filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.3)); }
-            100% { transform: scale(1.04); filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.7)); }
-        }
-        .splash-sub { color: var(--text-muted); font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; }
+        .switch-text span { color: var(--accent); cursor: pointer; font-weight: 500; }
 
-        .app-container { display: flex; width: 100%; height: 100%; display: none; }
+        /* --- GIAO DIỆN CHÍNH --- */
+        .app-container { display: flex; width: 100%; height: 100%; }
 
-        /* --- SIDEBAR --- */
         sidebar {
-            width: 300px; background: var(--sidebar-bg); backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px); border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; padding: 20px; gap: 16px; z-index: 10;
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
         }
+
         .sidebar-header {
-            font-weight: 600; font-size: 1.05rem; padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color); color: #fff;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.95rem;
         }
-        .user-badge-area { display: flex; align-items: center; gap: 8px; }
-        .user-status { font-size: 0.75rem; background: rgba(168, 85, 247, 0.2); border: 1px solid var(--accent); padding: 3px 8px; border-radius: 10px; color: #d8b4fe; }
-        
-        .logout-btn {
-            background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
-            color: #fda4af; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .logout-btn:hover { background: rgba(244, 63, 94, 0.3); color: #fff; border-color: #f43f5e; box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
 
         .new-chat-btn {
-            background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4);
-            color: var(--text-main); padding: 12px 16px; border-radius: 12px; cursor: pointer;
-            text-align: left; font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease;
+            background: rgba(33, 38, 45, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
         }
-        .new-chat-btn:hover { background: rgba(168, 85, 247, 0.3); border-color: var(--accent); box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
+        .new-chat-btn:hover { background: rgba(48, 54, 61, 0.6); }
 
-        .history-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .history-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 6px 4px; }
+        .history-section {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin: 10px 0 4px 4px;
+        }
+
         .history-item {
-            padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; color: #c9d1d9; cursor: pointer;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(255, 255, 255, 0.02);
-            border: 1px solid transparent; transition: 0.2s;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            transition: 0.2s;
         }
-        .history-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--border-color); }
-        .history-item.active { background: rgba(168, 85, 247, 0.2); border-color: var(--accent); }
+        .history-item:hover { 
+            background: rgba(255, 255, 255, 0.08); 
+            border-color: var(--border-color);
+        }
 
-        /* --- CHAT MAIN --- */
-        .main-chat { flex: 1; display: flex; flex-direction: column; background: transparent; position: relative; }
-        .chat-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 24px; overflow: hidden; }
+        .user-profile-box {
+            background: rgba(30, 37, 48, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .user-info-row { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.85rem; color: white;
+        }
+        .user-name { font-size: 0.9rem; font-weight: 500; color: white; }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .logout-btn:hover { background: #ef4444; color: white; }
 
-        .welcome-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; gap: 16px; }
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+        }
+
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
         .welcome-text {
-            font-size: 2.2rem; font-weight: 600;
-            background: linear-gradient(135deg, #60a5fa, #a855f7, #f43f5e);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #e6edf3;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-        .welcome-sub { color: var(--text-muted); font-size: 1rem; max-width: 500px; }
+
+        @keyframes drawBoxNitro {
+            0% { width: 0px; height: 0px; border-color: transparent; opacity: 0; }
+            50% { width: 100%; height: 0px; border-color: var(--accent); opacity: 1; }
+            100% {
+                width: 100%;
+                min-height: 54px;
+                border-color: var(--border-color);
+                background: rgba(20, 24, 33, 0.75);
+                opacity: 1;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            }
+        }
+
+        .draw-input-box {
+            width: 100%;
+            max-width: 680px;
+            min-height: 54px;
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 16px;
+            gap: 8px;
+            position: relative;
+            animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            backdrop-filter: blur(16px);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .draw-input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.6s forwards;
+        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
+
+        .attach-btn {
+            background: rgba(33, 38, 45, 0.8);
+            color: var(--text-muted);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .attach-btn:hover { background: rgba(48, 54, 61, 0.9); color: white; border-color: var(--accent); }
+
+        .send-icon {
+            background: var(--accent);
+            color: white;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .send-icon:hover { transform: scale(1.1); background: #2563eb; }
+
+        #image-preview-container {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding-left: 4px;
+        }
+        .preview-thumb-wrapper {
+            position: relative;
+            width: 50px; height: 50px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .preview-thumb-wrapper img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .remove-preview-btn {
+            position: absolute;
+            top: 2px; right: 2px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px; height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
 
         #chat-messages {
-            width: 100%; max-width: 800px; flex: 1; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 20px; padding: 20px 10px; display: none;
+            width: 100%;
+            max-width: 750px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            display: none;
         }
 
         .msg {
-            padding: 14px 18px; border-radius: 16px; max-width: 82%;
-            line-height: 1.6; font-size: 0.95rem; backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px); background: rgba(0, 0, 0, 0.02) !important; position: relative;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
         }
-        .msg.user { 
-            align-self: flex-end; border: 1px solid var(--user-bubble-border) !important;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25), inset 0 0 10px rgba(59, 130, 246, 0.1); color: #e2e8f0;
-        }
-        .msg.ai { 
-            align-self: flex-start; border: 1px solid var(--ai-bubble-border) !important;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25), inset 0 0 10px rgba(168, 85, 247, 0.1); color: #f8fafc;
-        }
-        .msg.ai p { margin-bottom: 10px; }
-        .msg.ai pre { background: rgba(0, 0, 0, 0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; }
-        .msg-image { max-width: 240px; border-radius: 10px; margin-bottom: 8px; display: block; border: 1px solid var(--border-color); }
+        .msg.user { background: rgba(43, 49, 59, 0.85); align-self: flex-end; border: 1px solid var(--border-color); }
+        .msg.ai { background: rgba(31, 36, 45, 0.85); border: 1px solid var(--border-color); align-self: flex-start; }
+        .msg.ai p { margin-bottom: 8px; }
+        .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
 
-        /* --- INPUT --- */
-        .input-wrapper { width: 100%; display: flex; justify-content: center; padding-bottom: 10px; }
-        .draw-input-box {
-            width: 100%; max-width: 750px; min-height: 58px; border-radius: 28px;
-            display: flex; flex-direction: column; padding: 10px 18px; gap: 8px; position: relative;
-            border: 1px solid rgba(168, 85, 247, 0.6); background: rgba(15, 17, 23, 0.25);
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.2), inset 0 0 12px rgba(168, 85, 247, 0.08);
-            backdrop-filter: blur(14px);
+        .msg-image {
+            max-width: 250px;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+            object-fit: cover;
         }
-        .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
-        .draw-input-box textarea {
-            flex: 1; background: transparent; border: none; outline: none;
-            color: var(--text-main); font-size: 0.98rem; resize: none; max-height: 120px; line-height: 1.5;
-        }
-        .send-btn {
-            background: linear-gradient(135deg, #a855f7, #3b82f6); color: white; width: 38px; height: 38px;
-            border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); flex-shrink: 0;
-        }
-        .send-btn:hover { transform: scale(1.06); }
-        .send-btn svg { width: 16px; height: 16px; fill: white; }
-
-        #image-preview-container { display: none; align-items: center; gap: 8px; padding-left: 4px; }
-        .preview-thumb-wrapper { position: relative; width: 48px; height: 48px; border-radius: 8px; overflow: hidden; border: 1px solid var(--accent); }
-        .preview-thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .remove-preview-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.8); color: white; border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ĐỐI CHIẾU SHEETDB -->
-    <div id="auth-modal">
+    <!-- Màn hình Intro Nitro Animation -->
+    <div id="intro-screen">
+        <div class="intro-title">Vanh AI Dev</div>
+        <div class="intro-dot"></div>
+    </div>
+
+    <!-- Màn hình Đăng nhập -->
+    <div id="auth-screen" style="display: none;">
         <div class="auth-box">
-            <div class="auth-title" id="authTitle">Đăng Nhập</div>
-            <div class="auth-error" id="authError"></div>
-            <input type="text" id="authUsername" class="auth-input" placeholder="Tên đăng nhập (Username)...">
-            <input type="password" id="authPassword" class="auth-input" placeholder="Mật khẩu (Password)..." onkeydown="if(event.key==='Enter') handleAuth()">
-            <button class="auth-btn" id="authActionBtn" onclick="handleAuth()">Đăng Nhập</button>
-            <div class="auth-switch" onclick="toggleAuthMode()" id="authSwitchText">Chưa có tài khoản? <span>Đăng ký ngay</span></div>
+            <div id="login-form">
+                <h2>Đăng nhập</h2>
+                <p>Kết nối SheetDB Database</p>
+                <div class="form-group">
+                    <label>Tài khoản</label>
+                    <input type="text" id="login-username" placeholder="Nhập tài khoản...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="login-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleLogin()">Đăng nhập</button>
+                <div class="switch-text">Chưa có tài khoản? <span onclick="switchTab('register')">Đăng ký ngay</span></div>
+            </div>
+
+            <div id="register-form" style="display: none;">
+                <h2>Đăng ký</h2>
+                <p>Tạo tài khoản lưu lên Sheet</p>
+                <div class="form-group">
+                    <label>Tên hiển thị / Tài khoản</label>
+                    <input type="text" id="reg-name" placeholder="Nhập tài khoản...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="reg-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleRegister()">Đăng ký</button>
+                <div class="switch-text">Đã có tài khoản? <span onclick="switchTab('login')">Đăng nhập</span></div>
+            </div>
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHỜ NITRO INTRO ANIMATION -->
-    <div id="nitro-splash">
-        <div class="splash-logo">⚡ Vanh AI Nitro</div>
-        <div class="splash-sub">Khởi động hệ thống tuyệt đỉnh...</div>
-    </div>
-
-    <!-- GIAO DIỆN CHAT CHÍNH -->
-    <div class="app-container" id="appContainer">
+    <!-- Giao diện chính -->
+    <div class="app-container" id="app-main" style="display: none;">
         <sidebar>
-            <div class="sidebar-header">
-                <span>⚡ Vanh AI</span>
-                <div class="user-badge-area">
-                    <span class="user-status" id="currentUserBadge">User</span>
-                    <button class="logout-btn" onclick="handleLogout()" title="Đăng xuất tài khoản">Đăng xuất</button>
-                </div>
-            </div>
+            <div class="sidebar-header">⚡ Vanh AI Desktop</div>
             <button class="new-chat-btn" onclick="startNewChat()">+ Cuộc trò chuyện mới</button>
             <div class="history-section" id="history-list">
                 <div class="history-title">Gần đây</div>
+            </div>
+            <div class="user-profile-box">
+                <div class="user-info-row">
+                    <div class="user-avatar" id="user-avatar-initial">V</div>
+                    <div class="user-name" id="user-display-name">User</div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
             </div>
         </sidebar>
 
         <div class="main-chat">
             <div class="chat-body">
-                <div class="welcome-container" id="welcomeContainer">
-                    <div class="welcome-text" id="welcomeUserText">Xin chào!</div>
-                    <div class="welcome-sub">Bạn muốn trò chuyện gì với Vanh AI hôm nay?</div>
-                </div>
-
+                <div class="welcome-text" id="welcome-msg">Chào Vanh AI, tiếp theo mình làm gì?</div>
                 <div id="chat-messages"></div>
-
-                <div class="input-wrapper">
-                    <div class="draw-input-box">
-                        <div id="image-preview-container">
-                            <div class="preview-thumb-wrapper">
-                                <img id="preview-img-tag" src="" alt="Preview">
-                                <button class="remove-preview-btn" onclick="clearAttachedImage()">✕</button>
-                            </div>
+                
+                <div class="draw-input-box" id="chatInputBox">
+                    <div id="image-preview-container">
+                        <div class="preview-thumb-wrapper">
+                            <img id="preview-img-tag" src="" alt="Preview">
+                            <button class="remove-preview-btn" onclick="clearAttachedImage()">✕</button>
                         </div>
-                        <div class="input-row">
-                            <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="processFile(event.target.files[0])">
-                            <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">+</button>
-                            <textarea id="userInput" placeholder="Nhắn gì đó cho Diễm My (Năm hiện tại: 2026)..." rows="1" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-                            <button class="send-btn" onclick="sendMessage()">
-                                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="input-row">
+                        <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
+                        <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()">+</button>
+                        
+                        <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì hoặc dán ảnh (Ctrl+V)..." onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
+                        <button class="send-icon" onclick="sendMessage()">➔</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const SHEETDB_URL = "https://sheetdb.io/api/v1/67pirhj3ffh1w";
-        const OPENAI_API_KEY = "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";
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
 
-        let isRegisterMode = false;
-        let loggedInUser = localStorage.getItem('nitro_logged_user') || null;
+        const p1 = "AQ.Ab8RN6IY-oy0TJ";
+        const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
+        const GEMINI_API_KEY = p1 + p2;
+        const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
+        
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        let currentAttachedImage = null;
 
-        window.addEventListener('load', () => {
-            if (loggedInUser) {
-                unlockApp(loggedInUser);
-            }
-        });
-
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('authTitle').innerText = isRegisterMode ? "Đăng Ký Tài Khoản" : "Đăng Nhập";
-            document.getElementById('authActionBtn').innerText = isRegisterMode ? "Đăng Ký" : "Đăng Nhập";
-            document.getElementById('authSwitchText').innerHTML = isRegisterMode ? 
-                "Đã có tài khoản? <span>Đăng nhập ngay</span>" : 
-                "Chưa có tài khoản? <span>Đăng ký ngay</span>";
-            document.getElementById('authError').innerText = "";
+        function getHistoryKey() {
+            return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
         }
 
-        async function handleAuth() {
-            const user = document.getElementById('authUsername').value.trim();
-            const pass = document.getElementById('authPassword').value.trim();
-            const errorBox = document.getElementById('authError');
+        let currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+        let activeSessionId = null;
 
-            if (!user || !pass) {
-                errorBox.innerText = "Vui lòng nhập đầy đủ tên và mật khẩu!";
-                return;
+        window.onload = function() {
+            const currentUser = localStorage.getItem('vanh_ai_current_user');
+            if (currentUser) {
+                setTimeout(() => { openApp(currentUser); }, 3200);
+            } else {
+                setTimeout(() => { document.getElementById('auth-screen').style.display = 'flex'; }, 3200);
             }
+        };
 
-            errorBox.innerText = "Đang kết nối ...";
+        window.switchTab = function(tab) {
+            if (tab === 'register') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            } else {
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            }
+        };
+
+        window.handleRegister = async function() {
+            const name = document.getElementById('reg-name').value.trim();
+            const pass = document.getElementById('reg-password').value.trim();
+            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
 
             try {
-                const res = await fetch(SHEETDB_URL);
-                const data = await res.json();
+                const checkRes = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}`);
+                const existing = await checkRes.json();
+                if (existing.length > 0) {
+                    alert('Tài khoản này đã tồn tại trên hệ thống!');
+                    return;
+                }
 
-                if (isRegisterMode) {
-                    const exist = data.find(row => row.username === user);
-                    if (exist) {
-                        errorBox.innerText = "Tên đăng nhập này đã tồn tại trên Sheet!";
-                        return;
-                    }
+                const response = await fetch(SHEETDB_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: { username: name, password: pass } })
+                });
 
-                    await fetch(SHEETDB_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: { username: user, password: pass } })
-                    });
-
-                    alert("Đăng ký thành công! Hãy đăng nhập ngay.");
-                    toggleAuthMode();
-                    errorBox.innerText = "";
+                if (response.ok) {
+                    alert('Đăng ký thành công!');
+                    switchTab('login');
                 } else {
-                    const matched = data.find(row => row.username === user && row.password === pass);
-                    if (matched) {
-                        localStorage.setItem('nitro_logged_user', user);
-                        loggedInUser = user;
-                        sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions_' + loggedInUser)) || [];
-                        unlockApp(user);
-                    } else {
-                        errorBox.innerText = "Sai tên đăng nhập hoặc mật khẩu trên Sheet!";
-                    }
+                    throw new Error('Lỗi từ SheetDB');
                 }
             } catch (err) {
-                errorBox.innerText = "Lỗi kết nối SheetDB: " + err.message;
+                alert('Đăng ký thất bại, vui lòng kiểm tra lại kết nối!');
             }
+        };
+
+        window.handleLogin = async function() {
+            const name = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
+
+            try {
+                const response = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}&password=${encodeURIComponent(pass)}`);
+                const users = await response.json();
+
+                if (users.length > 0) {
+                    localStorage.setItem('vanh_ai_current_user', name);
+                    openApp(name);
+                } else {
+                    alert('Sai tài khoản hoặc mật khẩu!');
+                }
+            } catch (err) {
+                alert('Không thể kết nối đến cơ sở dữ liệu!');
+            }
+        };
+
+        function openApp(username) {
+            document.getElementById('user-display-name').innerText = username;
+            document.getElementById('user-avatar-initial').innerText = username.charAt(0).toUpperCase();
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-main').style.display = 'flex';
+            currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+            loadHistory();
         }
 
-        // Xử lý nút Đăng xuất
-        function handleLogout() {
-            localStorage.removeItem('nitro_logged_user');
-            loggedInUser = null;
-            document.getElementById('appContainer').style.display = 'none';
-            document.getElementById('auth-modal').style.display = 'flex';
-            document.getElementById('authUsername').value = '';
-            document.getElementById('authPassword').value = '';
-            document.getElementById('authError').innerText = '';
-        }
-
-        function unlockApp(username) {
-            document.getElementById('auth-modal').style.display = 'none';
-            const splash = document.getElementById('nitro-splash');
-            splash.style.display = 'flex';
-
-            document.getElementById('currentUserBadge').innerText = username;
-            document.getElementById('welcomeUserText').innerText = `Xin chào ${username}!`;
-
-            setTimeout(() => {
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-                document.getElementById('appContainer').style.display = 'flex';
-                loadHistory();
-            }, 1000);
-        }
-
-        let currentAttachedImage = null;
-        let sessions = JSON.parse(localStorage.getItem('nitro_ai_sessions_' + loggedInUser)) || [];
-        let activeId = null;
+        window.handleLogout = function() {
+            localStorage.removeItem('vanh_ai_current_user');
+            location.reload();
+        };
 
         function loadHistory() {
-            const list = document.getElementById('history-list');
-            let html = '<div class="history-title">Gần đây</div>';
-            sessions.forEach((s, i) => {
-                html += `<div class="history-item ${activeId === i ? 'active' : ''}" onclick="loadSession(${i})">${escapeHtml(s.title)}</div>`;
+            const historyList = document.getElementById('history-list');
+            let itemsHtml = '<div class="history-title">Gần đây</div>';
+            
+            currentChatSessions.forEach((session, index) => {
+                itemsHtml += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title)}</div>`;
             });
-            list.innerHTML = html;
+            historyList.innerHTML = itemsHtml;
         }
 
         window.startNewChat = function() {
-            activeId = null;
+            activeSessionId = null;
             clearAttachedImage();
             document.getElementById('chat-messages').style.display = 'none';
-            document.getElementById('welcomeContainer').style.display = 'flex';
+            document.getElementById('welcome-msg').style.display = 'block';
             document.getElementById('chat-messages').innerHTML = '';
-            loadHistory();
-        }
+        };
 
-        window.loadSession = function(i) {
-            activeId = i;
+        window.loadSession = function(index) {
+            activeSessionId = index;
+            const session = currentChatSessions[index];
             const chatMsgs = document.getElementById('chat-messages');
+            
             chatMsgs.innerHTML = '';
-            document.getElementById('welcomeContainer').style.display = 'none';
+            document.getElementById('welcome-msg').style.display = 'none';
             chatMsgs.style.display = 'flex';
 
-            sessions[i].messages.forEach(m => {
-                let imgHtml = m.image ? `<img src="${m.image}" class="msg-image">` : '';
-                let contentHtml = m.role === 'user' ? escapeHtml(m.content) : marked.parse(m.content);
-                chatMsgs.innerHTML += `<div class="msg ${m.role === 'user' ? 'user' : 'ai'}">${imgHtml}<div>${contentHtml}</div></div>`;
+            session.messages.forEach(msg => {
+                let contentHtml = '';
+                if (msg.image) {
+                    contentHtml += `<img src="${msg.image}" class="msg-image">`;
+                }
+                if (msg.text) {
+                    if (msg.sender === 'user') {
+                        contentHtml += escapeHtml(msg.text);
+                    } else {
+                        contentHtml += marked.parse(msg.text);
+                    }
+                }
+                chatMsgs.innerHTML += `<div class="msg ${msg.sender}">${contentHtml}</div>`;
             });
+
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            if (window.renderMathInElement) {
+                renderMathInElement(chatMsgs, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        };
+
+        function saveMessageToCurrentSession(userText, aiText, imageBase64) {
+            if (activeSessionId === null) {
+                const titleText = userText ? userText : "[Hình ảnh]";
+                const newSession = {
+                    title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
+                    messages: [
+                        { sender: 'user', text: userText, image: imageBase64 },
+                        { sender: 'ai', text: aiText }
+                    ]
+                };
+                currentChatSessions.unshift(newSession);
+                activeSessionId = 0;
+            } else {
+                currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText, image: imageBase64 });
+                currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText });
+            }
+
+            if (currentChatSessions.length > 20) currentChatSessions.pop();
+            localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
             loadHistory();
         }
 
-        function processFile(file) {
-            if (!file) return;
+        window.handleFileSelected = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processImageFile(file);
+            }
+        }
+
+        window.handlePasteImage = function(event) {
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        processImageFile(file);
+                        event.preventDefault();
+                    }
+                }
+            }
+        }
+
+        function processImageFile(file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = function(e) {
                 currentAttachedImage = e.target.result;
                 document.getElementById('preview-img-tag').src = currentAttachedImage;
                 document.getElementById('image-preview-container').style.display = 'flex';
-            };
+            }
             reader.readAsDataURL(file);
         }
 
-        window.clearAttachedImage = () => {
+        window.clearAttachedImage = function() {
             currentAttachedImage = null;
             document.getElementById('image-preview-container').style.display = 'none';
+            document.getElementById('preview-img-tag').src = '';
             document.getElementById('imageInputFile').value = '';
         }
 
         window.sendMessage = async function() {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            const img = currentAttachedImage;
-            if (!text && !img) return;
+            const inputField = document.getElementById('userInput');
+            const text = inputField.value.trim();
+            const attachedImg = currentAttachedImage;
 
-            document.getElementById('welcomeContainer').style.display = 'none';
+            if (!text && !attachedImg) return;
+
+            document.getElementById('welcome-msg').style.display = 'none';
             const chatMsgs = document.getElementById('chat-messages');
             chatMsgs.style.display = 'flex';
 
-            let uHtml = `<div class="msg user">`;
-            if (img) uHtml += `<img src="${img}" class="msg-image">`;
-            if (text) uHtml += `<div>${escapeHtml(text)}</div>`;
-            uHtml += `</div>`;
+            let userMsgHtml = `<div class="msg user">`;
+            if (attachedImg) {
+                userMsgHtml += `<img src="${attachedImg}" class="msg-image">`;
+            }
+            if (text) {
+                userMsgHtml += `<div>${escapeHtml(text)}</div>`;
+            }
+            userMsgHtml += `</div>`;
 
-            chatMsgs.innerHTML += uHtml;
-            input.value = '';
-            input.style.height = 'auto';
+            chatMsgs.innerHTML += userMsgHtml;
+            inputField.value = '';
             clearAttachedImage();
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-            const loadId = 'load-' + Date.now();
-            chatMsgs.innerHTML += `<div class="msg ai" id="${loadId}" style="color: var(--text-muted)">Diễm My đang suy nghĩ...</div>`;
+            const loadingId = 'loading-' + Date.now();
+            chatMsgs.innerHTML += `<div class="msg ai" id="${loadingId}" style="color: var(--text-muted); font-style: italic;">Đang trả lời...</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-            let messagesPayload = [
-                { role: "system", content: `Bạn là trợ lý AI thông minh, thân thiện tên là Vanh AI của người dùng ${loggedInUser}.` }
-            ];
-
-            if (activeId !== null) {
-                sessions[activeId].messages.forEach(m => {
-                    messagesPayload.push({ role: m.role, content: m.content });
-                });
-            }
-            messagesPayload.push({ role: "user", content: text });
-
-            let reply = "";
+            let aiReply = "";
             try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o-mini",
-                        messages: messagesPayload
-                    })
-                });
+                let contentsParam = [];
+                if (attachedImg) {
+                    const base64Data = attachedImg.split(',')[1];
+                    const mimeType = attachedImg.substring(attachedImg.indexOf(':') + 1, attachedImg.indexOf(';'));
+                    
+                    contentsParam = [
+                        { inlineData: { data: base64Data, mimeType: mimeType } },
+                        text ? text : "Hãy mô tả hoặc phân tích hình ảnh này giúp tôi."
+                    ];
+                } else {
+                    contentsParam = text;
+                }
 
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                reply = data.choices[0].message.content;
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3.6-flash',
+                    contents: contentsParam,
+                });
+                aiReply = response.text || "Không nhận được phản hồi.";
             } catch (err) {
-                reply = "Lỗi kết nối OpenAI API: " + err.message;
+                aiReply = "Lỗi kết nối API: " + err.message;
             }
 
-            document.getElementById(loadId)?.remove();
-            chatMsgs.innerHTML += `<div class="msg ai">${marked.parse(reply)}</div>`;
+            const loadingElem = document.getElementById(loadingId);
+            if (loadingElem) loadingElem.remove();
+
+            const formattedHtml = marked.parse(aiReply);
+            chatMsgs.innerHTML += `<div class="msg ai">${formattedHtml}</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-            let sessionTitle = text.substring(0, 30) || 'Đoạn chat mới';
-            if (activeId === null) {
-                sessions.unshift({ 
-                    title: sessionTitle, 
-                    messages: [
-                        { role: 'user', content: text, image: img }, 
-                        { role: 'assistant', content: reply }
-                    ] 
-                });
-                activeId = 0;
-            } else {
-                sessionTitle = sessions[activeId].title;
-                sessions[activeId].messages.push({ role: 'user', content: text, image: img });
-                sessions[activeId].messages.push({ role: 'assistant', content: reply });
-            }
+            saveMessageToCurrentSession(text, aiReply, attachedImg);
 
-            localStorage.setItem('nitro_ai_sessions_' + loggedInUser, JSON.stringify(sessions));
-            loadHistory();
+            if (window.renderMathInElement) {
+                renderMathInElement(chatMsgs, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
         };
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>

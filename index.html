@@ -705,6 +705,30 @@ sidebar{
 }
 
 
+
+/* =========================================================
+   AI CREATE / ATTACH MENU
+   ========================================================= */
+#attachMenu{position:absolute;left:10px;bottom:64px;display:none;flex-direction:column;gap:7px;padding:9px;border-radius:15px;background:rgba(8,12,24,.82);border:1px solid rgba(140,126,255,.25);box-shadow:0 16px 45px rgba(0,0,0,.42),0 0 30px rgba(93,74,255,.12);backdrop-filter:blur(20px);z-index:30;min-width:190px}
+#attachMenu.show{display:flex;animation:menuPop .18s ease-out}
+@keyframes menuPop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.attach-menu-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(255,255,255,.035);color:#e9edfa;cursor:pointer;text-align:left;font-size:12px;transition:.18s}
+.attach-menu-btn:hover{background:rgba(112,95,255,.14);border-color:rgba(130,115,255,.38);transform:translateX(2px)}
+.attach-menu-icon{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:rgba(111,95,255,.13);font-size:14px}
+#imageModeBar{display:none;align-items:center;gap:7px;padding:0 8px 7px 8px;flex-wrap:wrap}
+#imageModeBar.show{display:flex}
+.image-mode-label{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:#8f98ad;margin-right:2px}
+.aspect-btn{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);color:#aeb7ca;border-radius:9px;padding:6px 9px;font-size:10px;cursor:pointer;transition:.18s}
+.aspect-btn:hover{border-color:rgba(133,115,255,.45);color:#fff}
+.aspect-btn.active{background:linear-gradient(135deg,rgba(112,94,255,.25),rgba(0,200,255,.12));border-color:rgba(145,128,255,.65);color:#fff;box-shadow:0 0 15px rgba(110,94,255,.12)}
+#imageModeStatus{font-size:10px;color:#9d95ff;margin-left:auto}
+.image-gen-msg{max-width:min(82%,780px)!important}
+.generated-ai-image{display:block;width:min(100%,720px);height:auto;border-radius:14px;margin-top:8px;border:1px solid rgba(170,150,255,.32);box-shadow:0 0 28px rgba(113,92,255,.14);background:rgba(0,0,0,.15)}
+.image-generating-card{display:flex;align-items:center;gap:10px;color:#c9c3ff}
+.image-generating-orb{width:9px;height:9px;border-radius:50%;background:#a99bff;box-shadow:0 0 8px #a99bff,0 0 22px #705cff;animation:imagePulse 1s ease-in-out infinite}
+@keyframes imagePulse{50%{transform:scale(.55);opacity:.45}}
+.image-prompt-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:rgba(110,94,255,.09);border:1px solid rgba(140,125,255,.18);font-size:9px;color:#aaa2ff;margin-bottom:7px}
+
 /* =========================================================
    MESSAGE / INPUT — GLASS + LUMINOUS TYPEWRITER
    ========================================================= */
@@ -939,15 +963,27 @@ sidebar{
                 <div id="chat-messages"></div>
                 
                 <div class="draw-input-box" id="chatInputBox">
+                    <div id="attachMenu">
+                        <button class="attach-menu-btn" onclick="openImageUpload()"><span class="attach-menu-icon">🖼</span><span>Gửi file ảnh</span></button>
+                        <button class="attach-menu-btn" onclick="startImageGeneration()"><span class="attach-menu-icon">✦</span><span>Tạo ảnh bằng AI</span></button>
+                    </div>
                     <div id="image-preview-container">
                         <div class="preview-thumb-wrapper">
                             <img id="preview-img-tag" src="" alt="Preview">
                             <button class="remove-preview-btn" onclick="clearAttachedImage()">✕</button>
                         </div>
                     </div>
+                    <div id="imageModeBar">
+                        <span class="image-mode-label">Tỷ lệ</span>
+                        <button class="aspect-btn active" data-ratio="1:1" onclick="selectAspectRatio('1:1',this)">1:1</button>
+                        <button class="aspect-btn" data-ratio="9:16" onclick="selectAspectRatio('9:16',this)">16:9 dọc</button>
+                        <button class="aspect-btn" data-ratio="16:9" onclick="selectAspectRatio('16:9',this)">16:9 ngang</button>
+                        <button class="aspect-btn" data-ratio="3:4" onclick="selectAspectRatio('3:4',this)">3:4 dọc</button>
+                        <span id="imageModeStatus">Nano Banana 2</span>
+                    </div>
                     <div class="input-row">
                         <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
-                        <button class="attach-btn" title="Đính kèm ảnh" onclick="document.getElementById('imageInputFile').click()">+</button>
+                        <button class="attach-btn" title="Thêm" onclick="toggleAttachMenu(event)">+</button>
                         
                         <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì hoặc dán ảnh (Ctrl+V)..." onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
                         <button class="send-icon" onclick="sendMessage()">➔</button>
@@ -967,6 +1003,8 @@ sidebar{
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         let currentAttachedImage = null;
+        let imageGenerationMode = false;
+        let selectedImageAspectRatio = '1:1';
 
         function getHistoryKey() {
             return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
@@ -1213,21 +1251,21 @@ sidebar{
             }
         };
 
-        function saveMessageToCurrentSession(userText, aiText, imageBase64) {
+        function saveMessageToCurrentSession(userText, aiText, imageBase64, aiImageBase64) {
             if (activeSessionId === null) {
                 const titleText = userText ? userText : "[Hình ảnh]";
                 const newSession = {
                     title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
                     messages: [
                         { sender: 'user', text: userText, image: imageBase64 },
-                        { sender: 'ai', text: aiText }
+                        { sender: 'ai', text: aiText, image: aiImageBase64 || null }
                     ]
                 };
                 currentChatSessions.unshift(newSession);
                 activeSessionId = 0;
             } else {
                 currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText, image: imageBase64 });
-                currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText });
+                currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText, image: aiImageBase64 || null });
             }
 
             if (currentChatSessions.length > 20) currentChatSessions.pop();
@@ -1272,10 +1310,120 @@ sidebar{
             document.getElementById('imageInputFile').value = '';
         }
 
+        window.toggleAttachMenu = function(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('attachMenu');
+            menu.classList.toggle('show');
+        };
+
+        window.openImageUpload = function() {
+            document.getElementById('attachMenu').classList.remove('show');
+            document.getElementById('imageInputFile').click();
+        };
+
+        window.startImageGeneration = function() {
+            document.getElementById('attachMenu').classList.remove('show');
+            imageGenerationMode = true;
+            selectedImageAspectRatio = '1:1';
+            document.querySelectorAll('.aspect-btn').forEach((b,i) => b.classList.toggle('active', i === 0));
+            document.getElementById('imageModeBar').classList.add('show');
+            const input = document.getElementById('userInput');
+            input.placeholder = 'Mô tả hình ảnh bạn muốn tạo...';
+            input.focus();
+        };
+
+        window.selectAspectRatio = function(ratio, button) {
+            selectedImageAspectRatio = ratio;
+            document.querySelectorAll('.aspect-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            document.getElementById('userInput').focus();
+        };
+
+        function exitImageGenerationMode() {
+            imageGenerationMode = false;
+            document.getElementById('imageModeBar').classList.remove('show');
+            document.getElementById('userInput').placeholder = 'Bạn đang nghĩ gì hoặc dán ảnh (Ctrl+V)...';
+        }
+
+        async function generateNanoBananaImage(prompt, aspectRatio) {
+            const response = await ai.models.generateContent({
+                model: 'gemini-3.1-flash-image',
+                contents: prompt,
+                config: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                    imageConfig: { aspectRatio: aspectRatio }
+                }
+            });
+            const parts = response?.candidates?.[0]?.content?.parts || response?.parts || [];
+            let imageData = null;
+            let mimeType = 'image/png';
+            let text = '';
+            for (const part of parts) {
+                if (part.inlineData?.data) {
+                    imageData = part.inlineData.data;
+                    mimeType = part.inlineData.mimeType || mimeType;
+                } else if (part.text) {
+                    text += part.text;
+                }
+            }
+            if (!imageData) throw new Error('Gemini không trả về dữ liệu ảnh.');
+            return { imageData, mimeType, text };
+        }
+
+        function appendGeneratedImage(imageData, mimeType, prompt) {
+            const chatMsgs = document.getElementById('chat-messages');
+            const loading = chatMsgs.querySelector('.image-generating-card')?.closest('.msg');
+            const bubble = loading || document.createElement('div');
+            bubble.className = 'msg ai image-gen-msg';
+            bubble.innerHTML = `<div class="image-prompt-badge">✦ Nano Banana 2 · ${escapeHtml(selectedImageAspectRatio)}</div><div>${escapeHtml(prompt)}</div><img class="generated-ai-image" src="data:${mimeType};base64,${imageData}" alt="Ảnh được tạo bởi Gemini">`;
+            if (!loading) chatMsgs.appendChild(bubble); else loading.replaceWith(bubble);
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            return `![Ảnh AI](data:${mimeType};base64,${imageData})`;
+        }
+
+        async function sendImageGeneration(prompt) {
+            const chatMsgs = document.getElementById('chat-messages');
+            const ratio = selectedImageAspectRatio;
+            const userBubble = document.createElement('div');
+            userBubble.className = 'msg user';
+            userBubble.innerHTML = `<div class="image-prompt-badge">✦ Tạo ảnh · ${escapeHtml(ratio)}</div><div>${escapeHtml(prompt)}</div>`;
+            chatMsgs.appendChild(userBubble);
+            const loading = document.createElement('div');
+            loading.className = 'msg ai typing-active';
+            loading.innerHTML = `<div class="image-generating-card"><span class="image-generating-orb"></span><span>Gemini Nano Banana đang tạo ảnh...</span></div>`;
+            chatMsgs.appendChild(loading);
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            try {
+                const result = await generateNanoBananaImage(prompt, ratio);
+                const bubble = document.createElement('div');
+                bubble.className = 'msg ai image-gen-msg';
+                bubble.innerHTML = `<div class="image-prompt-badge">✦ Nano Banana 2 · ${escapeHtml(ratio)}</div><img class="generated-ai-image" src="data:${result.mimeType};base64,${result.imageData}" alt="Ảnh được tạo bởi Gemini">`;
+                loading.replaceWith(bubble);
+                saveMessageToCurrentSession('🎨 Tạo ảnh [' + ratio + ']: ' + prompt, result.text || '', null, 'data:' + result.mimeType + ';base64,' + result.imageData);
+            } catch (err) {
+                loading.classList.remove('typing-active');
+                loading.innerHTML = `<div class="typewriter-content">Lỗi tạo ảnh: ${escapeHtml(err.message || String(err))}</div>`;
+                saveMessageToCurrentSession('🎨 Tạo ảnh [' + ratio + ']: ' + prompt, 'Lỗi tạo ảnh: ' + (err.message || String(err)), null);
+            }
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }
+
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
             const attachedImg = currentAttachedImage;
+
+            if (imageGenerationMode) {
+                if (!text) return;
+                inputField.value = '';
+                document.getElementById('welcome-wrap').style.display = 'none';
+                document.getElementById('welcome-msg').style.display = 'none';
+                document.getElementById('chat-messages').style.display = 'flex';
+                const promptForImage = text;
+                exitImageGenerationMode();
+                await sendImageGeneration(promptForImage);
+                return;
+            }
 
             if (!text && !attachedImg) return;
 
@@ -1402,6 +1550,12 @@ sidebar{
             }
             tick();
         }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('attachMenu');
+            const button = document.querySelector('.attach-btn');
+            if (menu && !menu.contains(e.target) && button && !button.contains(e.target)) menu.classList.remove('show');
+        });
 
         function escapeHtml(unsafe) {
             return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

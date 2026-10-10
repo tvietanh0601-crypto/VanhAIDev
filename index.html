@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanh AI Desktop</title>
-<link rel="icon" type="image/jpeg" href="https://knowledge.wharton.upenn.edu/wp-content/uploads/2026/06/6.3.26-kartik-hosanagar-SXSW-building-AI-products-GettyImages-2176436754.jpg">
+<link rel="icon" type="image/jpeg" href="https://www.google.com/imgres?q=icon%20ai%5C&imgurl=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F826%2F826118.png&imgrefurl=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fai_826118&docid=OSbLiSGvOxfpFM&tbnid=ZormYXu8X6el8M&vet=12ahUKEwjPiZH13a6XAxWLklYBHQ-bOYgQnPAOegUIzwIQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwjPiZH13a6XAxWLklYBHQ-bOYgQnPAOegUIzwIQAA">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
@@ -831,6 +831,7 @@ sidebar{
 @keyframes thinkingDot{0%,100%{opacity:.25;transform:translateY(0) scale(.75)}50%{opacity:1;transform:translateY(-3px) scale(1)}}
 
 </style>
+    <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
 <body>
 
@@ -854,10 +855,10 @@ sidebar{
             <div class="auth-divider"><span>WELCOME BACK</span></div>
             <div id="login-form">
                 <h2>Đăng nhập</h2>
-                <p>Kết nối SheetDB Database</p>
+                <p>Đăng nhập để đồng bộ lịch sử trên mọi thiết bị</p>
                 <div class="form-group">
-                    <label>Tài khoản</label>
-                    <input type="text" id="login-username" placeholder="Nhập tài khoản...">
+                    <label>Email</label>
+                    <input type="email" id="login-username" placeholder="Nhập email...">
                 </div>
                 <div class="form-group">
                     <label>Mật khẩu</label>
@@ -873,10 +874,10 @@ sidebar{
             <div id="register-form" style="display: none;">
                 <div class="auth-form-kicker">CREATE YOUR ACCOUNT</div>
                 <h2>Đăng ký</h2>
-                <p>Tạo tài khoản lưu lên Sheet</p>
+                <p>Tạo tài khoản Vanh AI để đồng bộ lịch sử</p>
                 <div class="form-group">
-                    <label>Tên hiển thị / Tài khoản</label>
-                    <input type="text" id="reg-name" placeholder="Nhập tài khoản...">
+                    <label>Email</label>
+                    <input type="email" id="reg-name" placeholder="Nhập email...">
                 </div>
                 <div class="form-group">
                     <label>Mật khẩu</label>
@@ -975,11 +976,82 @@ sidebar{
 
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
+        import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
         const p1 = "AQ.Ab8RN6IY-oy0TJ";
         const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
         const GEMINI_API_KEY = p1 + p2;
-        const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w"; 
+        const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w";
+        const SUPABASE_URL = "https://junppocxfixbhucjmdvg.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_P6upIRZoUWTWnwU12KPv6Q_B8OSH2Yp";
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        let cloudSyncReady = false;
+
+        async function getSupabaseUser() {
+            const { data, error } = await supabaseClient.auth.getUser();
+            if (error) throw error;
+            return data.user;
+        }
+
+        async function cloudSaveSession(session) {
+            const user = await getSupabaseUser();
+            if (!user) return false;
+            if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+            session.conversationId = session.cloudId;
+            const { data: old, error: findError } = await supabaseClient
+                .from('chat_history').select('id')
+                .eq('user_id', user.id).eq('conversation_id', session.cloudId).maybeSingle();
+            if (findError) throw findError;
+            const record = { user_id: user.id, conversation_id: session.cloudId,
+                title: session.title || 'Cuộc trò chuyện mới', messages: session.messages || [],
+                updated_at: new Date().toISOString() };
+            const result = old
+                ? await supabaseClient.from('chat_history').update(record).eq('id', old.id)
+                : await supabaseClient.from('chat_history').insert(record);
+            if (result.error) throw result.error;
+            return true;
+        }
+
+        async function cloudLoadSessions() {
+            const user = await getSupabaseUser();
+            if (!user) return [];
+            const { data, error } = await supabaseClient.from('chat_history')
+                .select('conversation_id,title,messages,updated_at')
+                .eq('user_id', user.id).order('updated_at', { ascending: false });
+            if (error) throw error;
+            return (data || []).map(row => ({ title: row.title, messages: row.messages || [],
+                cloudId: row.conversation_id, conversationId: row.conversation_id, updated_at: row.updated_at }));
+        }
+
+        async function syncHistoryFromCloud() {
+            try {
+                const user = await getSupabaseUser();
+                if (!user) { cloudSyncReady = false; return; }
+                const local = currentChatSessions || [];
+                const cloud = await cloudLoadSessions();
+                const cloudIds = new Set(cloud.map(x => x.cloudId));
+                // Keep existing local chats and upload them once after Supabase login.
+                for (const session of local) {
+                    if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+                    session.conversationId = session.cloudId;
+                    if (!cloudIds.has(session.cloudId)) {
+                        try { await cloudSaveSession(session); } catch (e) { console.warn('Không thể chuyển lịch sử cũ lên cloud:', e); }
+                    }
+                }
+                const merged = new Map();
+                cloud.forEach(x => merged.set(x.cloudId, x));
+                local.forEach(x => merged.set(x.cloudId, x));
+                currentChatSessions = Array.from(merged.values()).sort((a,b) => new Date(b.updated_at || 0)-new Date(a.updated_at || 0));
+                localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
+                cloudSyncReady = true;
+                loadHistory();
+            } catch (e) {
+                cloudSyncReady = false;
+                console.error('Cloud history sync error:', e);
+                alert('Đăng nhập được nhưng chưa đồng bộ lịch sử. Kiểm tra Supabase/RLS rồi thử lại.');
+            }
+        }
+
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         let currentAttachedImage = null;
@@ -1040,12 +1112,15 @@ sidebar{
                     throw new Error("Google không trả về email.");
                 }
 
-                // Lưu phiên đăng nhập theo email Google.
-                localStorage.setItem('vanh_ai_current_user', email);
+                // Xác thực Google token bằng Supabase Auth để có user ID an toàn cho RLS.
+                const { data: authData, error: authError } = await supabaseClient.auth.signInWithIdToken({
+                    provider: 'google', token: response.credential
+                });
+                if (authError) throw authError;
+                localStorage.setItem('vanh_ai_current_user', authData.user.email || email);
                 localStorage.setItem('vanh_ai_google_name', name);
                 localStorage.setItem('vanh_ai_google_picture', payload.picture || '');
-
-                openApp(email);
+                openApp(authData.user.email || email);
             } catch (err) {
                 console.error("Google Sign-In error:", err);
                 alert("Đăng nhập Google thất bại. Vui lòng thử lại.");
@@ -1096,56 +1171,42 @@ sidebar{
         });
 
         window.handleRegister = async function() {
-            const name = document.getElementById('reg-name').value.trim();
-            const pass = document.getElementById('reg-password').value.trim();
-            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
-
+            const email = document.getElementById('reg-name').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
+            if (pass.length < 6) { alert('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
             try {
-                const checkRes = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}`);
-                const existing = await checkRes.json();
-                if (existing.length > 0) {
-                    alert('Tài khoản này đã tồn tại trên hệ thống!');
-                    return;
-                }
-
-                const response = await fetch(SHEETDB_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: { username: name, password: pass } })
-                });
-
-                if (response.ok) {
-                    alert('Đăng ký thành công!');
-                    switchTab('login');
+                const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
+                if (error) throw error;
+                if (data.session) {
+                    localStorage.setItem('vanh_ai_current_user', data.user.email || email);
+                    openApp(data.user.email || email);
                 } else {
-                    throw new Error('Lỗi từ SheetDB');
+                    alert('Đăng ký thành công! Hãy kiểm tra email để xác nhận tài khoản, sau đó đăng nhập.');
+                    switchTab('login');
                 }
             } catch (err) {
-                alert('Đăng ký thất bại, vui lòng kiểm tra lại kết nối!');
+                alert('Đăng ký thất bại: ' + (err.message || 'Vui lòng thử lại.'));
             }
         };
 
         window.handleLogin = async function() {
-            const name = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value.trim();
-            if (!name || !pass) { alert('Vui lòng điền đầy đủ!'); return; }
-
+            const email = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value;
+            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
             try {
-                const response = await fetch(`${SHEETDB_API}/search?username=${encodeURIComponent(name)}&password=${encodeURIComponent(pass)}`);
-                const users = await response.json();
-
-                if (users.length > 0) {
-                    localStorage.setItem('vanh_ai_current_user', name);
-                    openApp(name);
-                } else {
-                    alert('Sai tài khoản hoặc mật khẩu!');
-                }
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+                if (error) throw error;
+                localStorage.setItem('vanh_ai_current_user', data.user.email || email);
+                localStorage.removeItem('vanh_ai_google_name');
+                localStorage.removeItem('vanh_ai_google_picture');
+                await openApp(data.user.email || email);
             } catch (err) {
-                alert('Không thể kết nối đến cơ sở dữ liệu!');
+                alert('Đăng nhập thất bại: ' + (err.message || 'Kiểm tra email và mật khẩu.'));
             }
         };
 
-        function openApp(username) {
+        async function openApp(username) {
             const googleName = localStorage.getItem('vanh_ai_google_name');
             const googlePicture = localStorage.getItem('vanh_ai_google_picture');
 
@@ -1161,9 +1222,11 @@ sidebar{
             document.getElementById('app-main').style.display = 'flex';
             currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
             loadHistory();
+            await syncHistoryFromCloud();
         }
 
-        window.handleLogout = function() {
+        window.handleLogout = async function() {
+            try { await supabaseClient.auth.signOut(); } catch (e) { console.warn(e); }
             localStorage.removeItem('vanh_ai_current_user');
             localStorage.removeItem('vanh_ai_google_name');
             localStorage.removeItem('vanh_ai_google_picture');
@@ -1180,6 +1243,34 @@ sidebar{
             });
             historyList.innerHTML = itemsHtml;
         }
+
+        window.filterHistory = function(query) {
+            const q = (query || '').toLowerCase();
+            const historyList = document.getElementById('history-list');
+            let html = '<div class="history-title">Gần đây</div>';
+            currentChatSessions.forEach((session, index) => {
+                if ((session.title || '').toLowerCase().includes(q)) {
+                    html += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title || 'Cuộc trò chuyện mới')}</div>`;
+                }
+            });
+            historyList.innerHTML = html;
+        };
+
+        window.clearAllHistory = async function() {
+            if (!confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?')) return;
+            try {
+                const user = await getSupabaseUser();
+                if (user) {
+                    const { error } = await supabaseClient.from('chat_history').delete().eq('user_id', user.id);
+                    if (error) throw error;
+                }
+                currentChatSessions = [];
+                activeSessionId = null;
+                localStorage.setItem(getHistoryKey(), '[]');
+                loadHistory();
+                startNewChat();
+            } catch (e) { alert('Không thể xóa lịch sử trên cloud: ' + e.message); }
+        };
 
         window.startNewChat = function() {
             activeSessionId = null;
@@ -1233,6 +1324,8 @@ sidebar{
             if (activeSessionId === null) {
                 const titleText = userText ? userText : "[Hình ảnh]";
                 const newSession = {
+                    conversationId: crypto.randomUUID(),
+                    cloudId: null,
                     title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
                     messages: [
                         { sender: 'user', text: userText, image: imageBase64 },
@@ -1249,6 +1342,10 @@ sidebar{
             if (currentChatSessions.length > 20) currentChatSessions.pop();
             localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
             loadHistory();
+            if (cloudSyncReady && activeSessionId !== null) {
+                cloudSaveSession(currentChatSessions[activeSessionId])
+                    .catch(err => console.error('Không thể lưu lịch sử lên Supabase:', err));
+            }
         }
 
         window.handleFileSelected = function(event) {

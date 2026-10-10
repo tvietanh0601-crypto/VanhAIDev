@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanh AI Desktop</title>
-<link rel="icon" type="image/jpeg" href="https://www.google.com/imgres?q=icon%20ai%5C&imgurl=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F826%2F826118.png&imgrefurl=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fai_826118&docid=OSbLiSGvOxfpFM&tbnid=ZormYXu8X6el8M&vet=12ahUKEwjPiZH13a6XAxWLklYBHQ-bOYgQnPAOegUIzwIQAA..i&w=512&h=512&hcb=2&ved=2ahUKEwjPiZH13a6XAxWLklYBHQ-bOYgQnPAOegUIzwIQAA">
+<link rel="icon" type="image/jpeg" href="https://knowledge.wharton.upenn.edu/wp-content/uploads/2026/06/6.3.26-kartik-hosanagar-SXSW-building-AI-products-GettyImages-2176436754.jpg">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
@@ -830,6 +830,13 @@ sidebar{
 .thinking-dots i:nth-child(2){animation-delay:.15s}.thinking-dots i:nth-child(3){animation-delay:.3s}
 @keyframes thinkingDot{0%,100%{opacity:.25;transform:translateY(0) scale(.75)}50%{opacity:1;transform:translateY(-3px) scale(1)}}
 
+
+/* Blue verified badge beside Vanh AI brand labels */
+.verified-brand{display:inline-flex;align-items:center;gap:5px}
+.verified-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex:0 0 16px;clip-path:polygon(50% 0%,61% 7%,75% 4%,82% 17%,96% 25%,93% 39%,100% 50%,93% 61%,96% 75%,82% 83%,75% 96%,61% 93%,50% 100%,39% 93%,25% 96%,18% 83%,4% 75%,7% 61%,0% 50%,7% 39%,4% 25%,18% 17%,25% 4%,39% 7%);background:linear-gradient(145deg,#48d8ff 0%,#1877f2 62%,#0866ff 100%);color:#fff;font-size:11px;font-weight:900;line-height:1;filter:drop-shadow(0 1px 3px rgba(24,119,242,.4));vertical-align:middle}
+.verified-badge::after{content:"✓";transform:translateY(-.3px);text-shadow:0 1px 1px rgba(0,0,0,.12)}
+.intro-title .verified-badge{width:17px;height:17px;flex-basis:17px;font-size:11px}
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
@@ -847,7 +854,7 @@ sidebar{
             <div class="auth-brand">
                 <div class="auth-logo"><span>V</span></div>
                 <div>
-                    <div class="auth-brand-title">Vanh AI</div>
+                    <div class="auth-brand-title"><span class="verified-brand">Vanh AI<span class="verified-badge" aria-label="Đã xác minh" title="Vanh AI đã xác minh"></span></span></div>
                     <div class="auth-brand-subtitle">Your intelligent desktop assistant</div>
                 </div>
                 <div class="secure-pill"><span></span> SECURE</div>
@@ -895,7 +902,7 @@ sidebar{
             <div class="sidebar-header">
                 <div class="brand-mark">✦</div>
                 <div class="brand-copy">
-                    <strong>Vanh AI</strong>
+                    <strong class="verified-brand">Vanh AI<span class="verified-badge" aria-label="Đã xác minh" title="Vanh AI đã xác minh"></span></strong>
                     <span>DESKTOP</span>
                 </div>
                 <div class="online-dot" title="Đang hoạt động"></div>
@@ -929,7 +936,7 @@ sidebar{
                 <div class="chat-topbar-title">
                     <div class="ai-status-icon">✦</div>
                     <div>
-                        <strong>Vanh AI</strong>
+                        <strong class="verified-brand">Vanh AI<span class="verified-badge" aria-label="Đã xác minh" title="Vanh AI đã xác minh"></span></strong>
                         <span>Trợ lý thông minh</span>
                     </div>
                 </div>

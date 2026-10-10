@@ -833,9 +833,8 @@ sidebar{
 
 /* Blue verified badge beside Vanh AI brand labels */
 .verified-brand{display:inline-flex;align-items:center;gap:5px}
-.verified-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex:0 0 16px;clip-path:polygon(50% 0%,61% 7%,75% 4%,82% 17%,96% 25%,93% 39%,100% 50%,93% 61%,96% 75%,82% 83%,75% 96%,61% 93%,50% 100%,39% 93%,25% 96%,18% 83%,4% 75%,7% 61%,0% 50%,7% 39%,4% 25%,18% 17%,25% 4%,39% 7%);background:linear-gradient(145deg,#48d8ff 0%,#1877f2 62%,#0866ff 100%);color:#fff;font-size:11px;font-weight:900;line-height:1;filter:drop-shadow(0 1px 3px rgba(24,119,242,.4));vertical-align:middle}
-.verified-badge::after{content:"✓";transform:translateY(-.3px);text-shadow:0 1px 1px rgba(0,0,0,.12)}
-.intro-title .verified-badge{width:17px;height:17px;flex-basis:17px;font-size:11px}
+.verified-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;flex:0 0 17px;box-sizing:border-box;border-radius:50%;background:linear-gradient(145deg,#45c8ff 0%,#1877f2 70%,#0866ff 100%);color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:900;line-height:17px;text-align:center;box-shadow:0 1px 4px rgba(24,119,242,.35);vertical-align:middle}
+.verified-badge::after{content:"✓";display:block;transform:translateY(-.2px);text-shadow:0 1px 1px rgba(0,0,0,.12)}
 
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->

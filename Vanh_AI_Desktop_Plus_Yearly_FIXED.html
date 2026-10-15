@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanh AI Desktop</title>
+<link rel="icon" type="image/jpeg" href="https://knowledge.wharton.upenn.edu/wp-content/uploads/2026/06/6.3.26-kartik-hosanagar-SXSW-building-AI-products-GettyImages-2176436754.jpg">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Thư viện Marked.js để dịch Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+
+    <!-- Thư viện KaTeX để render công thức toán học -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --sidebar-bg: rgba(22, 27, 34, 0.45);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --accent: #3b82f6;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(15, 17, 23, 0.65), rgba(15, 17, 23, 0.65)), 
+                        url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- MÀN HÌNH INTRO --- */
+        #intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: hideIntroScreen 0.1s ease 3.2s forwards;
+        }
+
+        @keyframes hideIntroScreen {
+            to { display: none; visibility: hidden; opacity: 0; pointer-events: none; }
+        }
+
+        .intro-title {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: textNitroAnim 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes textNitroAnim {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            30% { opacity: 1; transform: scale(1); filter: blur(0); }
+            70% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1); filter: blur(10px); }
+        }
+
+        .intro-dot {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: #3b82f6;
+            border-radius: 50%;
+            top: -30px;
+            opacity: 0;
+            animation: nitroDropAndGlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2s forwards;
+        }
+
+        @keyframes nitroDropAndGlow {
+            0% { top: -30px; opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            50% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            60% { top: calc(50% - 7px); opacity: 1; box-shadow: 0 0 100px 50px rgba(59, 130, 246, 0.7), 0 0 200px 100px rgba(147, 51, 234, 0.5); transform: scale(1.5); }
+            100% { top: calc(50% - 7px); opacity: 0; box-shadow: 0 0 300px 200px rgba(59, 130, 246, 0); transform: scale(4); }
+        }
+
+        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 17, 23, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            animation: fadeInAuth 0.5s ease 3.2s forwards;
+        }
+
+        @keyframes fadeInAuth { to { opacity: 1; } }
+
+        .auth-box {
+            background: rgba(30, 37, 48, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 35px 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            width: 380px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .auth-box h2 { margin-bottom: 6px; font-size: 1.5rem; color: white; text-align: center; }
+        .auth-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; text-align: center; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            background: rgba(21, 26, 33, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .form-group input:focus { border-color: var(--accent); }
+
+        .auth-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .auth-btn:hover { background: #2563eb; }
+
+        .google-login-wrapper {
+            width: 100%;
+        }
+
+        .google-login-wrapper > div {
+            width: 100%;
+        }
+
+        .google-login-wrapper iframe {
+            max-width: 100%;
+        }
+
+
+        .google-btn {
+            width: 100%;
+            background: #fff;
+            color: #1f1f1f;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 11px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+        .google-btn:hover { background: #f3f4f6; }
+        .google-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .switch-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+        .switch-text span { color: var(--accent); cursor: pointer; font-weight: 500; }
+
+        /* --- GIAO DIỆN CHÍNH --- */
+        .app-container { display: flex; width: 100%; height: 100%; }
+
+        sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .new-chat-btn {
+            background: rgba(33, 38, 45, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
+        }
+        .new-chat-btn:hover { background: rgba(48, 54, 61, 0.6); }
+
+        .history-section {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin: 10px 0 4px 4px;
+        }
+
+        .history-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .history-item:hover { 
+            background: rgba(255, 255, 255, 0.08); 
+            border-color: var(--border-color);
+        }
+
+        .user-profile-box {
+            background: rgba(30, 37, 48, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .user-info-row { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.85rem; color: white;
+        }
+        .user-name { font-size: 0.9rem; font-weight: 500; color: white; }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .logout-btn:hover { background: #ef4444; color: white; }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+        }
+
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .welcome-text {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #e6edf3;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        @keyframes drawBoxNitro {
+            0% { width: 0px; height: 0px; border-color: transparent; opacity: 0; }
+            50% { width: 100%; height: 0px; border-color: var(--accent); opacity: 1; }
+            100% {
+                width: 100%;
+                min-height: 54px;
+                border-color: var(--border-color);
+                background: rgba(20, 24, 33, 0.75);
+                opacity: 1;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            }
+        }
+
+        .draw-input-box {
+            width: 100%;
+            max-width: 680px;
+            min-height: 54px;
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 16px;
+            gap: 8px;
+            position: relative;
+            animation: drawBoxNitro 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            backdrop-filter: blur(16px);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .draw-input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.6s forwards;
+        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
+
+        .attach-btn {
+            background: rgba(33, 38, 45, 0.8);
+            color: var(--text-muted);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .attach-btn:hover { background: rgba(48, 54, 61, 0.9); color: white; border-color: var(--accent); }
+
+        .send-icon {
+            background: var(--accent);
+            color: white;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            opacity: 0;
+            animation: fadeInText 0.5s 0.7s forwards;
+        }
+        .send-icon:hover { transform: scale(1.1); background: #2563eb; }
+
+        #image-preview-container {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding-left: 4px;
+        }
+        .preview-thumb-wrapper {
+            position: relative;
+            width: 50px; height: 50px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .preview-thumb-wrapper img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .remove-preview-btn {
+            position: absolute;
+            top: 2px; right: 2px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px; height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        #chat-messages {
+            width: 100%;
+            max-width: 750px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            display: none;
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+        }
+        .msg.user { background: rgba(43, 49, 59, 0.85); align-self: flex-end; border: 1px solid var(--border-color); }
+        .msg.ai { background: rgba(31, 36, 45, 0.85); border: 1px solid var(--border-color); align-self: flex-start; }
+        .msg.ai p { margin-bottom: 8px; }
+        .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 8px; }
+
+        .msg-image {
+            max-width: 250px;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+            object-fit: cover;
+        }
+    
+/* =========================================================
+   VANH AI — PREMIUM / ULTIMATE UI OVERHAUL
+   ========================================================= */
+:root{
+    --bg-dark:#070a12;
+    --sidebar-bg:rgba(8,12,22,.72);
+    --border-color:rgba(255,255,255,.09);
+    --border-bright:rgba(139,92,246,.35);
+    --accent:#6d5dfc;
+    --accent-2:#00d4ff;
+    --accent-3:#b86cff;
+    --text-main:#f7f8ff;
+    --text-muted:#8e96aa;
+    --glass:rgba(16,20,34,.72);
+    --shadow:0 24px 80px rgba(0,0,0,.45);
+}
+body{
+    background:
+      radial-gradient(circle at 72% 15%,rgba(109,93,252,.16),transparent 28%),
+      radial-gradient(circle at 20% 80%,rgba(0,212,255,.09),transparent 25%),
+      linear-gradient(rgba(5,8,15,.55),rgba(5,8,15,.72)),
+      url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920&auto=format&fit=crop') center/cover fixed;
+}
+body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+    background:
+      radial-gradient(circle at 30% 20%,rgba(255,255,255,.035) 0 1px,transparent 1px) 0 0/32px 32px;
+    mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+button,input{font-family:inherit}
+
+/* AUTH */
+#auth-screen{
+    background:
+      radial-gradient(circle at 50% 35%,rgba(109,93,252,.18),transparent 32%),
+      rgba(3,6,13,.72);
+    backdrop-filter:blur(24px);
+}
+.auth-box{
+    position:relative;
+    width:min(430px,calc(100% - 32px));
+    padding:28px 30px 30px;
+    border-radius:28px;
+    background:linear-gradient(145deg,rgba(23,28,48,.92),rgba(10,14,25,.86));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 35px 100px rgba(0,0,0,.62),0 0 80px rgba(109,93,252,.12);
+    overflow:hidden;
+    isolation:isolate;
+}
+.auth-box::before{
+    content:"";position:absolute;inset:-2px;z-index:-2;border-radius:30px;
+    background:conic-gradient(from 180deg,transparent 0 32%,rgba(109,93,252,.65),rgba(0,212,255,.35),transparent 65%);
+    filter:blur(20px);opacity:.35;
+}
+.auth-box::after{
+    content:"";position:absolute;top:-120px;right:-100px;width:250px;height:250px;
+    background:radial-gradient(circle,rgba(109,93,252,.18),transparent 68%);z-index:-1;
+}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.auth-logo,.brand-mark,.ai-status-icon{
+    display:grid;place-items:center;border-radius:14px;
+    background:linear-gradient(135deg,#7c6cff,#2ccfff);
+    color:white;font-weight:800;box-shadow:0 8px 28px rgba(109,93,252,.35);
+}
+.auth-logo{width:46px;height:46px;font-size:20px}
+.auth-brand-title{font-size:18px;font-weight:750;letter-spacing:-.4px}
+.auth-brand-subtitle{font-size:11px;color:#7f89a1;margin-top:3px}
+.secure-pill{margin-left:auto;font-size:9px;letter-spacing:1px;color:#91f7c5;padding:6px 8px;border:1px solid rgba(145,247,197,.16);border-radius:999px;background:rgba(65,217,151,.06)}
+.secure-pill span{display:inline-block;width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 9px #52e7a1;margin-right:4px}
+.auth-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:0 -4px 24px;text-align:center}
+.auth-divider span{position:relative;top:-8px;background:#151b2c;padding:0 10px;color:#66718a;font-size:9px;letter-spacing:2px}
+.auth-form-kicker{font-size:9px;letter-spacing:2px;color:#7f89a1;margin-bottom:5px;text-align:center}
+.auth-box h2{font-size:25px;letter-spacing:-.7px;margin-bottom:7px}
+.auth-box p{font-size:12px;margin-bottom:22px}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:11px;color:#aab2c5;margin-bottom:7px}
+.form-group input{
+    height:46px;padding:0 14px;border-radius:13px;
+    background:rgba(4,8,17,.55);border:1px solid rgba(255,255,255,.09);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    transition:.25s;
+}
+.form-group input:hover{border-color:rgba(255,255,255,.16)}
+.form-group input:focus{border-color:rgba(109,93,252,.8);box-shadow:0 0 0 4px rgba(109,93,252,.1),0 0 30px rgba(109,93,252,.08)}
+.auth-btn{
+    height:46px;margin-top:8px;border-radius:13px;
+    background:linear-gradient(135deg,#7567ff,#4f8cff);
+    box-shadow:0 12px 28px rgba(80,100,255,.22);
+    transition:.25s;
+}
+.auth-btn:hover{background:linear-gradient(135deg,#887cff,#5aa0ff);transform:translateY(-1px);box-shadow:0 16px 34px rgba(80,100,255,.3)}
+.google-login-wrapper{margin-top:12px!important}
+.google-login-wrapper>div{display:flex;justify-content:center}
+.switch-text{font-size:11px;margin-top:18px}
+.switch-text span{color:#9a8fff}
+.switch-text span:hover{text-decoration:underline}
+
+/* SIDEBAR */
+sidebar{
+    width:292px;padding:14px;gap:10px;
+    background:linear-gradient(180deg,rgba(8,12,22,.88),rgba(8,11,19,.68));
+    border-right:1px solid rgba(255,255,255,.08);
+    box-shadow:12px 0 50px rgba(0,0,0,.18);
+}
+.sidebar-header{border:0;padding:5px 5px 14px;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:11px;font-size:15px}
+.brand-copy{display:flex;flex-direction:column;line-height:1.05}
+.brand-copy strong{font-size:14px;letter-spacing:-.2px}
+.brand-copy span{font-size:8px;color:#66718a;letter-spacing:2px;margin-top:5px}
+.online-dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#53e5a4;box-shadow:0 0 12px #53e5a4}
+.new-chat-btn{
+    display:flex;align-items:center;gap:9px;height:46px;padding:0 12px;
+    border-radius:14px;background:linear-gradient(135deg,rgba(109,93,252,.18),rgba(0,212,255,.06));
+    border:1px solid rgba(109,93,252,.24);font-size:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.16);transition:.22s
+}
+.new-chat-btn:hover{transform:translateY(-1px);border-color:rgba(109,93,252,.48);background:rgba(109,93,252,.18)}
+.new-chat-icon{font-size:19px;color:#bcb5ff}
+.new-chat-btn kbd{margin-left:auto;font-size:8px;color:#717b91;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:3px 5px;border-radius:5px}
+.history-tools{display:flex;gap:7px;margin-top:4px}
+.history-search-wrap{height:36px;flex:1;display:flex;align-items:center;gap:7px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.history-search-wrap>span{color:#69738a;font-size:17px}
+.history-search-wrap input{width:100%;border:0;outline:0;background:transparent;color:#e8ebf5;font-size:11px}
+.history-search-wrap input::placeholder{color:#687187}
+.history-clear-btn{width:36px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);color:#737e94;cursor:pointer}
+.history-clear-btn:hover{color:#ff7d8b;border-color:rgba(255,100,120,.3)}
+.history-section{gap:5px;padding-right:2px}
+.history-title{font-size:8px;letter-spacing:1.8px;color:#626d83;margin:12px 4px 5px}
+.history-item{
+    position:relative;padding:11px 11px 11px 34px;border-radius:11px;
+    font-size:11px;color:#aeb6c8;background:transparent;
+    border:1px solid transparent;transition:.2s
+}
+.history-item::before{content:"◷";position:absolute;left:11px;top:10px;color:#5e6a82;font-size:11px}
+.history-item:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);color:#eef1fa}
+.history-item.active{background:linear-gradient(90deg,rgba(109,93,252,.18),transparent);border-color:rgba(109,93,252,.18);color:#fff}
+.user-profile-box{
+    padding:10px;border-radius:15px;background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.08);box-shadow:0 15px 40px rgba(0,0,0,.2)
+}
+.user-info-row{padding:2px 2px 7px}
+.user-avatar{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#7b6cff,#31cfff);box-shadow:0 5px 16px rgba(80,100,255,.25)}
+.user-name{font-size:11px}
+.logout-btn{height:32px;border-radius:9px;font-size:10px;background:rgba(255,75,100,.06)}
+.logout-btn:hover{background:#ef4444}
+
+/* CHAT TOPBAR */
+.main-chat{position:relative}
+.chat-topbar{
+    height:64px;flex:0 0 64px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 22px;border-bottom:1px solid rgba(255,255,255,.065);
+    background:linear-gradient(180deg,rgba(8,12,21,.48),rgba(8,12,21,.18));backdrop-filter:blur(18px)
+}
+.chat-topbar-title{display:flex;align-items:center;gap:10px}
+.ai-status-icon{width:34px;height:34px;border-radius:11px;font-size:15px}
+.chat-topbar-title strong{display:block;font-size:12px}
+.chat-topbar-title span{display:block;font-size:9px;color:#69748b;margin-top:3px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.model-pill{height:32px;display:flex;align-items:center;gap:7px;padding:0 11px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);font-size:9px;color:#aeb7ca}
+.model-pill i{width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 8px #52e7a1}
+.model-pill span{color:#667188}
+.topbar-icon{width:32px;height:32px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.03);color:#78849a;cursor:pointer}
+.topbar-icon:hover{color:#fff;background:rgba(255,255,255,.07)}
+
+/* CHAT AREA — bầu trời sao chuyển động nhẹ */
+.chat-body{position:relative;isolation:isolate;overflow:hidden;padding:26px 20px 24px; background:rgba(3,7,16,.12)}
+.chat-body::before,.chat-body::after{content:"";position:absolute;inset:-20%;pointer-events:none;z-index:0}
+.chat-body::before{
+    opacity:.5;background-image:radial-gradient(1px 1px at 12% 18%,rgba(255,255,255,.9) 99%,transparent),radial-gradient(2px 2px at 76% 22%,rgba(151,180,255,.8) 99%,transparent),radial-gradient(1px 1px at 42% 64%,rgba(255,255,255,.75) 99%,transparent),radial-gradient(1.5px 1.5px at 87% 78%,rgba(118,225,255,.7) 99%,transparent),radial-gradient(1px 1px at 25% 83%,rgba(255,255,255,.7) 99%,transparent),radial-gradient(1px 1px at 63% 45%,rgba(255,255,255,.6) 99%,transparent);
+    background-size:260px 220px;animation:starDrift 18s linear infinite;will-change:transform
+}
+.chat-body::after{
+    opacity:.8;background:radial-gradient(ellipse at 50% 34%,rgba(83,72,205,.13),transparent 40%),radial-gradient(ellipse at 16% 85%,rgba(0,190,220,.08),transparent 38%);
+    animation:nebulaBreathe 6s ease-in-out infinite alternate;will-change:transform,opacity
+}
+@keyframes starDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-180px,110px,0)}}
+@keyframes nebulaBreathe{from{opacity:.28;transform:scale(.96)}to{opacity:.95;transform:scale(1.12)}}
+.chat-body>*{position:relative;z-index:1}
+.welcome-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;max-width:760px;margin:auto;position:relative}
+.welcome-orb{
+    width:72px;height:72px;border-radius:24px;display:grid;place-items:center;margin-bottom:18px;position:relative;
+    background:radial-gradient(circle at 30% 20%,#b0a5ff,#6558ff 48%,#13bce8);
+    box-shadow:0 18px 60px rgba(87,75,245,.4),0 0 90px rgba(0,212,255,.2);
+    font-size:30px;animation:floatOrb 4s ease-in-out infinite,orbGlow 3.5s ease-in-out infinite
+}
+.welcome-orb::before{content:"";position:absolute;inset:-9px;border-radius:29px;border:1px solid rgba(127,164,255,.22);animation:orbRing 5s ease-out infinite}
+.welcome-orb::after{content:"";position:absolute;inset:-18px;border-radius:34px;border:1px solid rgba(57,207,255,.12);animation:orbRing 5s ease-out 2.5s infinite}
+@keyframes floatOrb{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes orbGlow{0%,100%{filter:brightness(1);box-shadow:0 18px 60px rgba(87,75,245,.35),0 0 45px rgba(0,212,255,.12)}50%{filter:brightness(1.12);box-shadow:0 18px 70px rgba(87,75,245,.52),0 0 75px rgba(0,212,255,.22)}}
+@keyframes orbRing{0%{transform:scale(.86);opacity:0}35%{opacity:.65}100%{transform:scale(1.2);opacity:0}}
+.welcome-text{text-shadow:0 0 28px rgba(141,157,255,.13)}
+/* Keep subtle ambient motion enabled; core UI remains usable. */
+.welcome-text{font-size:29px;font-weight:700;letter-spacing:-1.2px;margin-bottom:8px}
+.welcome-subtext{max-width:520px;color:#7d879c;font-size:12px;line-height:1.7}
+.quick-prompts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
+.quick-prompts button{
+    padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.08);color:#aeb7c9;font-size:10px;cursor:pointer;transition:.2s
+}
+.quick-prompts button:hover{border-color:rgba(109,93,252,.4);background:rgba(109,93,252,.1);color:#fff;transform:translateY(-1px)}
+#chat-messages{
+    width:100%;max-width:900px;padding:8px 10px 20px;gap:14px;
+    scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent
+}
+.msg{
+    position:relative;padding:13px 16px 13px 18px;border-radius:18px;max-width:min(78%,760px);
+    line-height:1.72;font-size:13px;box-shadow:0 10px 35px rgba(0,0,0,.14);
+    border:1px solid rgba(255,255,255,.07)!important
+}
+.msg.user{
+    background:linear-gradient(135deg,rgba(91,78,220,.52),rgba(47,119,210,.42));
+    border-top-right-radius:5px!important
+}
+.msg.ai{
+    background:linear-gradient(145deg,rgba(20,26,42,.9),rgba(13,18,30,.86));
+    border-top-left-radius:5px!important
+}
+.msg.user::before,.msg.ai::before{
+    position:absolute;top:-9px;width:20px;height:20px;border-radius:7px;display:grid;place-items:center;
+    font-size:9px;font-weight:700;border:1px solid rgba(255,255,255,.1)
+}
+.msg.user::before{content:"U";right:9px;background:#5e54ed;color:#fff}
+.msg.ai::before{content:"✦";left:9px;background:linear-gradient(135deg,#7567ff,#22c7ee);color:#fff}
+.msg.ai p:last-child{margin-bottom:0}
+.msg-image{max-width:300px;max-height:300px;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+#chatInputBox{
+    max-width:860px;min-height:62px;border-radius:20px;padding:8px 10px;
+    background:rgba(9,13,24,.78);border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 70px rgba(0,0,0,.4),0 0 50px rgba(109,93,252,.07);
+    animation:none;transition:.25s
+}
+#chatInputBox:focus-within{border-color:rgba(109,93,252,.42);box-shadow:0 20px 70px rgba(0,0,0,.45),0 0 55px rgba(109,93,252,.12)}
+.draw-input-box input{font-size:12px;opacity:1;animation:none}
+.attach-btn{opacity:1;animation:none;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.045)}
+.attach-btn:hover{background:rgba(109,93,252,.14)}
+.send-icon{opacity:1;animation:none;width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7567ff,#2eaeff);box-shadow:0 7px 20px rgba(82,91,255,.3)}
+.send-icon:hover{transform:translateY(-1px) scale(1.03)}
+#image-preview-container{padding:3px 3px 0}
+.preview-thumb-wrapper{width:58px;height:58px;border-radius:12px}
+.remove-preview-btn{width:19px;height:19px}
+
+/* responsive */
+@media(max-width:800px){
+    sidebar{width:225px}
+    .model-pill{display:none}
+    .welcome-text{font-size:23px}
+    .msg{max-width:88%}
+}
+@media(max-width:640px){
+    sidebar{width:72px;padding:10px}
+    .brand-copy,.new-chat-btn span:not(.new-chat-icon),.new-chat-btn kbd,.history-tools,.history-title,.history-item{display:none}
+    .new-chat-btn{justify-content:center;padding:0}
+    .user-name,.logout-btn{display:none}
+    .user-info-row{justify-content:center}
+    .chat-topbar{padding:0 12px}
+}
+
+
+
+/* =========================================================
+   AI CREATE / ATTACH MENU
+   ========================================================= */
+#attachMenu{position:absolute;left:10px;bottom:64px;display:none;flex-direction:column;gap:7px;padding:9px;border-radius:15px;background:rgba(8,12,24,.82);border:1px solid rgba(140,126,255,.25);box-shadow:0 16px 45px rgba(0,0,0,.42),0 0 30px rgba(93,74,255,.12);backdrop-filter:blur(20px);z-index:30;min-width:190px}
+#attachMenu.show{display:flex;animation:menuPop .18s ease-out}
+@keyframes menuPop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.attach-menu-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(255,255,255,.035);color:#e9edfa;cursor:pointer;text-align:left;font-size:12px;transition:.18s}
+.attach-menu-btn:hover{background:rgba(112,95,255,.14);border-color:rgba(130,115,255,.38);transform:translateX(2px)}
+.attach-menu-icon{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:rgba(111,95,255,.13);font-size:14px}
+
+/* =========================================================
+   MESSAGE / INPUT — GLASS + LUMINOUS TYPEWRITER
+   ========================================================= */
+#chat-messages{gap:18px;padding:12px 14px 26px;overflow-x:visible}
+.msg{
+    position:relative;
+    padding:14px 17px;
+    border-radius:19px;
+    max-width:min(78%,780px);
+    color:#edf0fa;
+    background:rgba(8,12,22,.10)!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+    box-shadow:0 8px 35px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.035);
+    backdrop-filter:blur(18px) saturate(135%);
+    -webkit-backdrop-filter:blur(18px) saturate(135%);
+    overflow:visible;
+}
+.msg::before{display:none!important}
+.msg.user{
+    align-self:flex-end;
+    border-top-right-radius:7px;
+    background:rgba(12,18,32,.13)!important;
+    border-color:rgba(105,167,255,.40)!important;
+    box-shadow:0 0 0 1px rgba(90,150,255,.03),0 8px 32px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.msg.ai{
+    align-self:flex-start;
+    border-top-left-radius:7px;
+    background:rgba(10,14,25,.12)!important;
+    border-color:rgba(151,128,255,.38)!important;
+    box-shadow:0 0 0 1px rgba(145,118,255,.025),0 8px 36px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.055);
+}
+.msg:hover{border-color:rgba(255,255,255,.24)!important}
+.msg.typing-active{
+    border-color:rgba(153,135,255,.75)!important;
+    box-shadow:0 0 20px rgba(123,103,255,.11),0 10px 40px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.msg.user.typing-active{border-color:rgba(91,171,255,.72)!important;box-shadow:0 0 20px rgba(67,157,255,.10),0 10px 40px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+.msg.typing-active::after{
+    content:"";
+    position:absolute;
+    width:7px;height:7px;border-radius:50%;
+    top:-3px;left:10px;
+    background:#b9aaff;
+    box-shadow:0 0 7px #a995ff,0 0 18px #7c65ff,0 0 30px rgba(124,101,255,.75);
+    z-index:3;
+    pointer-events:none;
+    animation:orbitTop 2.7s linear infinite;
+}
+.msg.user.typing-active::after{
+    background:#8fd5ff;box-shadow:0 0 7px #8fd5ff,0 0 18px #4ea9ff,0 0 30px rgba(78,169,255,.65);
+    animation:orbitTopUser 2.35s linear infinite;
+}
+@keyframes orbitTop{
+  0%{left:10px;top:-3px}
+  24%{left:calc(100% - 17px);top:-3px}
+  25%{left:calc(100% + 2px);top:10px}
+  49%{left:calc(100% + 2px);top:calc(100% - 17px)}
+  50%{left:calc(100% - 17px);top:calc(100% + 2px)}
+  74%{left:10px;top:calc(100% + 2px)}
+  75%{left:-3px;top:calc(100% - 17px)}
+  99%{left:-3px;top:10px}
+  100%{left:10px;top:-3px}
+}
+@keyframes orbitTopUser{
+  0%{left:10px;top:-3px}
+  24%{left:calc(100% - 17px);top:-3px}
+  25%{left:calc(100% + 2px);top:10px}
+  49%{left:calc(100% + 2px);top:calc(100% - 17px)}
+  50%{left:calc(100% - 17px);top:calc(100% + 2px)}
+  74%{left:10px;top:calc(100% + 2px)}
+  75%{left:-3px;top:calc(100% - 17px)}
+  99%{left:-3px;top:10px}
+  100%{left:10px;top:-3px}
+}
+.typewriter-content{white-space:pre-wrap;word-break:break-word;min-height:1.35em}
+.typewriter-cursor{
+    display:inline-block;width:2px;height:1.05em;margin-left:3px;vertical-align:-2px;
+    border-radius:2px;background:currentColor;box-shadow:0 0 8px currentColor;
+    animation:cursorBlink .65s steps(1,end) infinite;
+}
+@keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.typing-done .typewriter-cursor{display:none}
+.msg.ai.typing-active .typewriter-content{color:#f3f2ff}
+.msg.user.typing-active .typewriter-content{color:#eef7ff}
+
+/* input box: nearly invisible glass, only luminous outline */
+#chatInputBox{
+    position:relative;
+    background:rgba(7,11,20,.16)!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    box-shadow:0 0 0 1px rgba(109,93,252,.035),0 14px 55px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07)!important;
+    backdrop-filter:blur(22px) saturate(140%);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    overflow:visible;
+}
+#chatInputBox::before{
+    content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+    background:conic-gradient(from 0deg,transparent 0 38%,rgba(113,94,255,.75) 45%,rgba(0,214,255,.7) 52%,transparent 60% 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;padding:1px;
+    opacity:.7;filter:blur(.2px);animation:inputOrbit 5s linear infinite;
+}
+#chatInputBox:focus-within{border-color:rgba(141,125,255,.55)!important;box-shadow:0 0 25px rgba(109,93,252,.09),0 18px 65px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08)!important}
+@keyframes inputOrbit{to{transform:rotate(360deg)}}
+
+
+.thinking-dots{display:inline-flex;gap:4px;margin-left:5px;vertical-align:middle}
+.thinking-dots i{width:4px;height:4px;border-radius:50%;background:#a79aff;box-shadow:0 0 8px #8878ff;animation:thinkingDot 1s ease-in-out infinite}
+.thinking-dots i:nth-child(2){animation-delay:.15s}.thinking-dots i:nth-child(3){animation-delay:.3s}
+@keyframes thinkingDot{0%,100%{opacity:.25;transform:translateY(0) scale(.75)}50%{opacity:1;transform:translateY(-3px) scale(1)}}
+
+
+
+/* VANH AI PLUS — purchase modal */
+.plus-entry-btn{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;cursor:pointer;text-align:left;color:#fff;background:linear-gradient(110deg,rgba(255,191,71,.16),rgba(124,92,255,.16));border:1px solid rgba(255,197,92,.25);transition:transform .2s,border-color .2s;}
+.plus-entry-btn:hover{transform:translateY(-1px);border-color:rgba(255,197,92,.55)}
+.plus-entry-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#ffcf70,#f59e0b);color:#382000;font-size:16px;box-shadow:0 0 20px #f59e0b30}
+.plus-entry-copy{display:flex;flex-direction:column;gap:3px;min-width:0}.plus-entry-copy strong{font-size:12px}.plus-entry-copy small{font-size:9px;color:#c4b9a0}.plus-entry-arrow{margin-left:auto;color:#ffd98b}
+#plus-modal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,13,.76);backdrop-filter:blur(14px)}
+#plus-modal.open{display:flex}.plus-dialog{position:relative;width:min(510px,100%);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.13);border-radius:26px;padding:26px;background:radial-gradient(circle at 85% 0,rgba(255,190,70,.15),transparent 35%),linear-gradient(145deg,rgba(23,28,48,.98),rgba(7,11,21,.98));box-shadow:0 30px 100px #0009,0 0 55px #8b5cf622;color:#f7f8ff}
+.plus-close{position:absolute;right:15px;top:14px;width:32px;height:32px;border-radius:10px;border:1px solid #ffffff18;background:#ffffff08;color:#aeb6c8;cursor:pointer}
+.plus-hero{display:flex;align-items:center;gap:13px;margin-bottom:18px}.plus-crown{width:54px;height:54px;display:grid;place-items:center;border-radius:17px;background:linear-gradient(135deg,#ffe3a1,#f59e0b);font-size:26px;box-shadow:0 10px 30px #f59e0b30}.plus-kicker{font-size:9px;letter-spacing:2px;color:#ffd98b}.plus-title{font-size:25px;font-weight:800;letter-spacing:-.6px;margin-top:3px}.plus-subtitle{font-size:11px;color:#9da7bc;margin-top:4px}
+.plus-price-row{display:flex;align-items:flex-end;gap:8px;margin:18px 0 14px}.plus-price{font-size:35px;font-weight:850;letter-spacing:-1.2px}.plus-period{font-size:11px;color:#9da7bc;padding-bottom:7px}.plus-features{display:grid;gap:10px;padding:15px;border-radius:16px;background:#ffffff06;border:1px solid #ffffff0e;font-size:12px;color:#dfe5f3}.plus-features div{display:flex;gap:9px;align-items:flex-start}.plus-features b{color:#8df0c0;font-weight:700}.plus-primary{width:100%;min-height:44px;margin-top:16px;border:0;border-radius:13px;background:linear-gradient(110deg,#ffcf70,#f59e0b);color:#241700;font-weight:800;cursor:pointer;box-shadow:0 10px 28px #f59e0b22}.plus-primary:disabled{opacity:.6;cursor:wait}.plus-secondary{width:100%;min-height:38px;margin-top:8px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff07;color:#dfe5f3;cursor:pointer}.plus-note{font-size:10px;line-height:1.6;color:#8f9ab0;margin-top:13px}.plus-status{margin-top:12px;padding:11px 12px;border-radius:12px;font-size:11px;line-height:1.55;background:#ffffff07;border:1px solid #ffffff10;color:#b9c4d8;overflow-wrap:anywhere}.plus-status.success{border-color:#34d39940;color:#a7f3d0;background:#34d3990b}.plus-status.error{border-color:#fb718540;color:#fecaca;background:#fb71850b}.plus-payment-box{display:none;margin-top:14px;padding:14px;border:1px solid #ffffff15;border-radius:16px;background:#0002}.plus-payment-box.show{display:block}.plus-qr{display:block;width:min(220px,100%);aspect-ratio:1;object-fit:contain;background:white;padding:8px;border-radius:12px;margin:12px auto}.plus-bank-row{font-size:11px;display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #ffffff0d}.plus-bank-row span:first-child{color:#8e9ab0}.plus-bank-row strong{text-align:right;overflow-wrap:anywhere}
+@media(max-width:720px){.plus-dialog{padding:22px 18px}.plus-price{font-size:30px}}
+
+</style>
+    <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
+</head>
+<body>
+
+    <!-- Màn hình Intro Nitro Animation -->
+    <div id="intro-screen">
+        <div class="intro-title">Vanh AI Dev</div>
+        <div class="intro-dot"></div>
+    </div>
+
+    <!-- Màn hình Đăng nhập -->
+    <div id="auth-screen" style="display: none;">
+        <div class="auth-box">
+            <div class="auth-brand">
+                <div class="auth-logo"><span>V</span></div>
+                <div>
+                    <div class="auth-brand-title">Vanh AI</div>
+                    <div class="auth-brand-subtitle">Your intelligent desktop assistant</div>
+                </div>
+                <div class="secure-pill"><span></span> SECURE</div>
+            </div>
+            <div class="auth-divider"><span>WELCOME BACK</span></div>
+            <div id="login-form">
+                <h2>Đăng nhập</h2>
+                <p>Đăng nhập để đồng bộ lịch sử trên mọi thiết bị</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-username" placeholder="Nhập email...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="login-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleLogin()">Đăng nhập</button>
+                <div class="google-login-wrapper" style="margin-top:12px; text-align:center;">
+                    <div id="google-login-button"></div>
+                </div>
+                <div class="switch-text">Chưa có tài khoản? <span onclick="switchTab('register')">Đăng ký ngay</span></div>
+            </div>
+
+            <div id="register-form" style="display: none;">
+                <div class="auth-form-kicker">CREATE YOUR ACCOUNT</div>
+                <h2>Đăng ký</h2>
+                <p>Tạo tài khoản Vanh AI để đồng bộ lịch sử</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-name" placeholder="Nhập email...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="reg-password" placeholder="Nhập mật khẩu...">
+                </div>
+                <button class="auth-btn" onclick="handleRegister()">Đăng ký</button>
+                <div class="switch-text">Đã có tài khoản? <span onclick="switchTab('login')">Đăng nhập</span></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Vanh AI Plus modal: payment activation is handled only by trusted backend/webhook -->
+    <div id="plus-modal" role="dialog" aria-modal="true" aria-labelledby="plus-modal-title" onclick="if(event.target===this)closePlusModal()">
+      <section class="plus-dialog">
+        <button class="plus-close" onclick="closePlusModal()" aria-label="Đóng">✕</button>
+        <div class="plus-hero"><div class="plus-crown">♛</div><div><div class="plus-kicker">VANH AI MEMBERSHIP</div><div class="plus-title" id="plus-modal-title">Vanh AI Plus</div><div class="plus-subtitle">Một tài khoản · mọi thiết bị · đồng bộ qua Supabase</div></div></div>
+        <div class="plus-price-row"><div class="plus-price">49.000đ</div><div class="plus-period">/ 1 năm</div></div>
+        <div class="plus-features">
+          <div><b>✓</b><span>Thành viên Plus gắn với tài khoản, không gắn riêng thiết bị</span></div>
+          <div><b>✓</b><span>Trạng thái thành viên được kiểm tra từ Supabase khi đăng nhập</span></div>
+          <div><b>✓</b><span>Thanh toán chuyển khoản ngân hàng bằng nội dung đơn riêng</span></div>
+          <div><b>✓</b><span>Plus chỉ kích hoạt sau khi backend xác minh khoản tiền đã nhận</span></div>
+        </div>
+        <div id="plus-current-status" class="plus-status">Đang kiểm tra trạng thái thành viên…</div>
+        <button id="plus-buy-btn" class="plus-primary" onclick="createPlusOrder()">Tạo đơn thanh toán · 49.000đ</button>
+        <button class="plus-secondary" onclick="refreshPlusStatus()">Làm mới trạng thái Plus</button>
+        <div id="plus-payment-box" class="plus-payment-box">
+          <div style="font-weight:750;font-size:13px">Quét QR hoặc chuyển khoản</div>
+          <div id="plus-qr-placeholder" class="plus-status">QR sẽ hiện tại đây khi backend trả về thông tin thanh toán đã cấu hình.</div>
+          <img id="plus-qr-image" class="plus-qr" alt="QR thanh toán Vanh AI Plus" style="display:none">
+          <div class="plus-bank-row"><span>Ngân hàng</span><strong id="plus-bank-name">—</strong></div>
+          <div class="plus-bank-row"><span>Chủ tài khoản</span><strong id="plus-account-name">—</strong></div>
+          <div class="plus-bank-row"><span>Số tài khoản</span><strong id="plus-account-number">—</strong></div>
+          <div class="plus-bank-row"><span>Số tiền</span><strong>49.000đ</strong></div>
+          <div class="plus-bank-row"><span>Nội dung CK</span><strong id="plus-transfer-content">—</strong></div>
+          <div id="plus-order-id" class="plus-note"></div>
+          <button class="plus-secondary" onclick="refreshPlusStatus()">Tôi đã chuyển khoản · Kiểm tra trạng thái</button>
+        </div>
+        <div class="plus-note">Lưu ý: hiện chưa có thông tin ngân hàng được cung cấp trong giao diện. Cần triển khai Edge Function và webhook xác minh giao dịch trước khi nhận thanh toán thật. Không chuyển tiền nếu chưa thấy thông tin ngân hàng hợp lệ do backend trả về.</div>
+      </section>
+    </div>
+
+    <!-- Giao diện chính -->
+    <div class="app-container" id="app-main" style="display: none;">
+        <sidebar>
+            <div class="sidebar-header">
+                <div class="brand-mark">✦</div>
+                <div class="brand-copy">
+                    <strong>Vanh AI</strong>
+                    <span>DESKTOP</span>
+                </div>
+                <div class="online-dot" title="Đang hoạt động"></div>
+            </div>
+            <button class="new-chat-btn" onclick="startNewChat()">
+                <span class="new-chat-icon">＋</span>
+                <span>Cuộc trò chuyện mới</span>
+                <kbd>Ctrl K</kbd>
+            </button>
+            <button class="plus-entry-btn" onclick="openPlusModal()" aria-label="Mua Vanh AI Plus">
+                <span class="plus-entry-icon">♛</span>
+                <span class="plus-entry-copy"><strong>Vanh AI Plus</strong><small>Mở khóa trải nghiệm cao cấp</small></span>
+                <span class="plus-entry-arrow">↗</span>
+            </button>
+            <div class="history-tools">
+                <div class="history-search-wrap">
+                    <span>⌕</span>
+                    <input id="history-search" type="text" placeholder="Tìm cuộc trò chuyện..." oninput="filterHistory(this.value)">
+                </div>
+                <button class="history-clear-btn" onclick="clearAllHistory()" title="Xóa lịch sử">⌫</button>
+            </div>
+            <div class="history-section" id="history-list">
+                <div class="history-title">Gần đây</div>
+            </div>
+            <div class="user-profile-box">
+                <div class="user-info-row">
+                    <div class="user-avatar" id="user-avatar-initial">V</div>
+                    <div class="user-name" id="user-display-name">User</div>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </sidebar>
+
+        <div class="main-chat">
+            <div class="chat-topbar">
+                <div class="chat-topbar-title">
+                    <div class="ai-status-icon">✦</div>
+                    <div>
+                        <strong>Vanh AI</strong>
+                        <span>Trợ lý thông minh</span>
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
+                    <button class="topbar-icon" title="Giao diện">◐</button>
+                    <button class="topbar-icon" title="Thông tin">ⓘ</button>
+                </div>
+            </div>
+            <div class="chat-body">
+                <div class="welcome-wrap" id="welcome-wrap">
+                    <div class="welcome-orb"><span>✦</span></div>
+                    <div class="welcome-text" id="welcome-msg">Chào bạn, hôm nay mình giúp gì được?</div>
+                    <div class="welcome-subtext">Hỏi bất cứ điều gì, phân tích hình ảnh hoặc bắt đầu một ý tưởng mới.</div>
+                    <div class="quick-prompts">
+                        <button onclick="usePrompt('Giải thích cho mình một chủ đề thật dễ hiểu')">✦ Giải thích dễ hiểu</button>
+                        <button onclick="usePrompt('Giúp mình lên ý tưởng cho một dự án')">⌁ Lên ý tưởng</button>
+                        <button onclick="usePrompt('Phân tích hình ảnh này giúp mình')">▣ Phân tích ảnh</button>
+                    </div>
+                </div>
+                <div id="chat-messages"></div>
+                
+                <div class="draw-input-box" id="chatInputBox">
+                    <div id="attachMenu">
+                        <button class="attach-menu-btn" onclick="openImageUpload()"><span class="attach-menu-icon">🖼</span><span>Gửi file ảnh</span></button>
+                    </div>
+                    <div id="image-preview-container">
+                        <div class="preview-thumb-wrapper">
+                            <img id="preview-img-tag" src="" alt="Preview">
+                            <button class="remove-preview-btn" onclick="clearAttachedImage()">✕</button>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <input type="file" id="imageInputFile" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
+                        <button class="attach-btn" title="Thêm" onclick="toggleAttachMenu(event)">+</button>
+                        
+                        <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì hoặc gửi ảnh (Ctrl+V)..." onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
+                        <button class="send-icon" onclick="sendMessage()">➔</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Safety fallback: do not leave the app stuck on the intro if a remote module fails to load. -->
+    <script>
+    (function () {
+      function revealFallback() {
+        var intro = document.getElementById('intro-screen');
+        var auth = document.getElementById('auth-screen');
+        var app = document.getElementById('app-main');
+        if (intro) { intro.style.display = 'none'; intro.style.visibility = 'hidden'; intro.style.opacity = '0'; }
+        var authVisible = auth && getComputedStyle(auth).display !== 'none';
+        var appVisible = app && getComputedStyle(app).display !== 'none';
+        if (!authVisible && !appVisible && auth) auth.style.display = 'flex';
+      }
+      window.setTimeout(revealFallback, 3800);
+      window.addEventListener('error', function (event) {
+        if (event && event.target && event.target.tagName === 'SCRIPT') {
+          window.setTimeout(revealFallback, 100);
+        }
+      }, true);
+    })();
+    </script>
+
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
+        import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+        const p1 = "AQ.Ab8RN6IY-oy0TJ";
+        const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
+        const GEMINI_API_KEY = p1 + p2;
+        const SHEETDB_API = "https://sheetdb.io/api/v1/67pirhj3ffh1w";
+        const SUPABASE_URL = "https://junppocxfixbhucjmdvg.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_P6upIRZoUWTWnwU12KPv6Q_B8OSH2Yp";
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        let cloudSyncReady = false;
+
+        // VANH AI PLUS: paid status must come from Supabase, never localStorage/client-side toggles.
+        window.openPlusModal = async function() {
+            document.getElementById('plus-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            await refreshPlusStatus();
+        };
+        window.closePlusModal = function() {
+            document.getElementById('plus-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        };
+        window.refreshPlusStatus = async function() {
+            const statusEl = document.getElementById('plus-current-status');
+            const buyBtn = document.getElementById('plus-buy-btn');
+            statusEl.className = 'plus-status';
+            statusEl.textContent = 'Đang kiểm tra trạng thái thành viên…';
+            try {
+                const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+                if (userError) throw userError;
+                const user = userData && userData.user;
+                if (!user) {
+                    statusEl.className = 'plus-status error';
+                    statusEl.textContent = 'Bạn cần đăng nhập để mua và đồng bộ Plus trên các thiết bị.';
+                    buyBtn.disabled = true;
+                    return;
+                }
+                buyBtn.disabled = false;
+                const { data, error } = await supabaseClient.from('user_entitlements')
+                    .select('plan,expires_at,status').eq('user_id', user.id).maybeSingle();
+                if (error) {
+                    if (error.code === 'PGRST116' || /relation .*user_entitlements.* does not exist/i.test(error.message || '')) throw new Error('Chưa cấu hình bảng user_entitlements trong Supabase. Xem hướng dẫn backend đi kèm file.');
+                    throw error;
+                }
+                const valid = data && data.plan === 'plus' && data.status === 'active' && (!data.expires_at || new Date(data.expires_at).getTime() > Date.now());
+                if (valid) {
+                    statusEl.className = 'plus-status success';
+                    statusEl.textContent = '✦ Bạn đang dùng Vanh AI Plus' + (data.expires_at ? ' đến ' + new Date(data.expires_at).toLocaleDateString('vi-VN') : '') + '. Quyền lợi được gắn với tài khoản này trên mọi thiết bị.';
+                    buyBtn.textContent = 'Bạn đã có Plus';
+                    buyBtn.disabled = true;
+                } else {
+                    statusEl.textContent = 'Tài khoản hiện chưa có Plus đang hoạt động. Gói 1 năm: 49.000đ.';
+                    buyBtn.textContent = 'Tạo đơn thanh toán · 49.000đ';
+                    buyBtn.disabled = false;
+                }
+            } catch (err) {
+                statusEl.className = 'plus-status error';
+                statusEl.textContent = 'Chưa kiểm tra được trạng thái Plus: ' + (err.message || 'Lỗi kết nối Supabase.');
+                buyBtn.disabled = false;
+            }
+        };
+        window.createPlusOrder = async function() {
+            const btn = document.getElementById('plus-buy-btn');
+            const statusEl = document.getElementById('plus-current-status');
+            const paymentBox = document.getElementById('plus-payment-box');
+            btn.disabled = true;
+            btn.textContent = 'Đang tạo đơn…';
+            statusEl.className = 'plus-status';
+            statusEl.textContent = 'Đang yêu cầu backend tạo đơn thanh toán an toàn…';
+            try {
+                const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+                if (userError) throw userError;
+                if (!userData.user) throw new Error('Bạn cần đăng nhập trước khi mua Plus.');
+                const { data, error } = await supabaseClient.functions.invoke('create-plus-order', { body: { plan: 'plus_yearly', amount_vnd: 49000 } });
+                if (error) throw new Error(error.message || 'Không gọi được Edge Function create-plus-order.');
+                if (!data || !data.order_id || !data.transfer_content) throw new Error('Backend chưa trả về mã đơn và nội dung chuyển khoản hợp lệ.');
+                document.getElementById('plus-payment-box').classList.add('show');
+                document.getElementById('plus-bank-name').textContent = data.bank_name || 'Chưa cấu hình';
+                document.getElementById('plus-account-name').textContent = data.account_name || 'Chưa cấu hình';
+                document.getElementById('plus-account-number').textContent = data.account_number || 'Chưa cấu hình';
+                document.getElementById('plus-transfer-content').textContent = data.transfer_content;
+                document.getElementById('plus-order-id').textContent = 'Mã đơn: ' + data.order_id;
+                const qr = document.getElementById('plus-qr-image');
+                if (data.qr_url && /^https:\/\//i.test(data.qr_url)) { qr.src = data.qr_url; qr.style.display = 'block'; document.getElementById('plus-qr-placeholder').style.display = 'none'; }
+                else { qr.style.display = 'none'; document.getElementById('plus-qr-placeholder').style.display = 'block'; document.getElementById('plus-qr-placeholder').textContent = 'Backend chưa trả QR HTTPS. Hãy cấu hình mã QR ở Edge Function trước khi chuyển khoản.'; }
+                statusEl.className = 'plus-status success';
+                statusEl.textContent = 'Đã tạo đơn. Chuyển đúng 49.000đ và ghi chính xác nội dung chuyển khoản. Plus chỉ được kích hoạt sau khi webhook xác minh giao dịch.';
+                btn.textContent = 'Đơn đã tạo';
+                btn.disabled = true;
+            } catch (err) {
+                statusEl.className = 'plus-status error';
+                statusEl.textContent = 'Chưa tạo được đơn: ' + (err.message || 'Backend chưa cấu hình.');
+                btn.textContent = 'Thử tạo lại đơn';
+                btn.disabled = false;
+            }
+        };
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.closePlusModal(); });
+
+        async function getSupabaseUser() {
+            const { data, error } = await supabaseClient.auth.getUser();
+            if (error) throw error;
+            return data.user;
+        }
+
+        async function cloudSaveSession(session) {
+            const user = await getSupabaseUser();
+            if (!user) return false;
+            if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+            session.conversationId = session.cloudId;
+            const { data: old, error: findError } = await supabaseClient
+                .from('chat_history').select('id')
+                .eq('user_id', user.id).eq('conversation_id', session.cloudId).maybeSingle();
+            if (findError) throw findError;
+            const record = { user_id: user.id, conversation_id: session.cloudId,
+                title: session.title || 'Cuộc trò chuyện mới', messages: session.messages || [],
+                updated_at: new Date().toISOString() };
+            const result = old
+                ? await supabaseClient.from('chat_history').update(record).eq('id', old.id)
+                : await supabaseClient.from('chat_history').insert(record);
+            if (result.error) throw result.error;
+            return true;
+        }
+
+        async function cloudLoadSessions() {
+            const user = await getSupabaseUser();
+            if (!user) return [];
+            const { data, error } = await supabaseClient.from('chat_history')
+                .select('conversation_id,title,messages,updated_at')
+                .eq('user_id', user.id).order('updated_at', { ascending: false });
+            if (error) throw error;
+            return (data || []).map(row => ({ title: row.title, messages: row.messages || [],
+                cloudId: row.conversation_id, conversationId: row.conversation_id, updated_at: row.updated_at }));
+        }
+
+        async function syncHistoryFromCloud() {
+            try {
+                const user = await getSupabaseUser();
+                if (!user) { cloudSyncReady = false; return; }
+                const local = currentChatSessions || [];
+                const cloud = await cloudLoadSessions();
+                const cloudIds = new Set(cloud.map(x => x.cloudId));
+                // Keep existing local chats and upload them once after Supabase login.
+                for (const session of local) {
+                    if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+                    session.conversationId = session.cloudId;
+                    if (!cloudIds.has(session.cloudId)) {
+                        try { await cloudSaveSession(session); } catch (e) { console.warn('Không thể chuyển lịch sử cũ lên cloud:', e); }
+                    }
+                }
+                const merged = new Map();
+                cloud.forEach(x => merged.set(x.cloudId, x));
+                local.forEach(x => merged.set(x.cloudId, x));
+                currentChatSessions = Array.from(merged.values()).sort((a,b) => new Date(b.updated_at || 0)-new Date(a.updated_at || 0));
+                localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
+                cloudSyncReady = true;
+                loadHistory();
+            } catch (e) {
+                cloudSyncReady = false;
+                console.error('Cloud history sync error:', e);
+                alert('Đăng nhập được nhưng chưa đồng bộ lịch sử. Kiểm tra Supabase/RLS rồi thử lại.');
+            }
+        }
+
+        
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        let currentAttachedImage = null;
+
+        function getHistoryKey() {
+            return 'vanh_ai_history_data_' + (localStorage.getItem('vanh_ai_current_user') || 'default');
+        }
+
+        let currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+        let activeSessionId = null;
+
+        window.onload = function() {
+            const currentUser = localStorage.getItem('vanh_ai_current_user');
+            if (currentUser) {
+                setTimeout(() => { openApp(currentUser); }, 3200);
+            } else {
+                setTimeout(() => { document.getElementById('auth-screen').style.display = 'flex'; }, 3200);
+            }
+        };
+
+        window.switchTab = function(tab) {
+            if (tab === 'register') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            } else {
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            }
+        };
+
+        // ================= GOOGLE SIGN-IN CONFIG =================
+        // 1. Tạo OAuth 2.0 Client ID loại Web application trong Google Cloud.
+        // 2. Thêm domain website vào Authorized JavaScript origins.
+        // 3. Dán Client ID vào biến bên dưới.
+        const GOOGLE_CLIENT_ID = "266226560778-8ghmsclflosn63jt232o2qv24gl3a4dn.apps.googleusercontent.com";
+
+        window.handleGoogleCredential = async function(response) {
+            try {
+                if (!response || !response.credential) {
+                    throw new Error("Không nhận được thông tin đăng nhập Google.");
+                }
+
+                // Decode phần payload của JWT để lấy tên/email hiển thị.
+                // ID token vẫn cần được xác thực phía server nếu dùng cho hệ thống production.
+                const payload = JSON.parse(
+                    decodeURIComponent(
+                        atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+                        .split('')
+                        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                        .join('')
+                    )
+                );
+
+                const email = payload.email || "";
+                const name = payload.name || email.split("@")[0] || "Google User";
+
+                if (!email) {
+                    throw new Error("Google không trả về email.");
+                }
+
+                // Xác thực Google token bằng Supabase Auth để có user ID an toàn cho RLS.
+                const { data: authData, error: authError } = await supabaseClient.auth.signInWithIdToken({
+                    provider: 'google', token: response.credential
+                });
+                if (authError) throw authError;
+                localStorage.setItem('vanh_ai_current_user', authData.user.email || email);
+                localStorage.setItem('vanh_ai_google_name', name);
+                localStorage.setItem('vanh_ai_google_picture', payload.picture || '');
+                openApp(authData.user.email || email);
+            } catch (err) {
+                console.error("Google Sign-In error:", err);
+                alert("Đăng nhập Google thất bại. Vui lòng thử lại.");
+            }
+        };
+
+        function initGoogleSignIn() {
+            if (!window.google || !google.accounts || !google.accounts.id) {
+                setTimeout(initGoogleSignIn, 300);
+                return;
+            }
+
+            if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith("YOUR_")) {
+                console.warn("Chưa cấu hình GOOGLE_CLIENT_ID.");
+                return;
+            }
+
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredential,
+                auto_select: false,
+                color_scheme: "dark"
+            });
+
+            google.accounts.id.renderButton(
+                document.getElementById("google-login-button"),
+                {
+                    type: "standard",
+                    theme: "outline",
+                    size: "large",
+                    text: "signin_with",
+                    shape: "rectangular",
+                    width: 300,
+                    logo_alignment: "left"
+                }
+            );
+        }
+
+        window.addEventListener("load", initGoogleSignIn);
+        // ==========================================================
+
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                startNewChat();
+                document.getElementById('userInput')?.focus();
+            }
+        });
+
+        window.handleRegister = async function() {
+            const email = document.getElementById('reg-name').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
+            if (pass.length < 6) { alert('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
+                if (error) throw error;
+                if (data.session) {
+                    localStorage.setItem('vanh_ai_current_user', data.user.email || email);
+                    openApp(data.user.email || email);
+                } else {
+                    alert('Đăng ký thành công! Hãy kiểm tra email để xác nhận tài khoản, sau đó đăng nhập.');
+                    switchTab('login');
+                }
+            } catch (err) {
+                alert('Đăng ký thất bại: ' + (err.message || 'Vui lòng thử lại.'));
+            }
+        };
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value;
+            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+                if (error) throw error;
+                localStorage.setItem('vanh_ai_current_user', data.user.email || email);
+                localStorage.removeItem('vanh_ai_google_name');
+                localStorage.removeItem('vanh_ai_google_picture');
+                await openApp(data.user.email || email);
+            } catch (err) {
+                alert('Đăng nhập thất bại: ' + (err.message || 'Kiểm tra email và mật khẩu.'));
+            }
+        };
+
+        async function openApp(username) {
+            const googleName = localStorage.getItem('vanh_ai_google_name');
+            const googlePicture = localStorage.getItem('vanh_ai_google_picture');
+
+            document.getElementById('user-display-name').innerText = googleName || username;
+            document.getElementById('user-avatar-initial').innerText =
+                (googleName || username).charAt(0).toUpperCase();
+
+            if (googlePicture) {
+                const avatar = document.getElementById('user-avatar-initial');
+                avatar.innerHTML = `<img src="${googlePicture}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            }
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-main').style.display = 'flex';
+            currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
+            loadHistory();
+            await syncHistoryFromCloud();
+        }
+
+        window.handleLogout = async function() {
+            try { await supabaseClient.auth.signOut(); } catch (e) { console.warn(e); }
+            localStorage.removeItem('vanh_ai_current_user');
+            localStorage.removeItem('vanh_ai_google_name');
+            localStorage.removeItem('vanh_ai_google_picture');
+            if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+            location.reload();
+        };
+
+        function loadHistory() {
+            const historyList = document.getElementById('history-list');
+            let itemsHtml = '<div class="history-title">Gần đây</div>';
+            
+            currentChatSessions.forEach((session, index) => {
+                itemsHtml += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title)}</div>`;
+            });
+            historyList.innerHTML = itemsHtml;
+        }
+
+        window.filterHistory = function(query) {
+            const q = (query || '').toLowerCase();
+            const historyList = document.getElementById('history-list');
+            let html = '<div class="history-title">Gần đây</div>';
+            currentChatSessions.forEach((session, index) => {
+                if ((session.title || '').toLowerCase().includes(q)) {
+                    html += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title || 'Cuộc trò chuyện mới')}</div>`;
+                }
+            });
+            historyList.innerHTML = html;
+        };
+
+        window.clearAllHistory = async function() {
+            if (!confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện?')) return;
+            try {
+                const user = await getSupabaseUser();
+                if (user) {
+                    const { error } = await supabaseClient.from('chat_history').delete().eq('user_id', user.id);
+                    if (error) throw error;
+                }
+                currentChatSessions = [];
+                activeSessionId = null;
+                localStorage.setItem(getHistoryKey(), '[]');
+                loadHistory();
+                startNewChat();
+            } catch (e) { alert('Không thể xóa lịch sử trên cloud: ' + e.message); }
+        };
+
+        window.startNewChat = function() {
+            activeSessionId = null;
+            clearAttachedImage();
+            document.getElementById('chat-messages').style.display = 'none';
+            document.getElementById('welcome-wrap').style.display = 'flex';
+            document.getElementById('welcome-msg').style.display = 'block';
+            document.getElementById('chat-messages').innerHTML = '';
+            loadHistory();
+        };
+
+        window.loadSession = function(index) {
+            activeSessionId = index;
+            const session = currentChatSessions[index];
+            const chatMsgs = document.getElementById('chat-messages');
+            
+            chatMsgs.innerHTML = '';
+            document.getElementById('welcome-wrap').style.display = 'none';
+            document.getElementById('welcome-msg').style.display = 'none';
+            chatMsgs.style.display = 'flex';
+
+            session.messages.forEach(msg => {
+                let contentHtml = '';
+                if (msg.image) {
+                    contentHtml += `<img src="${msg.image}" class="msg-image">`;
+                }
+                if (msg.text) {
+                    if (msg.sender === 'user') {
+                        contentHtml += escapeHtml(msg.text);
+                    } else {
+                        contentHtml += marked.parse(msg.text);
+                    }
+                }
+                chatMsgs.innerHTML += `<div class="msg ${msg.sender}">${contentHtml}</div>`;
+            });
+
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            loadHistory(document.getElementById('history-search')?.value || '');
+
+            if (window.renderMathInElement) {
+                renderMathInElement(chatMsgs, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        };
+
+        function saveMessageToCurrentSession(userText, aiText, imageBase64, aiImageBase64) {
+            if (activeSessionId === null) {
+                const titleText = userText ? userText : "[Hình ảnh]";
+                const newSession = {
+                    conversationId: crypto.randomUUID(),
+                    cloudId: null,
+                    title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
+                    messages: [
+                        { sender: 'user', text: userText, image: imageBase64 },
+                        { sender: 'ai', text: aiText, image: aiImageBase64 || null }
+                    ]
+                };
+                currentChatSessions.unshift(newSession);
+                activeSessionId = 0;
+            } else {
+                currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText, image: imageBase64 });
+                currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText, image: aiImageBase64 || null });
+            }
+
+            if (currentChatSessions.length > 20) currentChatSessions.pop();
+            localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
+            loadHistory();
+            if (cloudSyncReady && activeSessionId !== null) {
+                cloudSaveSession(currentChatSessions[activeSessionId])
+                    .catch(err => console.error('Không thể lưu lịch sử lên Supabase:', err));
+            }
+        }
+
+        window.handleFileSelected = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processImageFile(file);
+            }
+        }
+
+        window.handlePasteImage = function(event) {
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        processImageFile(file);
+                        event.preventDefault();
+                    }
+                }
+            }
+        }
+
+        function processImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentAttachedImage = e.target.result;
+                document.getElementById('preview-img-tag').src = currentAttachedImage;
+                document.getElementById('image-preview-container').style.display = 'flex';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        window.clearAttachedImage = function() {
+            currentAttachedImage = null;
+            document.getElementById('image-preview-container').style.display = 'none';
+            document.getElementById('preview-img-tag').src = '';
+            document.getElementById('imageInputFile').value = '';
+        }
+
+        window.toggleAttachMenu = function(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('attachMenu');
+            menu.classList.toggle('show');
+        };
+
+        window.openImageUpload = function() {
+            document.getElementById('attachMenu').classList.remove('show');
+            document.getElementById('imageInputFile').click();
+        };
+
+        window.sendMessage = async function() {
+            const inputField = document.getElementById('userInput');
+            const text = inputField.value.trim();
+            const attachedImg = currentAttachedImage;
+
+            if (!text && !attachedImg) return;
+
+            document.getElementById('welcome-wrap').style.display = 'none';
+            document.getElementById('welcome-msg').style.display = 'none';
+            const chatMsgs = document.getElementById('chat-messages');
+            chatMsgs.style.display = 'flex';
+
+            let userMsgHtml = `<div class="msg user">`;
+            if (attachedImg) {
+                userMsgHtml += `<img src="${attachedImg}" class="msg-image">`;
+            }
+            if (text) {
+                userMsgHtml += `<div>${escapeHtml(text)}</div>`;
+            }
+            userMsgHtml += `</div>`;
+
+            chatMsgs.innerHTML += userMsgHtml;
+            inputField.value = '';
+            clearAttachedImage();
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            const userTypingId = 'user-typing-' + Date.now();
+            // Replace the just-added user bubble with a typewriter bubble.
+            const userBubble = chatMsgs.lastElementChild;
+            if (userBubble) {
+                userBubble.id = userTypingId;
+                userBubble.classList.add('typing-active');
+                const userTextNode = userBubble.querySelector('div');
+                if (userTextNode) {
+                    const rawUserText = text;
+                    userTextNode.className = 'typewriter-content';
+                    userTextNode.innerHTML = '';
+                    typewriteText(userTextNode, rawUserText, 18, () => {
+                        userBubble.classList.remove('typing-active');
+                        userBubble.classList.add('typing-done');
+                    });
+                }
+            }
+
+            chatMsgs.innerHTML += `<div class="msg ai typing-active" id="${loadingId}"><div class="typewriter-content"><span style="color:#9c94ff">Đang suy nghĩ</span><span class="thinking-dots"><i></i><i></i><i></i></span><span class="typewriter-cursor"></span></div></div>`;
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+            let aiReply = "";
+            try {
+                let contentsParam = [];
+                if (attachedImg) {
+                    const base64Data = attachedImg.split(',')[1];
+                    const mimeType = attachedImg.substring(attachedImg.indexOf(':') + 1, attachedImg.indexOf(';'));
+                    
+                    contentsParam = [
+                        { inlineData: { data: base64Data, mimeType: mimeType } },
+                        text ? text : "Hãy mô tả hoặc phân tích hình ảnh này giúp tôi."
+                    ];
+                } else {
+                    contentsParam = text;
+                }
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3.6-flash',
+                    contents: contentsParam,
+                });
+                aiReply = response.text || "Không nhận được phản hồi.";
+            } catch (err) {
+                aiReply = "Lỗi kết nối API: " + err.message;
+            }
+
+            const loadingElem = document.getElementById(loadingId);
+            if (loadingElem) {
+                const content = loadingElem.querySelector('.typewriter-content');
+                if (content) {
+                    content.innerHTML = '';
+                    typewriteText(content, aiReply, 13, () => {
+                        // Render Markdown only after the visual typing pass has completed.
+                        content.innerHTML = marked.parse(aiReply);
+                        loadingElem.classList.remove('typing-active');
+                        loadingElem.classList.add('typing-done');
+                        if (window.renderMathInElement) {
+                            renderMathInElement(loadingElem, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},
+                                    {left: '$', right: '$', display: false}
+                                ]
+                            });
+                        }
+                        chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                    });
+                }
+            }
+
+            saveMessageToCurrentSession(text, aiReply, attachedImg);
+
+            if (window.renderMathInElement) {
+                renderMathInElement(chatMsgs, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        };
+
+        function typewriteText(element, text, speed = 16, onDone) {
+            let i = 0;
+            const safeText = String(text || '');
+            element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
+            const target = element.querySelector('.typed-text');
+            const cursor = element.querySelector('.typewriter-cursor');
+
+            function tick() {
+                if (i >= safeText.length) {
+                    if (cursor) cursor.style.display = 'none';
+                    if (typeof onDone === 'function') onDone();
+                    return;
+                }
+                // Reveal a few characters for a fluid effect while staying readable.
+                const chunk = safeText[i] === '\n' ? 1 : (safeText.length > 500 ? 2 : 1);
+                i = Math.min(i + chunk, safeText.length);
+                target.textContent = safeText.slice(0, i);
+                const parent = element.closest('#chat-messages');
+                if (parent) parent.scrollTop = parent.scrollHeight;
+                window.setTimeout(tick, speed);
+            }
+            tick();
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('attachMenu');
+            const button = document.querySelector('.attach-btn');
+            if (menu && !menu.contains(e.target) && button && !button.contains(e.target)) menu.classList.remove('show');
+        });
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>

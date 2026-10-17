@@ -1043,27 +1043,6 @@ sidebar{
         </div>
     </div>
 
-    <!-- Safety fallback: do not leave the app stuck on the intro if a remote module fails to load. -->
-    <script>
-    (function () {
-      function revealFallback() {
-        var intro = document.getElementById('intro-screen');
-        var auth = document.getElementById('auth-screen');
-        var app = document.getElementById('app-main');
-        if (intro) { intro.style.display = 'none'; intro.style.visibility = 'hidden'; intro.style.opacity = '0'; }
-        var authVisible = auth && getComputedStyle(auth).display !== 'none';
-        var appVisible = app && getComputedStyle(app).display !== 'none';
-        if (!authVisible && !appVisible && auth) auth.style.display = 'flex';
-      }
-      window.setTimeout(revealFallback, 3800);
-      window.addEventListener('error', function (event) {
-        if (event && event.target && event.target.tagName === 'SCRIPT') {
-          window.setTimeout(revealFallback, 100);
-        }
-      }, true);
-    })();
-    </script>
-
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
         import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -1135,11 +1114,38 @@ sidebar{
             statusEl.className = 'plus-status';
             statusEl.textContent = 'Đang yêu cầu backend tạo đơn thanh toán an toàn…';
             try {
-                const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+                // Always obtain the real Supabase session first. A username in localStorage
+                // is only a UI hint and must never be treated as an authenticated session.
+                const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                let authSession = sessionData && sessionData.session;
+                if (!authSession || !authSession.access_token) {
+                    const { data: refreshed, error: refreshError } = await supabaseClient.auth.refreshSession();
+                    if (refreshError) throw refreshError;
+                    authSession = refreshed && refreshed.session;
+                }
+                if (!authSession || !authSession.access_token) {
+                    throw new Error('Phiên đăng nhập Supabase đã hết hạn hoặc chưa tồn tại. Hãy đăng xuất, đăng nhập lại rồi thử mua Plus.');
+                }
+                const { data: userData, error: userError } = await supabaseClient.auth.getUser(authSession.access_token);
                 if (userError) throw userError;
-                if (!userData.user) throw new Error('Bạn cần đăng nhập trước khi mua Plus.');
-                const { data, error } = await supabaseClient.functions.invoke('create-plus-order', { body: { plan: 'plus_yearly', amount_vnd: 49000 } });
-                if (error) throw new Error(error.message || 'Không gọi được Edge Function create-plus-order.');
+                if (!userData || !userData.user) throw new Error('Không xác minh được tài khoản. Hãy đăng nhập lại.');
+                // Explicit Authorization header avoids invoking the Edge Function without
+                // the current access token on browsers where session restoration is delayed.
+                const { data, error } = await supabaseClient.functions.invoke('create-plus-order', {
+                    body: { plan: 'plus_yearly', amount_vnd: 49000 },
+                    headers: { Authorization: 'Bearer ' + authSession.access_token }
+                });
+                if (error) {
+                    let detail = error.message || 'Không gọi được Edge Function create-plus-order.';
+                    try {
+                        if (error.context && typeof error.context.json === 'function') {
+                            const payload = await error.context.clone().json();
+                            if (payload && (payload.error || payload.message)) detail += ' — ' + (payload.error || payload.message);
+                        }
+                    } catch (_) {}
+                    throw new Error(detail);
+                }
                 if (!data || !data.order_id || !data.transfer_content) throw new Error('Backend chưa trả về mã đơn và nội dung chuyển khoản hợp lệ.');
                 document.getElementById('plus-payment-box').classList.add('show');
                 document.getElementById('plus-bank-name').textContent = data.bank_name || 'Chưa cấu hình';
@@ -1164,9 +1170,18 @@ sidebar{
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.closePlusModal(); });
 
         async function getSupabaseUser() {
-            const { data, error } = await supabaseClient.auth.getUser();
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError) throw sessionError;
+            let session = sessionData && sessionData.session;
+            if (!session || !session.access_token) {
+                const { data: refreshed, error: refreshError } = await supabaseClient.auth.refreshSession();
+                if (refreshError) throw refreshError;
+                session = refreshed && refreshed.session;
+            }
+            if (!session || !session.access_token) return null;
+            const { data, error } = await supabaseClient.auth.getUser(session.access_token);
             if (error) throw error;
-            return data.user;
+            return data && data.user ? data.user : null;
         }
 
         async function cloudSaveSession(session) {
@@ -1206,17 +1221,26 @@ sidebar{
                 const local = currentChatSessions || [];
                 const cloud = await cloudLoadSessions();
                 const cloudIds = new Set(cloud.map(x => x.cloudId));
-                // Keep existing local chats and upload them once after Supabase login.
+                // Upload local-only chats, then persist cloud IDs locally.
                 for (const session of local) {
                     if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
                     session.conversationId = session.cloudId;
                     if (!cloudIds.has(session.cloudId)) {
-                        try { await cloudSaveSession(session); } catch (e) { console.warn('Không thể chuyển lịch sử cũ lên cloud:', e); }
+                        await cloudSaveSession(session);
+                        cloudIds.add(session.cloudId);
                     }
                 }
+                // Reload cloud after uploads so the merged list includes confirmed server data.
+                const cloudAfterUpload = await cloudLoadSessions();
                 const merged = new Map();
-                cloud.forEach(x => merged.set(x.cloudId, x));
-                local.forEach(x => merged.set(x.cloudId, x));
+                cloudAfterUpload.forEach(x => merged.set(x.cloudId, x));
+                // Local copy wins only when it has a newer timestamp; otherwise retain cloud.
+                local.forEach(x => {
+                    const cloudVersion = merged.get(x.cloudId);
+                    if (!cloudVersion || new Date(x.updated_at || 0) > new Date(cloudVersion.updated_at || 0)) {
+                        merged.set(x.cloudId, x);
+                    }
+                });
                 currentChatSessions = Array.from(merged.values()).sort((a,b) => new Date(b.updated_at || 0)-new Date(a.updated_at || 0));
                 localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
                 cloudSyncReady = true;
@@ -1224,7 +1248,8 @@ sidebar{
             } catch (e) {
                 cloudSyncReady = false;
                 console.error('Cloud history sync error:', e);
-                alert('Đăng nhập được nhưng chưa đồng bộ lịch sử. Kiểm tra Supabase/RLS rồi thử lại.');
+                const msg = e && e.message ? e.message : String(e || 'Lỗi không xác định');
+                alert('Chưa đồng bộ được lịch sử Supabase: ' + msg + '\nKiểm tra bảng chat_history, quyền RLS và phiên đăng nhập. Lịch sử cục bộ vẫn được giữ.');
             }
         }
 
@@ -1240,12 +1265,32 @@ sidebar{
         let activeSessionId = null;
 
         window.onload = function() {
-            const currentUser = localStorage.getItem('vanh_ai_current_user');
-            if (currentUser) {
-                setTimeout(() => { openApp(currentUser); }, 3200);
-            } else {
-                setTimeout(() => { document.getElementById('auth-screen').style.display = 'flex'; }, 3200);
-            }
+            // Restore the app only from a real Supabase session, not from the cached display name.
+            setTimeout(async () => {
+                try {
+                    const { data, error } = await supabaseClient.auth.getSession();
+                    if (error) throw error;
+                    let session = data && data.session;
+                    if (!session || !session.access_token) {
+                        const { data: refreshed, error: refreshError } = await supabaseClient.auth.refreshSession();
+                        if (refreshError) console.warn('Không thể khôi phục phiên Supabase:', refreshError.message);
+                        session = refreshed && refreshed.session;
+                    }
+                    if (session && session.user) {
+                        const username = session.user.email || localStorage.getItem('vanh_ai_current_user') || 'Người dùng';
+                        localStorage.setItem('vanh_ai_current_user', username);
+                        await openApp(username);
+                    } else {
+                        localStorage.removeItem('vanh_ai_current_user');
+                        document.getElementById('app-main').style.display = 'none';
+                        document.getElementById('auth-screen').style.display = 'flex';
+                    }
+                } catch (e) {
+                    console.error('Khôi phục phiên đăng nhập thất bại:', e);
+                    document.getElementById('app-main').style.display = 'none';
+                    document.getElementById('auth-screen').style.display = 'flex';
+                }
+            }, 800);
         };
 
         window.switchTab = function(tab) {
@@ -1500,6 +1545,7 @@ sidebar{
             if (activeSessionId === null) {
                 const titleText = userText ? userText : "[Hình ảnh]";
                 const newSession = {
+                    updated_at: new Date().toISOString(),
                     conversationId: crypto.randomUUID(),
                     cloudId: null,
                     title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
@@ -1513,6 +1559,7 @@ sidebar{
             } else {
                 currentChatSessions[activeSessionId].messages.push({ sender: 'user', text: userText, image: imageBase64 });
                 currentChatSessions[activeSessionId].messages.push({ sender: 'ai', text: aiText, image: aiImageBase64 || null });
+                currentChatSessions[activeSessionId].updated_at = new Date().toISOString();
             }
 
             if (currentChatSessions.length > 20) currentChatSessions.pop();

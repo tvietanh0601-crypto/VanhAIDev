@@ -1209,8 +1209,26 @@ sidebar{
         };
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.closePlusModal(); });
 
+        async function getSupabaseSession() {
+            // A local username is not proof of a valid Supabase session.
+            let { data, error } = await supabaseClient.auth.getSession();
+            if (error) throw error;
+            if (data && data.session) return data.session;
+
+            // Attempt refresh in case the access token expired but a refresh token remains.
+            try {
+                const refreshed = await supabaseClient.auth.refreshSession();
+                if (!refreshed.error && refreshed.data && refreshed.data.session) return refreshed.data.session;
+            } catch (_) {}
+            return null;
+        }
+
         async function getSupabaseUser() {
-            const { data, error } = await supabaseClient.auth.getUser();
+            const session = await getSupabaseSession();
+            if (!session || !session.access_token) {
+                throw new Error('Auth session missing! Phiên đăng nhập Supabase không còn trên trình duyệt. Hãy đăng nhập lại để đồng bộ.');
+            }
+            const { data, error } = await supabaseClient.auth.getUser(session.access_token);
             if (error) throw error;
             return data.user;
         }
@@ -1307,12 +1325,26 @@ sidebar{
         let activeSessionId = null;
 
         window.onload = function() {
-            const currentUser = localStorage.getItem('vanh_ai_current_user');
-            if (currentUser) {
-                setTimeout(() => { openApp(currentUser); }, 3200);
-            } else {
-                setTimeout(() => { document.getElementById('auth-screen').style.display = 'flex'; }, 3200);
-            }
+            setTimeout(async () => {
+                try {
+                    // Only restore the app if Supabase has a real session.
+                    const session = await getSupabaseSession();
+                    if (session && session.user) {
+                        const currentUser = session.user.email || localStorage.getItem('vanh_ai_current_user') || 'User';
+                        localStorage.setItem('vanh_ai_current_user', currentUser);
+                        await openApp(currentUser);
+                    } else {
+                        // Keep local chat data; remove only the stale login marker.
+                        localStorage.removeItem('vanh_ai_current_user');
+                        document.getElementById('auth-screen').style.display = 'flex';
+                        document.getElementById('app-main').style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error('Supabase session restore failed:', err);
+                    document.getElementById('auth-screen').style.display = 'flex';
+                    document.getElementById('app-main').style.display = 'none';
+                }
+            }, 500);
         };
 
         window.switchTab = function(tab) {
@@ -1818,6 +1850,23 @@ sidebar{
                 button.title = 'Mở thanh công cụ';
             }
         }
+        // This file uses a JavaScript module. Inline onclick handlers cannot see
+        // module-scoped functions unless they are explicitly exposed on window.
+        window.toggleSidebarTools = toggleSidebarTools;
+        window.closeSidebarTools = closeSidebarTools;
+
+        // Also bind directly for reliable taps on mobile browsers.
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('sidebarToggle');
+            if (toggle) {
+                toggle.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    toggleSidebarTools();
+                });
+            }
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (backdrop) backdrop.addEventListener('click', closeSidebarTools);
+        });
         window.addEventListener('resize', () => {
             if (!window.matchMedia('(max-width: 640px)').matches) closeSidebarTools();
         });

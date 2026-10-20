@@ -1200,33 +1200,54 @@ sidebar{
         }
 
         async function syncHistoryFromCloud() {
+            cloudSyncReady = false;
             try {
                 const user = await getSupabaseUser();
-                if (!user) { cloudSyncReady = false; return; }
-                const local = currentChatSessions || [];
-                const cloud = await cloudLoadSessions();
-                const cloudIds = new Set(cloud.map(x => x.cloudId));
-                // Keep existing local chats and upload them once after Supabase login.
+                if (!user) throw new Error('Phiên Supabase đã hết hạn. Hãy đăng xuất rồi đăng nhập lại.');
+
+                // Reload local data only after confirming the authenticated Supabase user.
+                const local = Array.isArray(currentChatSessions) ? currentChatSessions : [];
+                const cloudBefore = await cloudLoadSessions();
+                const cloudById = new Map(cloudBefore.map(x => [x.cloudId, x]));
+
+                // Upload local sessions too, including sessions that already have a cloud ID.
+                // This repairs the previous behavior where changed local chats were not uploaded
+                // during initial sync when their conversation ID already existed in the cloud.
                 for (const session of local) {
                     if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
                     session.conversationId = session.cloudId;
-                    if (!cloudIds.has(session.cloudId)) {
-                        try { await cloudSaveSession(session); } catch (e) { console.warn('Không thể chuyển lịch sử cũ lên cloud:', e); }
+                    const remote = cloudById.get(session.cloudId);
+                    const localTime = new Date(session.updated_at || 0).getTime();
+                    const remoteTime = new Date(remote?.updated_at || 0).getTime();
+                    if (!remote || localTime >= remoteTime) {
+                        await cloudSaveSession(session);
                     }
                 }
-                const merged = new Map();
-                cloud.forEach(x => merged.set(x.cloudId, x));
-                local.forEach(x => merged.set(x.cloudId, x));
-                currentChatSessions = Array.from(merged.values()).sort((a,b) => new Date(b.updated_at || 0)-new Date(a.updated_at || 0));
+
+                // Fetch again after uploads so the local list is based on the server's actual data.
+                const cloudAfter = await cloudLoadSessions();
+                const merged = new Map(cloudAfter.map(x => [x.cloudId, x]));
+                // Keep local-only chats if an upload failed to produce a matching cloud row.
+                for (const session of local) {
+                    if (session.cloudId && !merged.has(session.cloudId)) merged.set(session.cloudId, session);
+                }
+                currentChatSessions = Array.from(merged.values()).sort((a,b) =>
+                    new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
                 localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
                 cloudSyncReady = true;
+                activeSessionId = null;
                 loadHistory();
+                console.info('Supabase chat sync successful:', currentChatSessions.length, 'sessions');
             } catch (e) {
                 cloudSyncReady = false;
                 console.error('Cloud history sync error:', e);
-                alert('lỗi đồng bộ lịch sử. Kiểm tra kết nối và thông tin rồi thử lại.');
+                const message = e?.message || String(e);
+                alert('Chưa đồng bộ được lịch sử Supabase: ' + message + '\n\nKiểm tra bảng chat_history, các cột và policy RLS. Lịch sử hiện có vẫn được giữ ở thiết bị này.');
             }
         }
+
+        // Allow manual retry from the browser console or add a button later.
+        window.syncVanhAIHistory = syncHistoryFromCloud;
 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -1516,11 +1537,18 @@ sidebar{
             }
 
             if (currentChatSessions.length > 20) currentChatSessions.pop();
+            const savedSession = currentChatSessions[activeSessionId];
+            if (savedSession) savedSession.updated_at = new Date().toISOString();
             localStorage.setItem(getHistoryKey(), JSON.stringify(currentChatSessions));
             loadHistory();
-            if (cloudSyncReady && activeSessionId !== null) {
-                cloudSaveSession(currentChatSessions[activeSessionId])
-                    .catch(err => console.error('Không thể lưu lịch sử lên Supabase:', err));
+            if (cloudSyncReady && savedSession) {
+                cloudSaveSession(savedSession)
+                    .then(() => console.info('Đã lưu lịch sử lên Supabase.'))
+                    .catch(err => {
+                        cloudSyncReady = false;
+                        console.error('Không thể lưu lịch sử lên Supabase:', err);
+                        alert('Tin nhắn đã lưu trên thiết bị nhưng chưa lên Supabase: ' + (err?.message || err) + '\nHãy kiểm tra policy RLS của chat_history rồi đăng nhập lại để đồng bộ.');
+                    });
             }
         }
 

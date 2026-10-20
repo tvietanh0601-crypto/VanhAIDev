@@ -862,6 +862,50 @@ sidebar{
 .plus-price-row{display:flex;align-items:flex-end;gap:8px;margin:18px 0 14px}.plus-price{font-size:35px;font-weight:850;letter-spacing:-1.2px}.plus-period{font-size:11px;color:#9da7bc;padding-bottom:7px}.plus-features{display:grid;gap:10px;padding:15px;border-radius:16px;background:#ffffff06;border:1px solid #ffffff0e;font-size:12px;color:#dfe5f3}.plus-features div{display:flex;gap:9px;align-items:flex-start}.plus-features b{color:#8df0c0;font-weight:700}.plus-primary{width:100%;min-height:44px;margin-top:16px;border:0;border-radius:13px;background:linear-gradient(110deg,#ffcf70,#f59e0b);color:#241700;font-weight:800;cursor:pointer;box-shadow:0 10px 28px #f59e0b22}.plus-primary:disabled{opacity:.6;cursor:wait}.plus-secondary{width:100%;min-height:38px;margin-top:8px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff07;color:#dfe5f3;cursor:pointer}.plus-note{font-size:10px;line-height:1.6;color:#8f9ab0;margin-top:13px}.plus-status{margin-top:12px;padding:11px 12px;border-radius:12px;font-size:11px;line-height:1.55;background:#ffffff07;border:1px solid #ffffff10;color:#b9c4d8;overflow-wrap:anywhere}.plus-status.success{border-color:#34d39940;color:#a7f3d0;background:#34d3990b}.plus-status.error{border-color:#fb718540;color:#fecaca;background:#fb71850b}.plus-payment-box{display:none;margin-top:14px;padding:14px;border:1px solid #ffffff15;border-radius:16px;background:#0002}.plus-payment-box.show{display:block}.plus-qr{display:block;width:min(220px,100%);aspect-ratio:1;object-fit:contain;background:white;padding:8px;border-radius:12px;margin:12px auto}.plus-bank-row{font-size:11px;display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #ffffff0d}.plus-bank-row span:first-child{color:#8e9ab0}.plus-bank-row strong{text-align:right;overflow-wrap:anywhere}
 @media(max-width:720px){.plus-dialog{padding:22px 18px}.plus-price{font-size:30px}}
 
+
+
+/* SIDEBAR TOGGLE — responsive desktop + mobile */
+#sidebarToggle{
+  flex:0 0 40px;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#e9edfa;
+  background:rgba(255,255,255,.055);font-size:20px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;
+  box-shadow:0 5px 18px rgba(0,0,0,.16);touch-action:manipulation;z-index:60
+}
+#sidebarToggle:hover{background:rgba(109,93,252,.2);border-color:rgba(130,115,255,.42)}
+#sidebarToggle:active{transform:scale(.95)}
+#sidebarToggle:focus-visible{outline:2px solid #8e83ff;outline-offset:3px}
+#sidebarBackdrop{display:none}
+.app-container.sidebar-collapsed>sidebar{display:none}
+.chat-topbar{gap:12px}
+@media(max-width:640px){
+  #sidebarToggle{width:38px;height:38px;flex-basis:38px;font-size:19px;border-radius:11px}
+  .app-container>sidebar{
+    display:none;position:absolute;left:0;top:0;bottom:0;height:100%;width:min(290px,84vw);padding:14px;z-index:80;
+    overflow:hidden;box-sizing:border-box;background:rgba(8,12,22,.97);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+    border-right:1px solid rgba(255,255,255,.12);box-shadow:18px 0 55px rgba(0,0,0,.5)
+  }
+  .app-container.sidebar-open>sidebar{display:flex}
+  .app-container.sidebar-open #sidebarBackdrop{display:block;position:absolute;inset:0;background:rgba(0,0,0,.48);z-index:70}
+  .app-container.sidebar-open>sidebar .brand-copy,
+  .app-container.sidebar-open>sidebar .new-chat-btn span:not(.new-chat-icon),
+  .app-container.sidebar-open>sidebar .new-chat-btn kbd,
+  .app-container.sidebar-open>sidebar .history-tools,
+  .app-container.sidebar-open>sidebar .history-title,
+  .app-container.sidebar-open>sidebar .history-item,
+  .app-container.sidebar-open>sidebar .user-name,
+  .app-container.sidebar-open>sidebar .logout-btn{display:initial}
+  .app-container.sidebar-open>sidebar .new-chat-btn{justify-content:flex-start;padding:0 12px}
+  .app-container.sidebar-open>sidebar .new-chat-btn span:not(.new-chat-icon){display:inline}
+  .app-container.sidebar-open>sidebar .history-tools{display:flex}
+  .app-container.sidebar-open>sidebar .history-title{display:block}
+  .app-container.sidebar-open>sidebar .history-item{display:block}
+  .app-container.sidebar-open>sidebar .user-info-row{justify-content:flex-start}
+  .app-container.sidebar-open>sidebar .logout-btn{display:block;width:100%}
+  .chat-topbar{gap:8px;padding-left:10px;padding-right:10px}
+  .chat-topbar-title{min-width:0;gap:7px}
+  .chat-topbar-title strong{font-size:11px}
+}
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
@@ -959,7 +1003,8 @@ sidebar{
 
     <!-- Giao diện chính -->
     <div class="app-container" id="app-main" style="display: none;">
-        <sidebar>
+        <div id="sidebarBackdrop" onclick="closeSidebarTools()" aria-hidden="true"></div>
+        <sidebar id="appSidebar">
             <div class="sidebar-header">
                 <div class="brand-mark">✦</div>
                 <div class="brand-copy">
@@ -999,6 +1044,7 @@ sidebar{
 
         <div class="main-chat">
             <div class="chat-topbar">
+                <button id="sidebarToggle" type="button" onclick="toggleSidebarTools()" aria-label="Mở thanh công cụ" aria-expanded="false" title="Mở thanh công cụ">☰</button>
                 <div class="chat-topbar-title">
                     <div class="ai-status-icon">✦</div>
                     <div>
@@ -1740,6 +1786,41 @@ sidebar{
         function escapeHtml(unsafe) {
             return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
+
+        // Sidebar tools can be opened/closed on both desktop and mobile.
+        function toggleSidebarTools() {
+            const app = document.getElementById('app-main');
+            const button = document.getElementById('sidebarToggle');
+            if (!app || !button) return;
+            const isMobile = window.matchMedia('(max-width: 640px)').matches;
+            if (isMobile) {
+                app.classList.toggle('sidebar-open');
+                const open = app.classList.contains('sidebar-open');
+                button.setAttribute('aria-expanded', String(open));
+                button.setAttribute('aria-label', open ? 'Đóng thanh công cụ' : 'Mở thanh công cụ');
+                button.title = open ? 'Đóng thanh công cụ' : 'Mở thanh công cụ';
+            } else {
+                app.classList.toggle('sidebar-collapsed');
+                const open = !app.classList.contains('sidebar-collapsed');
+                button.setAttribute('aria-expanded', String(open));
+                button.setAttribute('aria-label', open ? 'Thu gọn thanh công cụ' : 'Mở thanh công cụ');
+                button.title = open ? 'Thu gọn thanh công cụ' : 'Mở thanh công cụ';
+            }
+        }
+        function closeSidebarTools() {
+            const app = document.getElementById('app-main');
+            const button = document.getElementById('sidebarToggle');
+            if (!app) return;
+            app.classList.remove('sidebar-open');
+            if (button) {
+                button.setAttribute('aria-expanded', 'false');
+                button.setAttribute('aria-label', 'Mở thanh công cụ');
+                button.title = 'Mở thanh công cụ';
+            }
+        }
+        window.addEventListener('resize', () => {
+            if (!window.matchMedia('(max-width: 640px)').matches) closeSidebarTools();
+        });
     </script>
 </body>
 </html>

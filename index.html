@@ -1182,17 +1182,26 @@ sidebar{
                 const { data: userData, error: userError } = await supabaseClient.auth.getUser();
                 if (userError) throw userError;
                 if (!userData.user) throw new Error('Bạn cần đăng nhập trước khi mua Plus.');
-                const { data, error } = await supabaseClient.functions.invoke('create-plus-order', { body: { plan: 'plus_yearly', amount_vnd: 49000 } });
-                if (error) { let detail = error.message || 'Không gọi được Edge Function create-plus-order.'; try { if (error.context && typeof error.context.json === 'function') { const body = await error.context.json(); if (body && body.error) detail += ' — ' + body.error; } } catch (_) {} throw new Error(detail); }
-                if (!data || !data.order_id || !data.transfer_content) throw new Error('Backend chưa trả về mã đơn và nội dung chuyển khoản hợp lệ.');
+                const { data: responseData, error } = await supabaseClient.functions.invoke('create-plus-order', { body: { plan: 'plus_yearly', amount_vnd: 49000 } });
+                if (error) { let detail = error.message || 'Không gọi được Edge Function create-plus-order.'; try { if (error.context && typeof error.context.json === 'function') { const body = await error.context.json(); if (body && (body.error || body.message)) detail += ' — ' + (body.error || body.message); } } catch (_) {} throw new Error(detail); }
+                // Accept both backend formats: {order:{id, transfer_content}} and flat {order_id, transfer_content}.
+                const payload = responseData || {};
+                const order = payload.order || payload.data?.order || payload.data || payload;
+                const orderId = order.order_id || order.id || payload.order_id || payload.id;
+                const transferContent = order.transfer_content || order.transferContent || payload.transfer_content || payload.transferContent;
+                if (!orderId || !transferContent) {
+                    const backendMessage = payload.error || payload.message || payload.details;
+                    throw new Error(backendMessage ? String(backendMessage) : 'Backend đã phản hồi nhưng thiếu mã đơn hoặc nội dung chuyển khoản. Kiểm tra JSON trả về của Edge Function create-plus-order.');
+                }
                 document.getElementById('plus-payment-box').classList.add('show');
-                document.getElementById('plus-bank-name').textContent = data.bank_name || 'MoMo';
-                document.getElementById('plus-account-name').textContent = data.account_name || 'DOAN PHUONG HONG HANH';
-                document.getElementById('plus-account-number').textContent = data.account_number || '0941009129';
-                document.getElementById('plus-transfer-content').textContent = data.transfer_content;
-                document.getElementById('plus-order-id').textContent = 'Mã đơn: ' + data.order_id;
+                document.getElementById('plus-bank-name').textContent = order.bank_name || payload.bank_name || 'MoMo';
+                document.getElementById('plus-account-name').textContent = order.account_name || payload.account_name || 'DOAN PHUONG HONG HANH';
+                document.getElementById('plus-account-number').textContent = order.account_number || payload.account_number || '0941009129';
+                document.getElementById('plus-transfer-content').textContent = transferContent;
+                document.getElementById('plus-order-id').textContent = 'Mã đơn: ' + orderId;
                 const qr = document.getElementById('plus-qr-image');
-                if (data.qr_url && /^https:\/\//i.test(data.qr_url)) { qr.src = data.qr_url; qr.style.display = 'block'; document.getElementById('plus-qr-placeholder').style.display = 'none'; }
+                const qrUrl = order.qr_url || payload.qr_url;
+                if (qrUrl && /^https:\/\//i.test(qrUrl)) { qr.src = qrUrl; qr.style.display = 'block'; document.getElementById('plus-qr-placeholder').style.display = 'none'; }
                 else { qr.style.display = 'none'; document.getElementById('plus-qr-placeholder').style.display = 'block'; document.getElementById('plus-qr-placeholder').textContent = 'Backend chưa trả QR HTTPS. Hãy cấu hình mã QR ở Edge Function trước khi chuyển khoản.'; }
                 statusEl.className = 'plus-status success';
                 statusEl.textContent = 'Đã tạo đơn. Chuyển đúng 49.000đ và ghi chính xác nội dung chuyển khoản. Gói năm chỉ được kích hoạt sau khi webhook xác minh giao dịch.';

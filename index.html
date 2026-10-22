@@ -906,6 +906,21 @@ sidebar{
   .chat-topbar-title strong{font-size:11px}
 }
 
+
+
+/* Bỏ khung/bong bóng bao quanh câu trả lời AI, giữ nguyên nội dung và ô nhập */
+.msg.ai {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 8px 2px !important;
+    max-width: min(92%, 820px) !important;
+}
+.msg.ai:hover { border: 0 !important; box-shadow: none !important; }
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
@@ -971,15 +986,15 @@ sidebar{
       <section class="plus-dialog">
         <button class="plus-close" onclick="closePlusModal()" aria-label="Đóng">✕</button>
         <div class="plus-hero"><div class="plus-crown">♛</div><div><div class="plus-kicker">VANH AI MEMBERSHIP</div><div class="plus-title" id="plus-modal-title">Vanh AI Plus</div><div class="plus-subtitle">Một tài khoản · mọi thiết bị · đồng bộ qua Supabase</div></div></div>
-        <div class="plus-price-row"><div class="plus-price">49.000đ</div><div class="plus-period">/ 1 năm</div></div>
+        <div class="plus-price-row"><div class="plus-price">49.000đ</div><div class="plus-period">/ năm</div></div>
         <div class="plus-features">
           <div><b>✓</b><span>Thành viên Plus gắn với tài khoản, không gắn riêng thiết bị</span></div>
           <div><b>✓</b><span>Trạng thái thành viên được kiểm tra từ Supabase khi đăng nhập</span></div>
           <div><b>✓</b><span>Thanh toán chuyển khoản ngân hàng bằng nội dung đơn riêng</span></div>
-          <div><b>✓</b><span>Plus chỉ kích hoạt sau khi backend xác minh khoản tiền đã nhận</span></div>
+          <div><b>✓</b><span>Gói Plus có thời hạn 1 năm và chỉ kích hoạt sau khi backend xác minh khoản tiền đã nhận</span></div>
         </div>
         <div id="plus-current-status" class="plus-status">Đang kiểm tra trạng thái thành viên…</div>
-        <button id="plus-buy-btn" class="plus-primary" onclick="createPlusOrder()">Tạo đơn thanh toán · 49.000đ</button>
+        <button id="plus-buy-btn" class="plus-primary" onclick="createPlusOrder()">Tạo đơn thanh toán · 49.000đ/năm</button>
         <button class="plus-secondary" onclick="refreshPlusStatus()">Làm mới trạng thái Plus</button>
         <div id="plus-payment-box" class="plus-payment-box">
           <div style="font-weight:750;font-size:13px">Quét QR hoặc chuyển khoản</div>
@@ -988,7 +1003,7 @@ sidebar{
           <div class="plus-bank-row"><span>Ví / đơn vị</span><strong id="plus-bank-name">MoMo</strong></div>
           <div class="plus-bank-row"><span>Chủ tài khoản</span><strong id="plus-account-name">DOAN PHUONG HONG HANH</strong></div>
           <div class="plus-bank-row"><span>Số điện thoại / tài khoản MoMo</span><strong id="plus-account-number">0941009129</strong></div>
-          <div class="plus-bank-row"><span>Số tiền</span><strong>49.000đ</strong></div>
+          <div class="plus-bank-row"><span>Số tiền / gói</span><strong>49.000đ / 1 năm</strong></div>
           <div class="plus-bank-row"><span>Nội dung CK riêng của đơn</span><strong id="plus-transfer-content">Chờ tạo đơn…</strong></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
             <button class="plus-secondary" type="button" onclick="copyPlusPaymentField('plus-account-number')">Sao chép số tài khoản</button>
@@ -1145,8 +1160,8 @@ sidebar{
                     buyBtn.textContent = 'Bạn đã có Plus';
                     buyBtn.disabled = true;
                 } else {
-                    statusEl.textContent = 'Tài khoản hiện chưa có Plus đang hoạt động. Gói 1 năm: 49.000đ.';
-                    buyBtn.textContent = 'Tạo đơn thanh toán · 49.000đ';
+                    statusEl.textContent = 'Tài khoản hiện chưa có Plus đang hoạt động. Gói năm: 49.000đ/năm.';
+                    buyBtn.textContent = 'Tạo đơn thanh toán · 49.000đ/năm';
                     buyBtn.disabled = false;
                 }
             } catch (err) {
@@ -1180,7 +1195,7 @@ sidebar{
                 if (data.qr_url && /^https:\/\//i.test(data.qr_url)) { qr.src = data.qr_url; qr.style.display = 'block'; document.getElementById('plus-qr-placeholder').style.display = 'none'; }
                 else { qr.style.display = 'none'; document.getElementById('plus-qr-placeholder').style.display = 'block'; document.getElementById('plus-qr-placeholder').textContent = 'Backend chưa trả QR HTTPS. Hãy cấu hình mã QR ở Edge Function trước khi chuyển khoản.'; }
                 statusEl.className = 'plus-status success';
-                statusEl.textContent = 'Đã tạo đơn. Chuyển đúng 49.000đ và ghi chính xác nội dung chuyển khoản. Plus chỉ được kích hoạt sau khi webhook xác minh giao dịch.';
+                statusEl.textContent = 'Đã tạo đơn. Chuyển đúng 49.000đ và ghi chính xác nội dung chuyển khoản. Gói năm chỉ được kích hoạt sau khi webhook xác minh giao dịch.';
                 btn.textContent = 'Đơn đã tạo';
                 btn.disabled = true;
             } catch (err) {

@@ -1,9 +1,12 @@
 {
   "version": "2.1.0",
   "title": "Vanh AI có gì mới?",
+  "date": "29/10/2026",
+  "description": "Chào mừng bạn đến với phiên bản cập nhật mới của Vanh AI!",
   "updates": [
-    "✨ Thêm tính năng mới",
-    "🔧 Sửa lỗi",
-    "📱 Tối ưu giao diện"
-  ]
+    "✨ Thêm thông báo What's New sau màn hình Nitro",
+    "🔧 Tiếp tục cải thiện độ ổn định của ứng dụng",
+    "📱 Tối ưu trải nghiệm sử dụng"
+  ],
+  "link": "https://github.com/tvietanh0601-crypto/tvietanh0601-crypto.github.io/commits/main/"
 }

@@ -953,6 +953,84 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 @keyframes panelSlideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){body::before,body::after,#intro-screen::before,#intro-screen::after,.app-container,.sidebar,.main-chat{animation:none!important}}
 
+
+
+/* =========================================================
+   VANH AI — CYBER MOTION PACK (2026)
+   Chỉ bổ sung hiệu ứng; không thay đổi luồng đăng nhập/API/lưu lịch sử.
+   ========================================================= */
+:root{--motion-cyan:#00e5ff;--motion-violet:#8b7bff;}
+#intro-screen{overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at center,rgba(0,120,210,.2),transparent 58%),#03152b!important;}
+#intro-screen::before{content:"";position:absolute;inset:-40%;z-index:-1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(0,220,255,.055) 6px 7px),linear-gradient(115deg,transparent 35%,rgba(0,229,255,.22) 49%,transparent 57%);background-size:100% 8px,220% 100%;animation:introScanGrid 5s linear infinite,introSweep 4.5s ease-in-out infinite;}
+#intro-screen::after{content:"";position:absolute;inset:7%;border:1px solid rgba(0,229,255,.28);box-shadow:0 0 22px rgba(0,200,255,.12),inset 0 0 28px rgba(0,200,255,.08);clip-path:polygon(0 0,22% 0,24% 2px,76% 2px,78% 0,100% 0,100% 100%,78% 100%,76% calc(100% - 2px),24% calc(100% - 2px),22% 100%,0 100%);animation:introFramePulse 2.8s ease-in-out infinite;pointer-events:none;}
+.intro-title{text-shadow:0 0 14px rgba(0,210,255,.7),0 0 38px rgba(90,110,255,.45);letter-spacing:4px!important;}
+.intro-dot{box-shadow:0 0 18px 7px rgba(0,229,255,.5)!important;}
+@keyframes introScanGrid{to{background-position:0 80px,0 0}}
+@keyframes introSweep{0%,100%{background-position:0 0,140% 0}50%{background-position:0 0,-40% 0}}
+@keyframes introFramePulse{0%,100%{opacity:.45;filter:brightness(.8)}50%{opacity:1;filter:brightness(1.8)}}
+
+/* App entrance sequence */
+#app-main{animation:appBootIn .75s cubic-bezier(.16,1,.3,1) both;}
+#app-main>sidebar,#appSidebar{animation:sideBootIn .8s cubic-bezier(.16,1,.3,1) both;}
+.chat-topbar{animation:topbarBootIn .65s .12s cubic-bezier(.16,1,.3,1) both;}
+#welcome-wrap,#welcome-msg{animation:welcomeBootIn .85s .22s cubic-bezier(.16,1,.3,1) both;}
+#chatInputBox{animation:composerBootIn .9s .32s cubic-bezier(.16,1,.3,1) both,composerGlow 4s 1.2s ease-in-out infinite;}
+@keyframes appBootIn{from{opacity:0;filter:brightness(.5);transform:scale(.992)}to{opacity:1;filter:brightness(1);transform:scale(1)}}
+@keyframes sideBootIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes topbarBootIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes welcomeBootIn{from{opacity:0;transform:translateY(18px) scale(.98);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes composerBootIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes composerGlow{0%,100%{box-shadow:0 0 0 1px rgba(0,229,255,.08),0 10px 34px rgba(0,0,0,.25),inset 0 0 18px rgba(0,180,255,.025)}50%{box-shadow:0 0 0 1px rgba(0,229,255,.35),0 0 24px rgba(0,190,255,.16),0 10px 34px rgba(0,0,0,.25),inset 0 0 22px rgba(0,180,255,.07)}}
+
+/* Sidebar history: staggered entry + neon hover */
+#history-list .history-item{position:relative;overflow:hidden;transition:transform .22s ease,background .22s ease,border-color .22s ease,box-shadow .22s ease;animation:historyRise .48s both;}
+#history-list .history-item:nth-child(2){animation-delay:.04s}#history-list .history-item:nth-child(3){animation-delay:.08s}#history-list .history-item:nth-child(4){animation-delay:.12s}#history-list .history-item:nth-child(5){animation-delay:.16s}#history-list .history-item:nth-child(6){animation-delay:.20s}#history-list .history-item:nth-child(7){animation-delay:.24s}#history-list .history-item:nth-child(n+8){animation-delay:.28s}
+#history-list .history-item::after{content:"";position:absolute;top:0;left:-130%;width:70%;height:100%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(0,229,255,.14),transparent);transition:left .55s ease;pointer-events:none;}
+#history-list .history-item:hover{transform:translateX(4px);border-color:rgba(0,220,255,.38)!important;box-shadow:0 0 16px rgba(0,190,255,.12);background:rgba(0,160,220,.10)!important;}
+#history-list .history-item:hover::after{left:150%;}
+@keyframes historyRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Composer: animated border sweep, focus state and send button */
+#chatInputBox{isolation:isolate;}
+#chatInputBox::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(110deg,transparent 10%,rgba(0,229,255,.0) 25%,rgba(0,229,255,.8) 48%,rgba(139,123,255,.65) 55%,transparent 78%);background-size:230% 100%;animation:composerBorderRun 5s linear infinite;pointer-events:none;z-index:0;opacity:.7;}
+#chatInputBox>*{position:relative;z-index:1;}
+#chatInputBox:focus-within{border-color:rgba(0,229,255,.65)!important;box-shadow:0 0 0 2px rgba(0,210,255,.10),0 0 28px rgba(0,190,255,.18),inset 0 0 24px rgba(0,190,255,.06)!important;}
+#userInput{transition:color .2s ease,text-shadow .2s ease;}
+#userInput:focus{text-shadow:0 0 12px rgba(0,210,255,.18);}
+.send-icon{position:relative;overflow:hidden;box-shadow:0 0 14px rgba(0,180,255,.3);transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important;}
+.send-icon::after{content:"";position:absolute;inset:-70%;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);transform:translateX(-130%) rotate(12deg);transition:transform .55s ease;}
+.send-icon:hover{transform:translateY(-2px) scale(1.09)!important;box-shadow:0 0 10px rgba(0,220,255,.55),0 0 28px rgba(0,130,255,.3);filter:brightness(1.18);}
+.send-icon:hover::after{transform:translateX(130%) rotate(12deg);}
+.send-icon:active{transform:scale(.92)!important;}
+@keyframes composerBorderRun{to{background-position:-230% 0}}
+
+/* Chat messages: pop-in user bubble, AI response glow and thinking state */
+#chat-messages{scroll-behavior:smooth;}
+#chat-messages .msg{transform-origin:bottom;will-change:transform,opacity;}
+#chat-messages .msg.user{animation:userMessageLaunch .48s cubic-bezier(.16,1,.3,1) both;box-shadow:0 7px 24px rgba(0,0,0,.18),0 0 0 rgba(0,220,255,0);}
+#chat-messages .msg.ai{animation:aiMessageMaterialize .62s cubic-bezier(.16,1,.3,1) both;}
+#chat-messages .msg.ai.typing-active{border-left:2px solid rgba(0,220,255,.7);filter:drop-shadow(0 0 10px rgba(0,190,255,.12));}
+#chat-messages .msg.typing-done{animation:messageSettle .35s ease-out both;}
+@keyframes userMessageLaunch{0%{opacity:0;transform:translate(24px,18px) scale(.94);filter:blur(5px)}70%{opacity:1;transform:translate(-2px,-2px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes aiMessageMaterialize{0%{opacity:0;transform:translate(-22px,14px) scale(.975);filter:blur(7px)}65%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translate(0,0) scale(1)}}
+@keyframes messageSettle{from{filter:brightness(1.25)}to{filter:brightness(1)}}
+#chat-messages .msg-image{animation:attachmentPop .42s cubic-bezier(.16,1,.3,1) both;box-shadow:0 0 18px rgba(0,190,255,.16);}
+@keyframes attachmentPop{from{opacity:0;transform:scale(.9) rotate(-1deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+
+/* Existing thinking dots become a clearer signal */
+.thinking-dots i{width:5px;height:5px;box-shadow:0 0 7px var(--motion-cyan),0 0 15px rgba(0,220,255,.55);background:var(--motion-cyan);}
+.msg.ai.typing-active .typewriter-cursor{background:var(--motion-cyan);box-shadow:0 0 10px var(--motion-cyan);}
+
+/* Buttons and cards respond to interaction */
+.new-chat-btn,.attach-btn,.history-clear-btn,.plus-entry-btn,.user-profile-box{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease;}
+.new-chat-btn:hover,.attach-btn:hover,.history-clear-btn:hover{transform:translateY(-2px);box-shadow:0 0 18px rgba(0,190,255,.13);border-color:rgba(0,220,255,.38)!important;}
+.brand-mark{animation:brandCorePulse 3.2s ease-in-out infinite;}
+@keyframes brandCorePulse{0%,100%{box-shadow:0 0 10px rgba(0,180,255,.22)}50%{box-shadow:0 0 24px rgba(0,210,255,.55),0 0 42px rgba(109,93,252,.24)}}
+
+@media(prefers-reduced-motion:reduce){
+ #intro-screen::before,#intro-screen::after,.intro-title,.intro-dot,#app-main,#appSidebar,.chat-topbar,#welcome-wrap,#welcome-msg,#chatInputBox,#history-list .history-item,#chat-messages .msg,#chat-messages .msg-image,.brand-mark{animation:none!important;transition:none!important;}
+}
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>

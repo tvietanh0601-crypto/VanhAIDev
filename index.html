@@ -955,81 +955,62 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
 
 
-/* =========================================================
-   VANH AI — CYBER MOTION PACK (2026)
-   Chỉ bổ sung hiệu ứng; không thay đổi luồng đăng nhập/API/lưu lịch sử.
-   ========================================================= */
-:root{--motion-cyan:#00e5ff;--motion-violet:#8b7bff;}
-#intro-screen{overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at center,rgba(0,120,210,.2),transparent 58%),#03152b!important;}
-#intro-screen::before{content:"";position:absolute;inset:-40%;z-index:-1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(0,220,255,.055) 6px 7px),linear-gradient(115deg,transparent 35%,rgba(0,229,255,.22) 49%,transparent 57%);background-size:100% 8px,220% 100%;animation:introScanGrid 5s linear infinite,introSweep 4.5s ease-in-out infinite;}
-#intro-screen::after{content:"";position:absolute;inset:7%;border:1px solid rgba(0,229,255,.28);box-shadow:0 0 22px rgba(0,200,255,.12),inset 0 0 28px rgba(0,200,255,.08);clip-path:polygon(0 0,22% 0,24% 2px,76% 2px,78% 0,100% 0,100% 100%,78% 100%,76% calc(100% - 2px),24% calc(100% - 2px),22% 100%,0 100%);animation:introFramePulse 2.8s ease-in-out infinite;pointer-events:none;}
-.intro-title{text-shadow:0 0 14px rgba(0,210,255,.7),0 0 38px rgba(90,110,255,.45);letter-spacing:4px!important;}
-.intro-dot{box-shadow:0 0 18px 7px rgba(0,229,255,.5)!important;}
-@keyframes introScanGrid{to{background-position:0 80px,0 0}}
-@keyframes introSweep{0%,100%{background-position:0 0,140% 0}50%{background-position:0 0,-40% 0}}
-@keyframes introFramePulse{0%,100%{opacity:.45;filter:brightness(.8)}50%{opacity:1;filter:brightness(1.8)}}
-
-/* App entrance sequence */
-#app-main{animation:appBootIn .75s cubic-bezier(.16,1,.3,1) both;}
-#app-main>sidebar,#appSidebar{animation:sideBootIn .8s cubic-bezier(.16,1,.3,1) both;}
-.chat-topbar{animation:topbarBootIn .65s .12s cubic-bezier(.16,1,.3,1) both;}
-#welcome-wrap,#welcome-msg{animation:welcomeBootIn .85s .22s cubic-bezier(.16,1,.3,1) both;}
-#chatInputBox{animation:composerBootIn .9s .32s cubic-bezier(.16,1,.3,1) both,composerGlow 4s 1.2s ease-in-out infinite;}
-@keyframes appBootIn{from{opacity:0;filter:brightness(.5);transform:scale(.992)}to{opacity:1;filter:brightness(1);transform:scale(1)}}
-@keyframes sideBootIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
-@keyframes topbarBootIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes welcomeBootIn{from{opacity:0;transform:translateY(18px) scale(.98);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
-@keyframes composerBootIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes composerGlow{0%,100%{box-shadow:0 0 0 1px rgba(0,229,255,.08),0 10px 34px rgba(0,0,0,.25),inset 0 0 18px rgba(0,180,255,.025)}50%{box-shadow:0 0 0 1px rgba(0,229,255,.35),0 0 24px rgba(0,190,255,.16),0 10px 34px rgba(0,0,0,.25),inset 0 0 22px rgba(0,180,255,.07)}}
-
-/* Sidebar history: staggered entry + neon hover */
-#history-list .history-item{position:relative;overflow:hidden;transition:transform .22s ease,background .22s ease,border-color .22s ease,box-shadow .22s ease;animation:historyRise .48s both;}
-#history-list .history-item:nth-child(2){animation-delay:.04s}#history-list .history-item:nth-child(3){animation-delay:.08s}#history-list .history-item:nth-child(4){animation-delay:.12s}#history-list .history-item:nth-child(5){animation-delay:.16s}#history-list .history-item:nth-child(6){animation-delay:.20s}#history-list .history-item:nth-child(7){animation-delay:.24s}#history-list .history-item:nth-child(n+8){animation-delay:.28s}
-#history-list .history-item::after{content:"";position:absolute;top:0;left:-130%;width:70%;height:100%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(0,229,255,.14),transparent);transition:left .55s ease;pointer-events:none;}
-#history-list .history-item:hover{transform:translateX(4px);border-color:rgba(0,220,255,.38)!important;box-shadow:0 0 16px rgba(0,190,255,.12);background:rgba(0,160,220,.10)!important;}
-#history-list .history-item:hover::after{left:150%;}
-@keyframes historyRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* Composer: animated border sweep, focus state and send button */
-#chatInputBox{isolation:isolate;}
-#chatInputBox::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(110deg,transparent 10%,rgba(0,229,255,.0) 25%,rgba(0,229,255,.8) 48%,rgba(139,123,255,.65) 55%,transparent 78%);background-size:230% 100%;animation:composerBorderRun 5s linear infinite;pointer-events:none;z-index:0;opacity:.7;}
-#chatInputBox>*{position:relative;z-index:1;}
-#chatInputBox:focus-within{border-color:rgba(0,229,255,.65)!important;box-shadow:0 0 0 2px rgba(0,210,255,.10),0 0 28px rgba(0,190,255,.18),inset 0 0 24px rgba(0,190,255,.06)!important;}
-#userInput{transition:color .2s ease,text-shadow .2s ease;}
-#userInput:focus{text-shadow:0 0 12px rgba(0,210,255,.18);}
-.send-icon{position:relative;overflow:hidden;box-shadow:0 0 14px rgba(0,180,255,.3);transition:transform .2s ease,box-shadow .2s ease,filter .2s ease!important;}
-.send-icon::after{content:"";position:absolute;inset:-70%;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);transform:translateX(-130%) rotate(12deg);transition:transform .55s ease;}
-.send-icon:hover{transform:translateY(-2px) scale(1.09)!important;box-shadow:0 0 10px rgba(0,220,255,.55),0 0 28px rgba(0,130,255,.3);filter:brightness(1.18);}
-.send-icon:hover::after{transform:translateX(130%) rotate(12deg);}
-.send-icon:active{transform:scale(.92)!important;}
-@keyframes composerBorderRun{to{background-position:-230% 0}}
-
-/* Chat messages: pop-in user bubble, AI response glow and thinking state */
-#chat-messages{scroll-behavior:smooth;}
-#chat-messages .msg{transform-origin:bottom;will-change:transform,opacity;}
-#chat-messages .msg.user{animation:userMessageLaunch .48s cubic-bezier(.16,1,.3,1) both;box-shadow:0 7px 24px rgba(0,0,0,.18),0 0 0 rgba(0,220,255,0);}
-#chat-messages .msg.ai{animation:aiMessageMaterialize .62s cubic-bezier(.16,1,.3,1) both;}
-#chat-messages .msg.ai.typing-active{border-left:2px solid rgba(0,220,255,.7);filter:drop-shadow(0 0 10px rgba(0,190,255,.12));}
-#chat-messages .msg.typing-done{animation:messageSettle .35s ease-out both;}
-@keyframes userMessageLaunch{0%{opacity:0;transform:translate(24px,18px) scale(.94);filter:blur(5px)}70%{opacity:1;transform:translate(-2px,-2px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:translate(0,0) scale(1)}}
-@keyframes aiMessageMaterialize{0%{opacity:0;transform:translate(-22px,14px) scale(.975);filter:blur(7px)}65%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translate(0,0) scale(1)}}
-@keyframes messageSettle{from{filter:brightness(1.25)}to{filter:brightness(1)}}
-#chat-messages .msg-image{animation:attachmentPop .42s cubic-bezier(.16,1,.3,1) both;box-shadow:0 0 18px rgba(0,190,255,.16);}
-@keyframes attachmentPop{from{opacity:0;transform:scale(.9) rotate(-1deg)}to{opacity:1;transform:scale(1) rotate(0)}}
-
-/* Existing thinking dots become a clearer signal */
-.thinking-dots i{width:5px;height:5px;box-shadow:0 0 7px var(--motion-cyan),0 0 15px rgba(0,220,255,.55);background:var(--motion-cyan);}
-.msg.ai.typing-active .typewriter-cursor{background:var(--motion-cyan);box-shadow:0 0 10px var(--motion-cyan);}
-
-/* Buttons and cards respond to interaction */
-.new-chat-btn,.attach-btn,.history-clear-btn,.plus-entry-btn,.user-profile-box{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease;}
-.new-chat-btn:hover,.attach-btn:hover,.history-clear-btn:hover{transform:translateY(-2px);box-shadow:0 0 18px rgba(0,190,255,.13);border-color:rgba(0,220,255,.38)!important;}
-.brand-mark{animation:brandCorePulse 3.2s ease-in-out infinite;}
-@keyframes brandCorePulse{0%,100%{box-shadow:0 0 10px rgba(0,180,255,.22)}50%{box-shadow:0 0 24px rgba(0,210,255,.55),0 0 42px rgba(109,93,252,.24)}}
-
-@media(prefers-reduced-motion:reduce){
- #intro-screen::before,#intro-screen::after,.intro-title,.intro-dot,#app-main,#appSidebar,.chat-topbar,#welcome-wrap,#welcome-msg,#chatInputBox,#history-list .history-item,#chat-messages .msg,#chat-messages .msg-image,.brand-mark{animation:none!important;transition:none!important;}
+/* ===== VANH AI: VISIBLE CYBER MOTION LAYER ===== */
+:root{--va-cyan:#00eaff;--va-blue:#278bff;--va-purple:#8875ff;}
+/* Always-moving ambient scan on the chat canvas */
+.main-chat{isolation:isolate;}
+.chat-body{position:relative;isolation:isolate;}
+.chat-body::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(112deg,transparent 0%,rgba(0,225,255,.02) 38%,rgba(0,225,255,.19) 49%,rgba(90,115,255,.10) 53%,transparent 64%);
+  background-size:240% 100%;animation:vaCanvasSweep 5.5s linear infinite!important;opacity:.85;
 }
+.chat-body::after{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 18% 75%,rgba(0,222,255,.16),transparent 28%),radial-gradient(circle at 80% 20%,rgba(86,91,255,.16),transparent 30%);
+  animation:vaAmbientPulse 4s ease-in-out infinite alternate!important;
+}
+.chat-body>*{position:relative;z-index:1;}
+@keyframes vaCanvasSweep{0%{background-position:140% 0}100%{background-position:-140% 0}}
+@keyframes vaAmbientPulse{from{opacity:.35;filter:hue-rotate(0deg)}to{opacity:1;filter:hue-rotate(24deg)}}
+/* Sidebar: a subtle animated edge + glowing history hover */
+#appSidebar,.sidebar{position:relative;isolation:isolate;}
+#appSidebar::after,.sidebar::after{content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--va-cyan),var(--va-purple),transparent);background-size:100% 220%;animation:vaSideEdge 4s linear infinite;opacity:.7;pointer-events:none;}
+@keyframes vaSideEdge{to{background-position:0 220%}}
+#history-list .history-item{position:relative;overflow:hidden;transition:transform .25s ease,background .25s ease,box-shadow .25s ease,border-color .25s ease;}
+#history-list .history-item:hover{transform:translateX(6px)!important;background:rgba(0,205,255,.13)!important;border-color:rgba(0,234,255,.48)!important;box-shadow:0 0 18px rgba(0,220,255,.2),inset 0 0 12px rgba(0,220,255,.06)!important;}
+#history-list .history-item::after{content:"";position:absolute;left:-120%;top:0;width:75%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,235,255,.22),transparent);transform:skewX(-24deg);pointer-events:none;}
+#history-list .history-item:hover::after{animation:vaHistoryFlash .65s ease forwards;}
+@keyframes vaHistoryFlash{to{left:150%}}
+/* Composer: rotating neon rim and pulsing send button */
+#chatInputBox{position:relative;isolation:isolate;overflow:visible!important;border-color:rgba(0,220,255,.38)!important;box-shadow:0 0 0 1px rgba(0,220,255,.10),0 0 22px rgba(0,170,255,.13)!important;}
+#chatInputBox::before{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,transparent 0 58%,rgba(0,235,255,.95) 68%,rgba(128,108,255,.85) 76%,transparent 88%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:vaRimRotate 3.2s linear infinite;pointer-events:none;z-index:0;}
+#chatInputBox::after{content:"";position:absolute;left:12%;right:12%;top:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--va-cyan),transparent);box-shadow:0 0 12px var(--va-cyan);animation:vaInputScan 2.8s ease-in-out infinite;pointer-events:none;}
+@keyframes vaRimRotate{to{transform:rotate(360deg)}}
+@keyframes vaInputScan{0%,100%{opacity:.15;transform:translateX(-20%)}50%{opacity:1;transform:translateX(20%)}}
+#chatInputBox:focus-within{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(0,234,255,.38),0 0 32px rgba(0,195,255,.25),inset 0 0 20px rgba(0,190,255,.07)!important;}
+.send-icon{animation:vaSendPulse 2.2s ease-in-out infinite!important;position:relative;}
+.send-icon:hover{animation:none!important;transform:translateY(-3px) scale(1.1)!important;filter:brightness(1.3);box-shadow:0 0 14px var(--va-cyan),0 0 34px rgba(39,139,255,.6)!important;}
+@keyframes vaSendPulse{0%,100%{box-shadow:0 0 8px rgba(0,180,255,.24),0 0 0 0 rgba(0,220,255,0)}50%{box-shadow:0 0 17px rgba(0,220,255,.62),0 0 0 5px rgba(0,220,255,.06)}}
+/* New messages visibly travel into the conversation */
+#chat-messages .msg{transform-origin:bottom;will-change:transform,opacity;}
+#chat-messages .msg.user{animation:vaUserSend .58s cubic-bezier(.16,1,.3,1) both!important;}
+#chat-messages .msg.ai{animation:vaAiReceive .72s cubic-bezier(.16,1,.3,1) both!important;}
+@keyframes vaUserSend{0%{opacity:0;transform:translate(65px,32px) scale(.82);filter:blur(8px)}65%{opacity:1;transform:translate(-4px,-3px) scale(1.025);filter:blur(0)}100%{opacity:1;transform:none}}
+@keyframes vaAiReceive{0%{opacity:0;transform:translate(-55px,24px) scale(.9);filter:blur(9px)}70%{opacity:1;transform:translate(3px,-2px) scale(1.01);filter:blur(0)}100%{opacity:1;transform:none}}
+/* Welcome orb and brand stay alive after the intro has ended */
+.welcome-orb,.ai-status-icon,.brand-mark{animation:vaCoreGlow 2.6s ease-in-out infinite alternate!important;}
+@keyframes vaCoreGlow{from{filter:brightness(.95);box-shadow:0 0 10px rgba(0,220,255,.22)}to{filter:brightness(1.25);box-shadow:0 0 25px rgba(0,220,255,.58),0 0 42px rgba(120,100,255,.24)}}
+/* Do not suppress motion unless the visitor explicitly requests reduced motion */
+@media(prefers-reduced-motion:reduce){.chat-body::before,.chat-body::after,#appSidebar::after,.sidebar::after,#chatInputBox::before,#chatInputBox::after,.send-icon,.welcome-orb,.ai-status-icon,.brand-mark{animation:none!important}}
+
+
+        /* Private conversation URL entries in the history sidebar */
+        .history-link-item{display:flex!important;align-items:center;gap:5px;min-width:0;padding-right:5px!important}
+        .history-link-item a{display:block;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit;text-decoration:none;font-size:10px;}
+        .history-link-item a:hover{color:#55eaff;text-shadow:0 0 10px rgba(0,220,255,.65)}
+        .history-copy-link{flex:0 0 auto;border:1px solid rgba(0,220,255,.18);background:rgba(0,180,255,.07);color:#75eaff;border-radius:6px;padding:2px 5px;cursor:pointer;opacity:.55}
+        .history-copy-link:hover{opacity:1;box-shadow:0 0 12px rgba(0,220,255,.3)}
 
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
@@ -1350,6 +1331,76 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         };
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.closePlusModal(); });
 
+        // ================= PRIVATE CONVERSATION URLS =================
+        // Each conversation gets a non-sequential, unguessable URL slug.
+        // Actual access control is enforced by Supabase Auth + RLS, not by the slug.
+        function createConversationSlug() {
+            const bytes = new Uint8Array(12);
+            crypto.getRandomValues(bytes);
+            return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+        }
+        function getVanhAIBasePath() {
+            const path = window.location.pathname;
+            return path.endsWith('/') ? path : path.slice(0, path.lastIndexOf('/') + 1);
+        }
+        const VANHAI_BASE_PATH = getVanhAIBasePath();
+        function getConversationSlugFromUrl() {
+            const path = window.location.pathname;
+            if (!path.startsWith(VANHAI_BASE_PATH)) return null;
+            const tail = decodeURIComponent(path.slice(VANHAI_BASE_PATH.length)).replace(/\/$/, '');
+            return /^[a-f0-9]{24}$/i.test(tail) ? tail.toLowerCase() : null;
+        }
+        function conversationUrl(session) {
+            if (!session.shareSlug) session.shareSlug = createConversationSlug();
+            return window.location.origin + VANHAI_BASE_PATH + session.shareSlug;
+        }
+        window.copyConversationLink = async function(index, event) {
+            if (event) event.stopPropagation();
+            const session = currentChatSessions[index];
+            if (!session) return;
+            const url = conversationUrl(session);
+            try {
+                await navigator.clipboard.writeText(url);
+                alert('Đã sao chép đường dẫn riêng:\n' + url);
+            } catch (_) {
+                prompt('Sao chép đường dẫn cuộc trò chuyện:', url);
+            }
+            if (cloudSyncReady) cloudSaveSession(session).catch(err => console.error('Không lưu được mã URL:', err));
+        };
+        function setConversationUrl(session, replace=false) {
+            const target = session ? conversationUrl(session) : window.location.origin + VANHAI_BASE_PATH;
+            if (replace) history.replaceState({vanhAI:true}, '', target);
+            else history.pushState({vanhAI:true}, '', target);
+        }
+        function showConversationAccessDenied() {
+            alert('Không thể truy cập cuộc trò chuyện này. Đường dẫn không tồn tại hoặc thuộc tài khoản khác.');
+            history.replaceState({vanhAI:true}, '', window.location.origin + VANHAI_BASE_PATH);
+            activeSessionId = null;
+            document.getElementById('chat-messages').style.display = 'none';
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('welcome-wrap').style.display = 'flex';
+            document.getElementById('welcome-msg').style.display = 'block';
+        }
+        function openConversationFromCurrentUrl() {
+            const slug = getConversationSlugFromUrl();
+            if (!slug) {
+                if (window.location.pathname !== VANHAI_BASE_PATH) showConversationAccessDenied();
+                else startNewChat();
+                return;
+            }
+            const index = currentChatSessions.findIndex(item => item.shareSlug === slug);
+            if (index < 0) {
+                showConversationAccessDenied();
+                return;
+            }
+            loadSession(index, {skipUrl:true});
+        }
+        window.addEventListener('popstate', () => {
+            if (document.getElementById('app-main')?.style.display === 'flex') {
+                openConversationFromCurrentUrl();
+            }
+        });
+
         async function getSupabaseSession() {
             // A local username is not proof of a valid Supabase session.
             let { data, error } = await supabaseClient.auth.getSession();
@@ -1378,12 +1429,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             const user = await getSupabaseUser();
             if (!user) return false;
             if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+            if (!session.shareSlug) session.shareSlug = createConversationSlug();
             session.conversationId = session.cloudId;
             const { data: old, error: findError } = await supabaseClient
                 .from('chat_history').select('id')
                 .eq('user_id', user.id).eq('conversation_id', session.cloudId).maybeSingle();
             if (findError) throw findError;
-            const record = { user_id: user.id, conversation_id: session.cloudId,
+            const record = { user_id: user.id, conversation_id: session.cloudId, share_slug: session.shareSlug,
                 title: session.title || 'Cuộc trò chuyện mới', messages: session.messages || [],
                 updated_at: new Date().toISOString() };
             const result = old
@@ -1397,10 +1449,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             const user = await getSupabaseUser();
             if (!user) return [];
             const { data, error } = await supabaseClient.from('chat_history')
-                .select('conversation_id,title,messages,updated_at')
+                .select('conversation_id,share_slug,title,messages,updated_at')
                 .eq('user_id', user.id).order('updated_at', { ascending: false });
             if (error) throw error;
-            return (data || []).map(row => ({ title: row.title, messages: row.messages || [],
+            return (data || []).map(row => ({ title: row.title, messages: row.messages || [], shareSlug: row.share_slug,
                 cloudId: row.conversation_id, conversationId: row.conversation_id, updated_at: row.updated_at }));
         }
 
@@ -1420,6 +1472,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 // during initial sync when their conversation ID already existed in the cloud.
                 for (const session of local) {
                     if (!session.cloudId) session.cloudId = session.conversationId || crypto.randomUUID();
+                    if (!session.shareSlug) session.shareSlug = createConversationSlug();
                     session.conversationId = session.cloudId;
                     const remote = cloudById.get(session.cloudId);
                     const localTime = new Date(session.updated_at || 0).getTime();
@@ -1443,6 +1496,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 activeSessionId = null;
                 loadHistory();
                 console.info('Supabase chat sync successful:', currentChatSessions.length, 'sessions');
+                openConversationFromCurrentUrl();
             } catch (e) {
                 cloudSyncReady = false;
                 console.error('Cloud history sync error:', e);
@@ -1657,7 +1711,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             let itemsHtml = '<div class="history-title">Gần đây</div>';
             
             currentChatSessions.forEach((session, index) => {
-                itemsHtml += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title)}</div>`;
+                if (!session.shareSlug) session.shareSlug = createConversationSlug();
+                const url = conversationUrl(session);
+                itemsHtml += `<div class="history-item history-link-item" title="${escapeHtml(session.title || 'Cuộc trò chuyện')}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(url.replace(/^https?:\/\//,''))}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn">⧉</button></div>`;
             });
             historyList.innerHTML = itemsHtml;
         }
@@ -1667,8 +1723,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             const historyList = document.getElementById('history-list');
             let html = '<div class="history-title">Gần đây</div>';
             currentChatSessions.forEach((session, index) => {
-                if ((session.title || '').toLowerCase().includes(q)) {
-                    html += `<div class="history-item" onclick="loadSession(${index})">${escapeHtml(session.title || 'Cuộc trò chuyện mới')}</div>`;
+                if (!session.shareSlug) session.shareSlug = createConversationSlug();
+                const url = conversationUrl(session);
+                if ((session.title || '').toLowerCase().includes(q) || url.toLowerCase().includes(q)) {
+                    html += `<div class="history-item history-link-item" title="${escapeHtml(session.title || 'Cuộc trò chuyện')}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(url.replace(/^https?:\/\//,''))}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn">⧉</button></div>`;
                 }
             });
             historyList.innerHTML = html;
@@ -1692,6 +1750,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
         window.startNewChat = function() {
             activeSessionId = null;
+            if (getConversationSlugFromUrl()) setConversationUrl(null);
             clearAttachedImage();
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('welcome-wrap').style.display = 'flex';
@@ -1700,9 +1759,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             loadHistory();
         };
 
-        window.loadSession = function(index) {
+        window.loadSession = function(index, options={}) {
             activeSessionId = index;
             const session = currentChatSessions[index];
+            if (!session) return;
+            if (!session.shareSlug) session.shareSlug = createConversationSlug();
+            if (!options.skipUrl) setConversationUrl(session);
             const chatMsgs = document.getElementById('chat-messages');
             
             chatMsgs.innerHTML = '';
@@ -1744,6 +1806,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 const newSession = {
                     conversationId: crypto.randomUUID(),
                     cloudId: null,
+                    shareSlug: createConversationSlug(),
                     title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
                     messages: [
                         { sender: 'user', text: userText, image: imageBase64 },

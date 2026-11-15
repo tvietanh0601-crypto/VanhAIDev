@@ -1267,6 +1267,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
               <button class="board-tool" data-tool="right" onclick="setBoardTool('right',this)">⌜ Góc vuông</button>
               <button class="board-tool" data-tool="ruler" onclick="setBoardTool('ruler',this)">📏 Thước</button>
               <button class="board-tool" data-tool="protractor" onclick="setBoardTool('protractor',this)">◔ Thước đo độ</button>
+              <button class="board-tool" data-tool="text" onclick="setBoardTool('text',this)">Aa Ký hiệu</button>
               <button class="board-tool" onclick="undoBoard()">↶ Hoàn tác</button><button class="board-tool" onclick="clearBoard()">Xóa bảng</button>
             </div>
             <canvas id="geometryCanvas" width="1100" height="650" aria-label="Bảng vẽ hình học"></canvas>
@@ -2240,17 +2241,59 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         window.calcClear = function(){document.getElementById('calcDisplay').value='';document.getElementById('calcResult').textContent='Kết quả sẽ hiện ở đây';};
         window.calculateMath = function(){const el=document.getElementById('calcDisplay'),out=document.getElementById('calcResult');try{const expr=el.value.trim();if(!expr) return;const result=mathEvaluate(expr);out.textContent='= '+(typeof result==='number'?Number(result.toPrecision(12)).toString():String(result));}catch(e){out.textContent='Biểu thức chưa hợp lệ';}};
 
-        let boardTool='select', boardPoints=[], boardShapes=[], boardUndo=[], boardCanvas=null, boardCtx=null;
+        let boardTool='select', boardPoints=[], boardShapes=[], boardUndo=[], boardCanvas=null, boardCtx=null, boardDragStart=null, boardPreviewPoint=null, boardPointerDown=false;
         function boardSave(){boardUndo.push(JSON.stringify(boardShapes));if(boardUndo.length>40)boardUndo.shift();}
         function resizeGeometryCanvas(){boardCanvas=document.getElementById('geometryCanvas');if(!boardCanvas)return;const rect=boardCanvas.getBoundingClientRect();if(!rect.width||!rect.height)return;const old=document.createElement('canvas');old.width=boardCanvas.width;old.height=boardCanvas.height;old.getContext('2d').drawImage(boardCanvas,0,0);boardCanvas.width=Math.max(700,Math.round(rect.width*devicePixelRatio));boardCanvas.height=Math.max(400,Math.round(rect.height*devicePixelRatio));boardCtx=boardCanvas.getContext('2d');boardCtx.setTransform(1,0,0,1,0,0);boardCtx.scale(devicePixelRatio,devicePixelRatio);boardRender();}
-        function boardRender(){if(!boardCanvas)return;const w=boardCanvas.width/devicePixelRatio,h=boardCanvas.height/devicePixelRatio;boardCtx.clearRect(0,0,w,h);boardCtx.lineWidth=2;boardCtx.strokeStyle='#17466a';boardCtx.fillStyle='#123d60';boardCtx.font='14px Inter, sans-serif';for(const sh of boardShapes){const p=sh.points||[];if(sh.type==='line'||sh.type==='ray'||sh.type==='ruler'){if(p.length>=2){boardCtx.beginPath();boardCtx.moveTo(p[0].x,p[0].y);boardCtx.lineTo(sh.type==='ray'?p[0].x+(p[1].x-p[0].x)*20:p[1].x,sh.type==='ray'?p[0].y+(p[1].y-p[0].y)*20:p[1].y);boardCtx.stroke();if(sh.type==='ruler'){const len=Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y);boardCtx.fillText((len/24).toFixed(1)+' ô',p[1].x+8,p[1].y-8);}}}else if(sh.type==='angle'||sh.type==='right'){if(p.length===3){const [a,v,b]=p;boardCtx.beginPath();boardCtx.moveTo(a.x,a.y);boardCtx.lineTo(v.x,v.y);boardCtx.lineTo(b.x,b.y);boardCtx.stroke();const ang1=Math.atan2(a.y-v.y,a.x-v.x),ang2=Math.atan2(b.y-v.y,b.x-v.x);let d=(ang2-ang1+Math.PI*2)%(Math.PI*2);if(d>Math.PI)d=2*Math.PI-d;const deg=d*180/Math.PI;boardCtx.beginPath();if(sh.type==='right'){const u={x:(a.x-v.x)/Math.hypot(a.x-v.x,a.y-v.y),y:(a.y-v.y)/Math.hypot(a.x-v.x,a.y-v.y)},z={x:(b.x-v.x)/Math.hypot(b.x-v.x,b.y-v.y),y:(b.y-v.y)/Math.hypot(b.x-v.x,b.y-v.y)};const k=22;boardCtx.moveTo(v.x+u.x*k,v.y+u.y*k);boardCtx.lineTo(v.x+(u.x+z.x)*k,v.y+(u.y+z.y)*k);boardCtx.lineTo(v.x+z.x*k,v.y+z.y*k);}else{boardCtx.arc(v.x,v.y,28,ang1,ang2,false);}boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();boardCtx.fillStyle='#a12c6d';boardCtx.fillText(sh.type==='right'?'90°':deg.toFixed(1)+'°',v.x+30,v.y-12);boardCtx.strokeStyle='#17466a';}}else if(sh.type==='protractor'){const p=sh.points[0];boardCtx.beginPath();boardCtx.arc(p.x,p.y,90,Math.PI,0);boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();for(let i=0;i<=180;i+=10){const a=Math.PI-i*Math.PI/180;boardCtx.beginPath();boardCtx.moveTo(p.x+Math.cos(a)*80,p.y-Math.sin(a)*80);boardCtx.lineTo(p.x+Math.cos(a)*(i%30===0?100:90),p.y-Math.sin(a)*(i%30===0?100:90));boardCtx.stroke();if(i%30===0)boardCtx.fillText(String(i),p.x+Math.cos(a)*112-7,p.y-Math.sin(a)*112);}}}
-          boardCtx.fillStyle='#0b7aa0';for(const sh of boardShapes)for(const p of sh.points||[]){boardCtx.beginPath();boardCtx.arc(p.x,p.y,3.5,0,Math.PI*2);boardCtx.fill();}}
+        function boardRender(){if(!boardCanvas)return;const w=boardCanvas.width/devicePixelRatio,h=boardCanvas.height/devicePixelRatio;boardCtx.clearRect(0,0,w,h);boardCtx.lineWidth=2;boardCtx.strokeStyle='#17466a';boardCtx.fillStyle='#123d60';boardCtx.font='14px Inter, sans-serif';for(const sh of boardShapes){const p=sh.points||[];if(sh.type==='line'||sh.type==='ray'||sh.type==='ruler'){if(p.length>=2){boardCtx.beginPath();boardCtx.moveTo(p[0].x,p[0].y);boardCtx.lineTo(sh.type==='ray'?p[0].x+(p[1].x-p[0].x)*20:p[1].x,sh.type==='ray'?p[0].y+(p[1].y-p[0].y)*20:p[1].y);boardCtx.stroke();if(sh.type==='ruler'){const len=Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y);boardCtx.fillText((len/24).toFixed(1)+' ô',p[1].x+8,p[1].y-8);}}}else if(sh.type==='angle'||sh.type==='right'){if(p.length===3){const [a,v,b]=p;boardCtx.beginPath();boardCtx.moveTo(a.x,a.y);boardCtx.lineTo(v.x,v.y);boardCtx.lineTo(b.x,b.y);boardCtx.stroke();const ang1=Math.atan2(a.y-v.y,a.x-v.x),ang2=Math.atan2(b.y-v.y,b.x-v.x);let d=(ang2-ang1+Math.PI*2)%(Math.PI*2);if(d>Math.PI)d=2*Math.PI-d;const deg=d*180/Math.PI;boardCtx.beginPath();if(sh.type==='right'){const u={x:(a.x-v.x)/Math.hypot(a.x-v.x,a.y-v.y),y:(a.y-v.y)/Math.hypot(a.x-v.x,a.y-v.y)},z={x:(b.x-v.x)/Math.hypot(b.x-v.x,b.y-v.y),y:(b.y-v.y)/Math.hypot(b.x-v.x,b.y-v.y)};const k=22;boardCtx.moveTo(v.x+u.x*k,v.y+u.y*k);boardCtx.lineTo(v.x+(u.x+z.x)*k,v.y+(u.y+z.y)*k);boardCtx.lineTo(v.x+z.x*k,v.y+z.y*k);}else{boardCtx.arc(v.x,v.y,28,ang1,ang2,false);}boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();boardCtx.fillStyle='#a12c6d';boardCtx.fillText(sh.type==='right'?'90°':deg.toFixed(1)+'°',v.x+30,v.y-12);boardCtx.strokeStyle='#17466a';}}else if(sh.type==='protractor'){const p=sh.points[0];boardCtx.beginPath();boardCtx.arc(p.x,p.y,90,Math.PI,0);boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();for(let i=0;i<=180;i+=10){const a=Math.PI-i*Math.PI/180;boardCtx.beginPath();boardCtx.moveTo(p.x+Math.cos(a)*80,p.y-Math.sin(a)*80);boardCtx.lineTo(p.x+Math.cos(a)*(i%30===0?100:90),p.y-Math.sin(a)*(i%30===0?100:90));boardCtx.stroke();if(i%30===0)boardCtx.fillText(String(i),p.x+Math.cos(a)*112-7,p.y-Math.sin(a)*112);}}else if(sh.type==='text'){const p=sh.points[0];boardCtx.save();boardCtx.font='bold 17px Inter, sans-serif';boardCtx.fillStyle='#b12d78';boardCtx.shadowColor='#ffffff';boardCtx.shadowBlur=3;boardCtx.fillText(sh.text,p.x,p.y);boardCtx.restore();}}
+          boardCtx.fillStyle='#0b7aa0';for(const sh of boardShapes)if(sh.type!=='text')for(const p of sh.points||[]){boardCtx.beginPath();boardCtx.arc(p.x,p.y,3.5,0,Math.PI*2);boardCtx.fill();}
+          // Live drafting preview: the segment follows the pointer before it is committed.
+          if(boardDragStart && boardPreviewPoint && (boardTool==='line'||boardTool==='ray'||boardTool==='ruler')){
+            const a=boardDragStart,b=boardPreviewPoint;boardCtx.save();boardCtx.beginPath();boardCtx.setLineDash([7,5]);boardCtx.lineWidth=2.5;boardCtx.strokeStyle='#00aeea';boardCtx.shadowColor='#00cfff';boardCtx.shadowBlur=8;boardCtx.moveTo(a.x,a.y);boardCtx.lineTo(b.x,b.y);boardCtx.stroke();boardCtx.setLineDash([]);boardCtx.fillStyle='#00aeea';for(const q of [a,b]){boardCtx.beginPath();boardCtx.arc(q.x,q.y,4,0,Math.PI*2);boardCtx.fill();}boardCtx.restore();
+          }}
         window.setBoardTool=function(t,btn){boardTool=t;document.querySelectorAll('.board-tool[data-tool]').forEach(x=>x.classList.toggle('active',x===btn));boardPoints=[];};
         function canvasPoint(e){const r=boardCanvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
         function angleDeg(a,v,b){const x1=a.x-v.x,y1=a.y-v.y,x2=b.x-v.x,y2=b.y-v.y;const dot=x1*x2+y1*y2;return Math.acos(Math.max(-1,Math.min(1,dot/(Math.hypot(x1,y1)*Math.hypot(x2,y2)))))*180/Math.PI;}
-        function initBoard(){boardCanvas=document.getElementById('geometryCanvas');if(!boardCanvas||boardCanvas.dataset.ready)return;boardCanvas.dataset.ready='1';boardCtx=boardCanvas.getContext('2d');boardCanvas.addEventListener('pointerdown',e=>{const p=canvasPoint(e);if(boardTool==='select')return;if(boardTool==='protractor'){boardSave();boardShapes.push({type:'protractor',points:[p]});boardRender();return;}boardPoints.push(p);if((boardTool==='angle'||boardTool==='right')&&boardPoints.length===3){boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});if(boardTool==='angle'){const deg=angleDeg(...boardPoints);document.getElementById('angleReadout').textContent='Số đo góc ≈ '+deg.toFixed(1)+'°';}else document.getElementById('angleReadout').textContent='Đã tạo ký hiệu góc vuông 90°.';boardPoints=[];boardRender();}else if((boardTool==='line'||boardTool==='ray'||boardTool==='ruler')&&boardPoints.length===2){boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});if(boardTool==='ruler')document.getElementById('angleReadout').textContent='Độ dài theo lưới ≈ '+(Math.hypot(boardPoints[1].x-boardPoints[0].x,boardPoints[1].y-boardPoints[0].y)/24).toFixed(2)+' ô lưới.';boardPoints=[];boardRender();}});}
+        function initBoard(){
+          boardCanvas=document.getElementById('geometryCanvas');
+          if(!boardCanvas||boardCanvas.dataset.ready)return;
+          boardCanvas.dataset.ready='1';boardCtx=boardCanvas.getContext('2d');
+          boardCanvas.addEventListener('pointerdown',e=>{
+            const p=canvasPoint(e);if(boardTool==='select')return;
+            if(boardTool==='line'){
+              boardPointerDown=true;boardDragStart=p;boardPreviewPoint=p;
+              try{boardCanvas.setPointerCapture(e.pointerId);}catch(_){}
+              boardRender();return;
+            }
+            if(boardTool==='protractor'){boardSave();boardShapes.push({type:'protractor',points:[p]});boardRender();return;}
+            if(boardTool==='text'){const value=prompt('Nhập ký hiệu cần đặt (ví dụ: A, B, AB, ∠ABC, 60°):');if(value&&value.trim()){boardSave();boardShapes.push({type:'text',text:value.trim().slice(0,40),points:[p]});boardRender();}return;}
+            boardPoints.push(p);
+            if((boardTool==='angle'||boardTool==='right')&&boardPoints.length===3){
+              boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});
+              if(boardTool==='angle'){const deg=angleDeg(...boardPoints);document.getElementById('angleReadout').textContent='Số đo góc ≈ '+deg.toFixed(1)+'°';}
+              else document.getElementById('angleReadout').textContent='Đã tạo ký hiệu góc vuông 90°.';
+              boardPoints=[];boardRender();
+            }else if((boardTool==='ray'||boardTool==='ruler')&&boardPoints.length===2){
+              boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});
+              if(boardTool==='ruler')document.getElementById('angleReadout').textContent='Độ dài theo lưới ≈ '+(Math.hypot(boardPoints[1].x-boardPoints[0].x,boardPoints[1].y-boardPoints[0].y)/24).toFixed(2)+' ô lưới.';
+              boardPoints=[];boardRender();
+            }
+          });
+          boardCanvas.addEventListener('pointermove',e=>{
+            if(!boardPointerDown||!boardDragStart)return;
+            boardPreviewPoint=canvasPoint(e);boardRender();
+          });
+          const finishSegment=e=>{
+            if(!boardPointerDown||!boardDragStart)return;
+            const end=canvasPoint(e),start=boardDragStart;
+            boardPointerDown=false;boardDragStart=null;boardPreviewPoint=null;
+            if(Math.hypot(end.x-start.x,end.y-start.y)>3){boardSave();boardShapes.push({type:'line',points:[start,end]});document.getElementById('angleReadout').textContent='Đã tạo đoạn thẳng.';}
+            boardRender();
+          };
+          boardCanvas.addEventListener('pointerup',finishSegment);
+          boardCanvas.addEventListener('pointercancel',finishSegment);
+        }
         window.undoBoard=function(){if(boardUndo.length){boardShapes=JSON.parse(boardUndo.pop());boardRender();}};
-        window.clearBoard=function(){boardSave();boardShapes=[];boardPoints=[];boardRender();document.getElementById('angleReadout').textContent='Đã xóa bảng vẽ.';};
+        window.clearBoard=function(){boardSave();boardShapes=[];boardPoints=[];boardDragStart=null;boardPreviewPoint=null;boardPointerDown=false;boardRender();document.getElementById('angleReadout').textContent='Đã xóa bảng vẽ.';};
         window.askGeometryAI=function(){const prompt=document.getElementById('geometryPrompt').value.trim();if(!prompt){alert('Nhập yêu cầu hình học trước nhé.');return;}if(!boardCanvas)return;const image=boardCanvas.toDataURL('image/png');currentAttachedImage=image;document.getElementById('userInput').value='Hãy phân tích hình vẽ hình học đính kèm và giải yêu cầu sau từng bước: '+prompt+'\nHãy đọc các ký hiệu và số đo nhìn thấy được; nếu dữ kiện chưa đủ, hãy nói rõ.';closeMathStudio();window.sendMessage();};
         document.addEventListener('DOMContentLoaded',()=>{initBoard();});
         window.addEventListener('resize',()=>{if(document.getElementById('mathStudio')?.classList.contains('open'))resizeGeometryCanvas();});

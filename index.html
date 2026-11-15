@@ -1019,7 +1019,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
     <!-- Màn hình Intro Nitro Animation -->
     <div id="intro-screen">
-        <div class="intro-title">Web đang trong quá trình cập nhật</div>
+        <div class="intro-title">Vanh AI Dev</div>
         <div class="intro-dot"></div>
     </div>
 
@@ -1167,7 +1167,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             <div class="chat-body">
                 <div class="welcome-wrap" id="welcome-wrap">
                     <div class="welcome-orb"><span>✦</span></div>
-                    <div class="welcome-text" id="welcome-msg">Web đang trong quá trình cập nhật</div>
+                    <div class="welcome-text" id="welcome-msg">Chào bạn, hôm nay mình giúp gì được?</div>
                     <div class="welcome-subtext">Hỏi bất cứ điều gì, phân tích hình ảnh hoặc bắt đầu một ý tưởng mới.</div>
                     <div class="quick-prompts">
                         <button onclick="usePrompt('Giải thích cho mình một chủ đề thật dễ hiểu')">✦ Giải thích dễ hiểu</button>
@@ -1198,8 +1198,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                         <input type="file" id="anyInputFile" style="display:none" onchange="handleDocumentSelected(event)">
                         <button class="attach-btn" title="Thêm" onclick="toggleAttachMenu(event)">+</button>
                         
-                        <input type="text" id="userInput" placeholder="Web đang trong quá trình cập nhật" onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
-                        <button class="send-icon" onclick="sendMessage()">❌</button>
+                        <input type="text" id="userInput" placeholder="Bạn đang nghĩ gì hoặc gửi ảnh (Ctrl+V)..." onkeydown="if(event.key==='Enter') sendMessage()" onpaste="handlePasteImage(event)">
+                        <button class="send-icon" onclick="sendMessage()">➔</button>
                     </div>
                 </div>
             </div>
@@ -1371,10 +1371,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             const target = session ? conversationUrl(session) : window.location.origin + VANHAI_BASE_PATH;
             if (replace) history.replaceState({vanhAI:true}, '', target);
             else history.pushState({vanhAI:true}, '', target);
+            document.title = session ? `${session.title || 'Cuộc trò chuyện'} | Vanh AI` : 'Vanh AI Desktop';
         }
         function showConversationAccessDenied() {
             alert('Không thể truy cập cuộc trò chuyện này. Đường dẫn không tồn tại hoặc thuộc tài khoản khác.');
             history.replaceState({vanhAI:true}, '', window.location.origin + VANHAI_BASE_PATH);
+            document.title = 'Vanh AI Desktop';
             activeSessionId = null;
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('chat-messages').innerHTML = '';
@@ -1713,7 +1715,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             currentChatSessions.forEach((session, index) => {
                 if (!session.shareSlug) session.shareSlug = createConversationSlug();
                 const url = conversationUrl(session);
-                itemsHtml += `<div class="history-item history-link-item" title="${escapeHtml(session.title || 'Cuộc trò chuyện')}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(url.replace(/^https?:\/\//,''))}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn">⧉</button></div>`;
+                const displayTitle = session.title || 'Cuộc trò chuyện mới';
+                itemsHtml += `<div class="history-item history-link-item" title="${escapeHtml(displayTitle)}\n${escapeHtml(url)}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(displayTitle)}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn riêng">⧉</button></div>`;
             });
             historyList.innerHTML = itemsHtml;
         }
@@ -1726,7 +1729,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 if (!session.shareSlug) session.shareSlug = createConversationSlug();
                 const url = conversationUrl(session);
                 if ((session.title || '').toLowerCase().includes(q) || url.toLowerCase().includes(q)) {
-                    html += `<div class="history-item history-link-item" title="${escapeHtml(session.title || 'Cuộc trò chuyện')}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(url.replace(/^https?:\/\//,''))}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn">⧉</button></div>`;
+                    const displayTitle = session.title || 'Cuộc trò chuyện mới';
+                    html += `<div class="history-item history-link-item" title="${escapeHtml(displayTitle)}\n${escapeHtml(url)}"><a href="${url}" onclick="event.preventDefault(); loadSession(${index})">${escapeHtml(displayTitle)}</a><button type="button" class="history-copy-link" onclick="copyConversationLink(${index}, event)" title="Sao chép đường dẫn riêng">⧉</button></div>`;
                 }
             });
             historyList.innerHTML = html;
@@ -1751,6 +1755,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         window.startNewChat = function() {
             activeSessionId = null;
             if (getConversationSlugFromUrl()) setConversationUrl(null);
+            else document.title = 'Vanh AI Desktop';
             clearAttachedImage();
             document.getElementById('chat-messages').style.display = 'none';
             document.getElementById('welcome-wrap').style.display = 'flex';
@@ -1765,6 +1770,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             if (!session) return;
             if (!session.shareSlug) session.shareSlug = createConversationSlug();
             if (!options.skipUrl) setConversationUrl(session);
+            else document.title = `${session.title || 'Cuộc trò chuyện'} | Vanh AI`;
             const chatMsgs = document.getElementById('chat-messages');
             
             chatMsgs.innerHTML = '';
@@ -1807,7 +1813,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     conversationId: crypto.randomUUID(),
                     cloudId: null,
                     shareSlug: createConversationSlug(),
-                    title: titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText,
+                    title: titleText.replace(/\s+/g, ' ').trim().length > 32 ? titleText.replace(/\s+/g, ' ').trim().substring(0, 32) + '…' : titleText.replace(/\s+/g, ' ').trim(),
                     messages: [
                         { sender: 'user', text: userText, image: imageBase64 },
                         { sender: 'ai', text: aiText, image: aiImageBase64 || null }
@@ -2137,20 +2143,16 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         window.toggleSidebarTools = toggleSidebarTools;
         window.closeSidebarTools = closeSidebarTools;
 
-        // Also bind directly for reliable taps on mobile browsers.
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggle = document.getElementById('sidebarToggle');
-            if (toggle) {
-                toggle.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    toggleSidebarTools();
-                });
-            }
-            const backdrop = document.getElementById('sidebarBackdrop');
-            if (backdrop) backdrop.addEventListener('click', closeSidebarTools);
+        // The button and backdrop already use inline handlers. Do not bind
+        // a second click listener here, otherwise one tap toggles twice.
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeSidebarTools();
         });
         window.addEventListener('resize', () => {
-            if (!window.matchMedia('(max-width: 640px)').matches) closeSidebarTools();
+            if (!window.matchMedia('(max-width: 640px)').matches) {
+                const app = document.getElementById('app-main');
+                if (app) app.classList.remove('sidebar-open');
+            }
         });
     </script>
 </body>

@@ -1012,6 +1012,36 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         .history-copy-link{flex:0 0 auto;border:1px solid rgba(0,220,255,.18);background:rgba(0,180,255,.07);color:#75eaff;border-radius:6px;padding:2px 5px;cursor:pointer;opacity:.55}
         .history-copy-link:hover{opacity:1;box-shadow:0 0 12px rgba(0,220,255,.3)}
 
+
+/* ===== VANH AI MATH STUDIO ===== */
+.math-launch{border:1px solid rgba(0,220,255,.25)!important;background:linear-gradient(135deg,rgba(0,170,255,.13),rgba(110,90,255,.15))!important;color:#c9f7ff!important;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;box-shadow:0 0 16px rgba(0,190,255,.1);}
+.math-launch:hover{box-shadow:0 0 22px rgba(0,220,255,.35);transform:translateY(-1px)}
+#mathStudio{position:fixed;inset:0;z-index:10050;display:none;background:rgba(2,8,20,.82);backdrop-filter:blur(18px);padding:clamp(8px,2vw,24px);overflow:auto}
+#mathStudio.open{display:flex;align-items:center;justify-content:center;animation:mathFade .22s ease}
+@keyframes mathFade{from{opacity:0}to{opacity:1}}
+.math-window{width:min(1180px,100%);height:min(850px,96vh);min-height:560px;border:1px solid rgba(0,220,255,.28);border-radius:20px;background:linear-gradient(145deg,#07172b,#0b1224 65%,#101936);box-shadow:0 0 55px rgba(0,180,255,.16),0 25px 90px #000b;display:flex;flex-direction:column;overflow:hidden;color:#eaf7ff}
+.math-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #1b3a54;background:rgba(0,180,255,.06)}
+.math-head strong{font-size:17px;letter-spacing:.3px}.math-head small{display:block;color:#8ba9c4;font-size:11px;margin-top:3px}
+.math-close{border:1px solid #31516c;background:#10243a;color:#dff8ff;border-radius:9px;width:36px;height:36px;font-size:20px;cursor:pointer}
+.math-tabs{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid #1b334c}
+.math-tab{border:1px solid #294761;background:#0d2035;color:#a9c6dc;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:650}
+.math-tab.active{color:#eaffff;border-color:#00cfff;background:linear-gradient(120deg,#075078,#322d75);box-shadow:0 0 18px #00cfff24}
+.math-pane{display:none;flex:1;min-height:0;overflow:auto;padding:16px}.math-pane.active{display:block}
+.calc-shell{max-width:760px;margin:0 auto;border:1px solid #2b4962;border-radius:17px;padding:16px;background:#09182a;box-shadow:inset 0 0 25px #00101e}
+.calc-display{width:100%;height:76px;border:1px solid #31536e;border-radius:12px;background:#06111f;color:#dffaff;font-size:26px;text-align:right;padding:12px 16px;outline:none;margin-bottom:12px}
+.calc-result{height:26px;text-align:right;color:#59dfff;font-size:14px;margin:-5px 5px 10px}
+.calc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.calc-key{min-height:48px;border:1px solid #263f57;border-radius:10px;background:linear-gradient(145deg,#172b40,#101e31);color:#e2f4ff;font-size:17px;cursor:pointer;transition:.16s}
+.calc-key:hover{border-color:#00cfff;box-shadow:0 0 14px #00cfff38;transform:translateY(-2px)}.calc-key.op{background:#123b56;color:#73eaff}.calc-key.equal{background:linear-gradient(120deg,#087aa6,#5547ba);font-weight:800}.calc-key.wide{grid-column:span 2}
+.board-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;height:100%;min-height:430px}
+.board-main{display:flex;flex-direction:column;min-width:0;gap:10px}.board-toolbar{display:flex;flex-wrap:wrap;gap:7px}
+.board-tool{border:1px solid #294761;background:#10243a;color:#cbe6f7;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px}.board-tool.active{background:#075579;border-color:#00d5ff;color:#fff;box-shadow:0 0 12px #00cfff33}
+#geometryCanvas{width:100%;height:100%;min-height:340px;border:1px solid #31516c;border-radius:12px;background-color:#f9fcff;background-image:linear-gradient(#dce8f1 1px,transparent 1px),linear-gradient(90deg,#dce8f1 1px,transparent 1px);background-size:24px 24px;touch-action:none;cursor:crosshair}
+.board-side{border:1px solid #294761;border-radius:12px;padding:12px;background:#0b1a2b;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.board-side label{font-size:12px;color:#9fc0d7;font-weight:650}.board-side textarea{width:100%;min-height:100px;resize:vertical;border:1px solid #31516c;border-radius:9px;background:#061321;color:#e9f8ff;padding:10px;outline:none;font:13px Inter,sans-serif}
+.board-action{border:1px solid #147da0;border-radius:9px;padding:10px;background:linear-gradient(120deg,#075a7d,#37317b);color:#fff;font-weight:700;cursor:pointer}.board-note{font-size:11px;line-height:1.55;color:#83a4bc}.board-measure{font-size:13px;color:#63e7ff;background:#071321;border:1px solid #1c4960;padding:9px;border-radius:8px;min-height:38px}
+@media(max-width:760px){.math-window{height:96vh;min-height:0}.board-layout{grid-template-columns:1fr;grid-template-rows:minmax(270px,1fr) auto}.board-side{max-height:230px}.calc-grid{gap:5px}.calc-key{min-height:43px;font-size:15px}.math-pane{padding:9px}}
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
@@ -1159,6 +1189,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     </div>
                 </div>
                 <div class="topbar-actions">
+                    <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
                     <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
                     <button class="topbar-icon" title="Giao diện">◐</button>
                     <button class="topbar-icon" title="Thông tin">ⓘ</button>
@@ -1206,9 +1237,54 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         </div>
     </div>
 
+
+    <!-- Math Studio: calculator + geometry writeboard -->
+    <section id="mathStudio" aria-hidden="true">
+      <div class="math-window" role="dialog" aria-modal="true" aria-label="Vanh AI Math Studio">
+        <div class="math-head"><div><strong>✦ Vanh AI · Math Studio</strong><small>Máy tính và bảng hình học tương tác</small></div><button class="math-close" onclick="closeMathStudio()" aria-label="Đóng">×</button></div>
+        <div class="math-tabs"><button class="math-tab active" data-pane="calculator" onclick="switchMathPane('calculator',this)">▦ Máy tính</button><button class="math-tab" data-pane="writeboard" onclick="switchMathPane('writeboard',this)">✎ Writeboard hình học</button></div>
+        <div class="math-pane active" id="mathPane-calculator">
+          <div class="calc-shell"><input id="calcDisplay" class="calc-display" placeholder="Nhập biểu thức…" autocomplete="off" onkeydown="if(event.key==='Enter')calculateMath()"><div id="calcResult" class="calc-result">Kết quả sẽ hiện ở đây</div>
+            <div class="calc-grid">
+              <button class="calc-key" onclick="calcInsert('sin(')">sin</button><button class="calc-key" onclick="calcInsert('cos(')">cos</button><button class="calc-key" onclick="calcInsert('tan(')">tan</button><button class="calc-key" onclick="calcInsert('sqrt(')">√</button><button class="calc-key op" onclick="calcInsert('^')">xʸ</button>
+              <button class="calc-key" onclick="calcInsert('π')">π</button><button class="calc-key" onclick="calcInsert('e')">e</button><button class="calc-key" onclick="calcInsert('log10(')">log</button><button class="calc-key" onclick="calcInsert('log(')">ln</button><button class="calc-key op" onclick="calcInsert('!')">n!</button>
+              <button class="calc-key" onclick="calcInsert('7')">7</button><button class="calc-key" onclick="calcInsert('8')">8</button><button class="calc-key" onclick="calcInsert('9')">9</button><button class="calc-key op" onclick="calcInsert('/')">÷</button><button class="calc-key op" onclick="calcInsert('(')">(</button>
+              <button class="calc-key" onclick="calcInsert('4')">4</button><button class="calc-key" onclick="calcInsert('5')">5</button><button class="calc-key" onclick="calcInsert('6')">6</button><button class="calc-key op" onclick="calcInsert('*')">×</button><button class="calc-key op" onclick="calcInsert(')')">)</button>
+              <button class="calc-key" onclick="calcInsert('1')">1</button><button class="calc-key" onclick="calcInsert('2')">2</button><button class="calc-key" onclick="calcInsert('3')">3</button><button class="calc-key op" onclick="calcInsert('-')">−</button><button class="calc-key op" onclick="calcInsert('+')">+</button>
+              <button class="calc-key wide" onclick="calcInsert('0')">0</button><button class="calc-key" onclick="calcInsert('.')">.</button><button class="calc-key" onclick="calcBackspace()">⌫</button><button class="calc-key equal" onclick="calculateMath()">=</button>
+              <button class="calc-key wide" onclick="calcClear()">AC · Xóa</button><button class="calc-key wide" onclick="calcInsert('^2')">x²</button>
+            </div>
+            <div class="board-note" style="margin-top:12px">Lưu ý: sin, cos, tan mặc định dùng radian. Có thể nhập <b>sin(30 deg)</b> để tính theo độ.</div>
+          </div>
+        </div>
+        <div class="math-pane" id="mathPane-writeboard">
+          <div class="board-layout"><div class="board-main">
+            <div class="board-toolbar">
+              <button class="board-tool active" data-tool="select" onclick="setBoardTool('select',this)">↖ Chọn</button>
+              <button class="board-tool" data-tool="line" onclick="setBoardTool('line',this)">／ Đoạn thẳng</button>
+              <button class="board-tool" data-tool="ray" onclick="setBoardTool('ray',this)">→ Tia</button>
+              <button class="board-tool" data-tool="angle" onclick="setBoardTool('angle',this)">∠ Đo góc</button>
+              <button class="board-tool" data-tool="right" onclick="setBoardTool('right',this)">⌜ Góc vuông</button>
+              <button class="board-tool" data-tool="ruler" onclick="setBoardTool('ruler',this)">📏 Thước</button>
+              <button class="board-tool" data-tool="protractor" onclick="setBoardTool('protractor',this)">◔ Thước đo độ</button>
+              <button class="board-tool" onclick="undoBoard()">↶ Hoàn tác</button><button class="board-tool" onclick="clearBoard()">Xóa bảng</button>
+            </div>
+            <canvas id="geometryCanvas" width="1100" height="650" aria-label="Bảng vẽ hình học"></canvas>
+          </div><aside class="board-side">
+            <label for="geometryPrompt">Điều cần chứng minh / tính toán</label>
+            <textarea id="geometryPrompt" placeholder="Ví dụ: CM tam giác GDP = tam giác UWB. Tính góc G nếu biết góc D = 50°…"></textarea>
+            <div class="board-measure" id="angleReadout">Chọn công cụ “Đo góc”, sau đó chạm 3 điểm: cạnh – đỉnh – cạnh.</div>
+            <button class="board-action" onclick="askGeometryAI()">Gửi hình và yêu cầu cho AI ↗</button>
+            <div class="board-note">Đo góc: chạm lần lượt điểm trên cạnh thứ nhất, đỉnh góc, điểm trên cạnh thứ hai. Thước đo độ và góc vuông là công cụ hỗ trợ dựng hình. AI sẽ phân tích hình và đề bài; hãy kiểm tra lại kết quả nếu nét vẽ chưa rõ.</div>
+          </aside></div>
+        </div>
+      </div>
+    </section>
+
     <script type="module">
         import { GoogleGenAI } from "https://esm.run/@google/genai";
         import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+        import { evaluate as mathEvaluate } from "https://esm.sh/mathjs@13.2.0";
 
         const p1 = "AQ.Ab8RN6IY-oy0TJ";
         const p2 = "8e8r2fwLSI-TsbKX8HaIYvru_cvhg-N38Yvg";
@@ -2154,6 +2230,31 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 if (app) app.classList.remove('sidebar-open');
             }
         });
+
+        // ===== Math Studio controls =====
+        window.openMathStudio = function(){const el=document.getElementById('mathStudio');el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';resizeGeometryCanvas();};
+        window.closeMathStudio = function(){const el=document.getElementById('mathStudio');el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.style.overflow='';};
+        window.switchMathPane = function(name,btn){document.querySelectorAll('.math-tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.math-pane').forEach(x=>x.classList.toggle('active',x.id==='mathPane-'+name));if(name==='writeboard')setTimeout(resizeGeometryCanvas,30);};
+        window.calcInsert = function(v){const el=document.getElementById('calcDisplay');const a=el.selectionStart??el.value.length,b=el.selectionEnd??el.value.length;el.value=el.value.slice(0,a)+v+el.value.slice(b);el.focus();el.setSelectionRange(a+v.length,a+v.length);};
+        window.calcBackspace = function(){const el=document.getElementById('calcDisplay');const a=el.selectionStart??el.value.length,b=el.selectionEnd??el.value.length;if(a===b&&a>0)el.value=el.value.slice(0,a-1)+el.value.slice(b);else el.value=el.value.slice(0,a)+el.value.slice(b);el.focus();};
+        window.calcClear = function(){document.getElementById('calcDisplay').value='';document.getElementById('calcResult').textContent='Kết quả sẽ hiện ở đây';};
+        window.calculateMath = function(){const el=document.getElementById('calcDisplay'),out=document.getElementById('calcResult');try{const expr=el.value.trim();if(!expr) return;const result=mathEvaluate(expr);out.textContent='= '+(typeof result==='number'?Number(result.toPrecision(12)).toString():String(result));}catch(e){out.textContent='Biểu thức chưa hợp lệ';}};
+
+        let boardTool='select', boardPoints=[], boardShapes=[], boardUndo=[], boardCanvas=null, boardCtx=null;
+        function boardSave(){boardUndo.push(JSON.stringify(boardShapes));if(boardUndo.length>40)boardUndo.shift();}
+        function resizeGeometryCanvas(){boardCanvas=document.getElementById('geometryCanvas');if(!boardCanvas)return;const rect=boardCanvas.getBoundingClientRect();if(!rect.width||!rect.height)return;const old=document.createElement('canvas');old.width=boardCanvas.width;old.height=boardCanvas.height;old.getContext('2d').drawImage(boardCanvas,0,0);boardCanvas.width=Math.max(700,Math.round(rect.width*devicePixelRatio));boardCanvas.height=Math.max(400,Math.round(rect.height*devicePixelRatio));boardCtx=boardCanvas.getContext('2d');boardCtx.setTransform(1,0,0,1,0,0);boardCtx.scale(devicePixelRatio,devicePixelRatio);boardRender();}
+        function boardRender(){if(!boardCanvas)return;const w=boardCanvas.width/devicePixelRatio,h=boardCanvas.height/devicePixelRatio;boardCtx.clearRect(0,0,w,h);boardCtx.lineWidth=2;boardCtx.strokeStyle='#17466a';boardCtx.fillStyle='#123d60';boardCtx.font='14px Inter, sans-serif';for(const sh of boardShapes){const p=sh.points||[];if(sh.type==='line'||sh.type==='ray'||sh.type==='ruler'){if(p.length>=2){boardCtx.beginPath();boardCtx.moveTo(p[0].x,p[0].y);boardCtx.lineTo(sh.type==='ray'?p[0].x+(p[1].x-p[0].x)*20:p[1].x,sh.type==='ray'?p[0].y+(p[1].y-p[0].y)*20:p[1].y);boardCtx.stroke();if(sh.type==='ruler'){const len=Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y);boardCtx.fillText((len/24).toFixed(1)+' ô',p[1].x+8,p[1].y-8);}}}else if(sh.type==='angle'||sh.type==='right'){if(p.length===3){const [a,v,b]=p;boardCtx.beginPath();boardCtx.moveTo(a.x,a.y);boardCtx.lineTo(v.x,v.y);boardCtx.lineTo(b.x,b.y);boardCtx.stroke();const ang1=Math.atan2(a.y-v.y,a.x-v.x),ang2=Math.atan2(b.y-v.y,b.x-v.x);let d=(ang2-ang1+Math.PI*2)%(Math.PI*2);if(d>Math.PI)d=2*Math.PI-d;const deg=d*180/Math.PI;boardCtx.beginPath();if(sh.type==='right'){const u={x:(a.x-v.x)/Math.hypot(a.x-v.x,a.y-v.y),y:(a.y-v.y)/Math.hypot(a.x-v.x,a.y-v.y)},z={x:(b.x-v.x)/Math.hypot(b.x-v.x,b.y-v.y),y:(b.y-v.y)/Math.hypot(b.x-v.x,b.y-v.y)};const k=22;boardCtx.moveTo(v.x+u.x*k,v.y+u.y*k);boardCtx.lineTo(v.x+(u.x+z.x)*k,v.y+(u.y+z.y)*k);boardCtx.lineTo(v.x+z.x*k,v.y+z.y*k);}else{boardCtx.arc(v.x,v.y,28,ang1,ang2,false);}boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();boardCtx.fillStyle='#a12c6d';boardCtx.fillText(sh.type==='right'?'90°':deg.toFixed(1)+'°',v.x+30,v.y-12);boardCtx.strokeStyle='#17466a';}}else if(sh.type==='protractor'){const p=sh.points[0];boardCtx.beginPath();boardCtx.arc(p.x,p.y,90,Math.PI,0);boardCtx.strokeStyle='#e05d9d';boardCtx.stroke();for(let i=0;i<=180;i+=10){const a=Math.PI-i*Math.PI/180;boardCtx.beginPath();boardCtx.moveTo(p.x+Math.cos(a)*80,p.y-Math.sin(a)*80);boardCtx.lineTo(p.x+Math.cos(a)*(i%30===0?100:90),p.y-Math.sin(a)*(i%30===0?100:90));boardCtx.stroke();if(i%30===0)boardCtx.fillText(String(i),p.x+Math.cos(a)*112-7,p.y-Math.sin(a)*112);}}}
+          boardCtx.fillStyle='#0b7aa0';for(const sh of boardShapes)for(const p of sh.points||[]){boardCtx.beginPath();boardCtx.arc(p.x,p.y,3.5,0,Math.PI*2);boardCtx.fill();}}
+        window.setBoardTool=function(t,btn){boardTool=t;document.querySelectorAll('.board-tool[data-tool]').forEach(x=>x.classList.toggle('active',x===btn));boardPoints=[];};
+        function canvasPoint(e){const r=boardCanvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+        function angleDeg(a,v,b){const x1=a.x-v.x,y1=a.y-v.y,x2=b.x-v.x,y2=b.y-v.y;const dot=x1*x2+y1*y2;return Math.acos(Math.max(-1,Math.min(1,dot/(Math.hypot(x1,y1)*Math.hypot(x2,y2)))))*180/Math.PI;}
+        function initBoard(){boardCanvas=document.getElementById('geometryCanvas');if(!boardCanvas||boardCanvas.dataset.ready)return;boardCanvas.dataset.ready='1';boardCtx=boardCanvas.getContext('2d');boardCanvas.addEventListener('pointerdown',e=>{const p=canvasPoint(e);if(boardTool==='select')return;if(boardTool==='protractor'){boardSave();boardShapes.push({type:'protractor',points:[p]});boardRender();return;}boardPoints.push(p);if((boardTool==='angle'||boardTool==='right')&&boardPoints.length===3){boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});if(boardTool==='angle'){const deg=angleDeg(...boardPoints);document.getElementById('angleReadout').textContent='Số đo góc ≈ '+deg.toFixed(1)+'°';}else document.getElementById('angleReadout').textContent='Đã tạo ký hiệu góc vuông 90°.';boardPoints=[];boardRender();}else if((boardTool==='line'||boardTool==='ray'||boardTool==='ruler')&&boardPoints.length===2){boardSave();boardShapes.push({type:boardTool,points:[...boardPoints]});if(boardTool==='ruler')document.getElementById('angleReadout').textContent='Độ dài theo lưới ≈ '+(Math.hypot(boardPoints[1].x-boardPoints[0].x,boardPoints[1].y-boardPoints[0].y)/24).toFixed(2)+' ô lưới.';boardPoints=[];boardRender();}});}
+        window.undoBoard=function(){if(boardUndo.length){boardShapes=JSON.parse(boardUndo.pop());boardRender();}};
+        window.clearBoard=function(){boardSave();boardShapes=[];boardPoints=[];boardRender();document.getElementById('angleReadout').textContent='Đã xóa bảng vẽ.';};
+        window.askGeometryAI=function(){const prompt=document.getElementById('geometryPrompt').value.trim();if(!prompt){alert('Nhập yêu cầu hình học trước nhé.');return;}if(!boardCanvas)return;const image=boardCanvas.toDataURL('image/png');currentAttachedImage=image;document.getElementById('userInput').value='Hãy phân tích hình vẽ hình học đính kèm và giải yêu cầu sau từng bước: '+prompt+'\nHãy đọc các ký hiệu và số đo nhìn thấy được; nếu dữ kiện chưa đủ, hãy nói rõ.';closeMathStudio();window.sendMessage();};
+        document.addEventListener('DOMContentLoaded',()=>{initBoard();});
+        window.addEventListener('resize',()=>{if(document.getElementById('mathStudio')?.classList.contains('open'))resizeGeometryCanvas();});
+
     </script>
 </body>
 </html>

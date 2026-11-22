@@ -10,7 +10,6 @@
     
     <!-- Thư viện Marked.js để dịch Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async></script>
 
     <!-- Thư viện KaTeX để render công thức toán học -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -194,7 +193,7 @@
         .switch-text span { color: var(--accent); cursor: pointer; font-weight: 500; }
 
         /* --- GIAO DIỆN CHÍNH --- */
-        .app-container { display: flex; width: 100%; height: 100%; }
+        .app-container { display: flex; width: 100%; height: 100%; position:relative; }
 
         sidebar {
             width: 280px;
@@ -1042,6 +1041,73 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 .board-action{border:1px solid #147da0;border-radius:9px;padding:10px;background:linear-gradient(120deg,#075a7d,#37317b);color:#fff;font-weight:700;cursor:pointer}.board-note{font-size:11px;line-height:1.55;color:#83a4bc}.board-measure{font-size:13px;color:#63e7ff;background:#071321;border:1px solid #1c4960;padding:9px;border-radius:8px;min-height:38px}
 @media(max-width:760px){.math-window{height:96vh;min-height:0}.board-layout{grid-template-columns:1fr;grid-template-rows:minmax(270px,1fr) auto}.board-side{max-height:230px}.calc-grid{gap:5px}.calc-key{min-height:43px;font-size:15px}.math-pane{padding:9px}}
 
+
+/* Provider-only sign-in */
+.provider-login-list{display:grid;gap:11px;margin:22px 0 14px}
+.provider-login{height:48px;border-radius:12px;border:1px solid rgba(150,170,210,.22);background:#111a2b;color:#f5f7ff;font:650 13px Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:.2s}
+.provider-login:hover{transform:translateY(-2px);border-color:#56dfff;box-shadow:0 0 20px #20cfff20}
+.provider-login.google{background:#f7f8fc;color:#202637}.provider-login.apple{background:#050608;color:white}.provider-login.facebook{background:#1877f2;color:white}
+.provider-icon{width:23px;height:23px;border-radius:7px;background:#fff;color:#4285f4;display:grid;place-items:center;font-weight:900;font-size:16px}
+.apple .provider-icon{background:transparent;color:#fff;font-size:21px}.facebook .provider-icon{background:transparent;color:white;font-size:24px}
+.auth-provider-note{font-size:10px;color:#78849e;text-align:center;line-height:1.6}
+.mode-switch{display:flex;gap:3px;padding:3px;border:1px solid rgba(100,190,230,.18);background:rgba(5,16,31,.75);border-radius:11px}
+.mode-switch-btn{border:0;border-radius:8px;padding:8px 11px;background:transparent;color:#8292aa;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.mode-switch-btn.active{color:#eafaff;background:linear-gradient(120deg,#075a7d,#4940a2);box-shadow:0 0 14px #00cfff25}
+#socialModePanel{display:none;position:absolute;inset:56px 0 0;z-index:5;background:radial-gradient(ellipse at 70% 10%,rgba(0,174,220,.12),transparent 55%),#07101d}
+#app-main.social-mode .main-chat>.chat-body{display:none}
+#app-main.social-mode #socialModePanel{display:block}
+#app-main.social-mode .chat-topbar{position:relative;z-index:6}
+.social-layout{height:100%;display:grid;grid-template-columns:minmax(245px,310px) minmax(0,1fr);border-top:1px solid rgba(70,180,220,.13)}
+.social-rail{min-width:0;display:flex;flex-direction:column;background:rgba(5,13,25,.92);border-right:1px solid rgba(80,190,230,.18);padding:15px;overflow:hidden}
+.social-heading{display:flex;align-items:center;justify-content:space-between;padding:3px 3px 15px}
+.social-heading strong{display:block;color:#e8f8ff;font-size:14px}.social-heading small{display:block;color:#70839c;font-size:10px;margin-top:4px}
+.social-online-dot{width:8px;height:8px;background:#38e5a3;border-radius:50%;box-shadow:0 0 12px #38e5a3}
+.social-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;background:#0c1a2b;border:1px solid #1d3850;border-radius:10px}
+.social-tab{border:0;border-radius:7px;padding:9px 3px;background:transparent;color:#8296ac;font-size:10px;cursor:pointer}
+.social-tab.active{background:#123b56;color:#dff9ff;box-shadow:inset 0 0 0 1px #1b7390}
+.social-tab b{display:inline-grid;place-items:center;min-width:16px;height:16px;margin-left:2px;border-radius:8px;background:#e05e86;color:white;font-size:9px}
+.social-list-view{min-height:0;flex:1;overflow:auto;padding-top:13px}.social-list-view[hidden],.social-chat-view[hidden]{display:none}
+.social-section-label{font-size:9px;letter-spacing:1.5px;color:#65768e;font-weight:800;margin:3px 5px 9px}
+.social-list{display:grid;gap:6px}
+.social-user-row{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.025);color:#dbe8f4;min-width:0}
+.social-user-row:hover{border-color:#17617b;background:#0e2638}
+.social-avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#6259e8,#00b8d5);color:white;font-weight:800;font-size:13px}
+.social-avatar img{width:100%;height:100%;object-fit:cover}
+.social-avatar.large{width:38px;height:38px;flex-basis:38px}
+.social-user-meta{min-width:0;flex:1}.social-user-meta strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.social-user-meta small{display:block;color:#74869e;font-size:9px;margin-top:3px}
+.social-action{border:1px solid #17617b;background:#0b2d42;color:#7deaff;border-radius:8px;padding:6px 8px;font-size:10px;cursor:pointer;white-space:nowrap}
+.social-action.accept{color:#75f0bb;border-color:#1c765b;background:#0d302b}.social-action.reject{color:#ff9aa9;border-color:#70404c;background:#2b1722}
+.social-account-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #1b2c40;padding-top:11px;color:#65768e;font-size:9px}
+.social-account-foot button{border:1px solid #24465c;background:#0d2234;color:#80cde5;border-radius:7px;padding:6px 8px;cursor:pointer}
+.social-conversation{min-width:0;min-height:0;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,rgba(12,100,150,.12),transparent 60%)}
+.social-empty{margin:auto;max-width:330px;padding:25px;text-align:center;display:flex;align-items:center;flex-direction:column;gap:10px}
+.social-empty-icon{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,#6259e8,#00b8d5);color:white;font-size:28px;box-shadow:0 0 35px #00bce533}
+.social-empty strong{color:#e8f8ff;font-size:16px}.social-empty span{color:#8293aa;font-size:11px;line-height:1.7}
+.social-chat-view{height:100%;min-height:0;display:flex;flex-direction:column}
+.social-chat-head{height:65px;flex:0 0 65px;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid #1c3449;background:rgba(7,19,33,.7)}
+.social-back{width:30px;height:30px;border:1px solid #28465d;border-radius:9px;background:#10283b;color:#a8eaff;font-size:25px;line-height:20px;cursor:pointer}
+.social-chat-person strong{display:block;color:#e8f8ff;font-size:12px}.social-chat-person small{display:block;color:#748ba2;font-size:9px;margin-top:3px}
+.social-messages{flex:1;min-height:0;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:9px}
+.social-msg{max-width:min(72%,520px);padding:10px 13px;border-radius:13px;background:#11283b;border:1px solid #1c4058;color:#e4f4ff;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.social-msg.mine{align-self:flex-end;background:linear-gradient(135deg,#164c70,#37356f);border-color:#326e91}
+.social-msg time{display:block;color:#86a3b8;font-size:8px;margin-top:5px;text-align:right}
+.social-send-form{display:flex;gap:8px;padding:13px 16px;border-top:1px solid #1c3449}
+.social-send-form input{flex:1;min-width:0;border:1px solid #29475f;border-radius:11px;background:#071625;color:#e9f8ff;padding:12px;outline:none;font:12px Inter,sans-serif}
+.social-send-form input:focus{border-color:#00cfff;box-shadow:0 0 14px #00cfff20}
+.social-send-form button{border:0;border-radius:10px;padding:0 17px;background:linear-gradient(120deg,#087aa6,#5143a7);color:white;font-weight:750;cursor:pointer}
+.social-empty-list{color:#73869d;text-align:center;padding:20px 8px;font-size:10px;line-height:1.6}
+@media(max-width:760px){
+ .mode-switch-btn{padding:8px 7px;font-size:9px}
+ #socialModePanel{inset:54px 0 0}
+ .social-layout{grid-template-columns:1fr}
+ .social-rail{border-right:0}
+ .social-conversation{display:none}
+ #socialModePanel.chat-open .social-rail{display:none}
+ #socialModePanel.chat-open .social-conversation{display:flex}
+ .social-list-view{max-height:calc(100vh - 210px)}
+}
+
+
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
 </head>
@@ -1066,76 +1132,16 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             </div>
             <div class="auth-divider"><span>WELCOME BACK</span></div>
             <div id="login-form">
-                <h2>Đăng nhập</h2>
-                <p>Đăng nhập để đồng bộ lịch sử trên mọi thiết bị</p>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="login-username" placeholder="Nhập email...">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" id="login-password" placeholder="Nhập mật khẩu...">
-                </div>
-                <button class="auth-btn" onclick="handleLogin()">Đăng nhập</button>
-                <div class="google-login-wrapper" style="margin-top:12px; text-align:center;">
-                    <div id="google-login-button"></div>
-                </div>
-                <div class="switch-text">Chưa có tài khoản? <span onclick="switchTab('register')">Đăng ký ngay</span></div>
-            </div>
-
-            <div id="register-form" style="display: none;">
-                <div class="auth-form-kicker">CREATE YOUR ACCOUNT</div>
-                <h2>Đăng ký</h2>
-                <p>Tạo tài khoản Vanh AI để đồng bộ lịch sử</p>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="reg-name" placeholder="Nhập email...">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" id="reg-password" placeholder="Nhập mật khẩu...">
-                </div>
-                <button class="auth-btn" onclick="handleRegister()">Đăng ký</button>
-                <div class="switch-text">Đã có tài khoản? <span onclick="switchTab('login')">Đăng nhập</span></div>
+                <h2>Đăng nhập Vanh AI</h2>
+                <p>Đăng nhập bằng Google để đồng bộ trên mọi thiết bị</p>
+                <button class="provider-login google" onclick="signInProvider('google')">
+                    <span class="provider-icon">G</span> Tiếp tục với Google
+                </button>
+                <div class="auth-provider-note">Vanh AI chỉ hỗ trợ đăng nhập bằng Google.</div>
             </div>
         </div>
     </div>
 
-
-    <!-- Vanh AI Plus modal: payment activation is handled only by trusted backend/webhook -->
-    <div id="plus-modal" role="dialog" aria-modal="true" aria-labelledby="plus-modal-title" onclick="if(event.target===this)closePlusModal()">
-      <section class="plus-dialog">
-        <button class="plus-close" onclick="closePlusModal()" aria-label="Đóng">✕</button>
-        <div class="plus-hero"><div class="plus-crown">♛</div><div><div class="plus-kicker">VANH AI MEMBERSHIP</div><div class="plus-title" id="plus-modal-title">Vanh AI Plus</div><div class="plus-subtitle">Một tài khoản · mọi thiết bị · đồng bộ qua Supabase</div></div></div>
-        <div class="plus-price-row"><div class="plus-price">49.000đ</div><div class="plus-period">/ năm</div></div>
-        <div class="plus-features">
-          <div><b>✓</b><span>Thành viên Plus gắn với tài khoản, không gắn riêng thiết bị</span></div>
-          <div><b>✓</b><span>Trạng thái thành viên được kiểm tra từ Supabase khi đăng nhập</span></div>
-          <div><b>✓</b><span>Thanh toán chuyển khoản ngân hàng bằng nội dung đơn riêng</span></div>
-          <div><b>✓</b><span>Gói Plus có thời hạn 1 năm và chỉ kích hoạt sau khi backend xác minh khoản tiền đã nhận</span></div>
-        </div>
-        <div id="plus-current-status" class="plus-status">Đang kiểm tra trạng thái thành viên…</div>
-        <button id="plus-buy-btn" class="plus-primary" onclick="createPlusOrder()">Tạo đơn thanh toán · 49.000đ/năm</button>
-        <button class="plus-secondary" onclick="refreshPlusStatus()">Làm mới trạng thái Plus</button>
-        <div id="plus-payment-box" class="plus-payment-box">
-          <div style="font-weight:750;font-size:13px">Quét QR hoặc chuyển khoản</div>
-          <div id="plus-qr-placeholder" class="plus-status">QR sẽ hiện tại đây khi backend trả về thông tin thanh toán đã cấu hình.</div>
-          <img id="plus-qr-image" class="plus-qr" alt="QR thanh toán Vanh AI Plus" style="display:none">
-          <div class="plus-bank-row"><span>Ví / đơn vị</span><strong id="plus-bank-name">MoMo</strong></div>
-          <div class="plus-bank-row"><span>Chủ tài khoản</span><strong id="plus-account-name">DOAN PHUONG HONG HANH</strong></div>
-          <div class="plus-bank-row"><span>Số điện thoại / tài khoản MoMo</span><strong id="plus-account-number">0941009129</strong></div>
-          <div class="plus-bank-row"><span>Số tiền / gói</span><strong>49.000đ / 1 năm</strong></div>
-          <div class="plus-bank-row"><span>Nội dung CK riêng của đơn</span><strong id="plus-transfer-content">Chờ tạo đơn…</strong></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-            <button class="plus-secondary" type="button" onclick="copyPlusPaymentField('plus-account-number')">Sao chép số tài khoản</button>
-            <button class="plus-secondary" type="button" onclick="copyPlusPaymentField('plus-transfer-content')">Sao chép nội dung</button>
-          </div>
-          <div id="plus-order-id" class="plus-note"></div>
-          <button class="plus-secondary" onclick="refreshPlusStatus()">Tôi đã chuyển khoản · Kiểm tra trạng thái</button>
-        </div>
-        <div class="plus-note">Thanh toán MoMo cần được đối soát bằng API/webhook phía máy chủ. Giao diện này không tự xác nhận đã nhận tiền và không tự bật Plus. Chỉ chuyển tiền khi đơn hàng được tạo thành công và có nội dung chuyển khoản riêng.</div>
-      </section>
-    </div>
 
     <!-- Giao diện chính -->
     <div class="app-container" id="app-main" style="display: none;">
@@ -1153,11 +1159,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 <span class="new-chat-icon">＋</span>
                 <span>Cuộc trò chuyện mới</span>
                 <kbd>Ctrl K</kbd>
-            </button>
-            <button class="plus-entry-btn" onclick="openPlusModal()" aria-label="Mua Vanh AI Plus">
-                <span class="plus-entry-icon">♛</span>
-                <span class="plus-entry-copy"><strong>Vanh AI Plus</strong><small>Mở khóa trải nghiệm cao cấp</small></span>
-                <span class="plus-entry-arrow">↗</span>
             </button>
             <div class="history-tools">
                 <div class="history-search-wrap">
@@ -1189,6 +1190,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     </div>
                 </div>
                 <div class="topbar-actions">
+                    <div class="mode-switch" role="group" aria-label="Chế độ Vanh AI">
+                        <button id="modeChatBtn" class="mode-switch-btn active" onclick="switchMainMode('ai')">✦ Chat AI</button>
+                        <button id="modeSocialBtn" class="mode-switch-btn" onclick="switchMainMode('social')">☏ Tin nhắn</button>
+                    </div>
                     <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
                     <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
                     <button class="topbar-icon" title="Giao diện">◐</button>
@@ -1235,8 +1240,49 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 </div>
             </div>
         </div>
-    </div>
+    <!-- Vanh AI Social: danh bạ, lời mời và trò chuyện riêng -->
+    <section id="socialModePanel" aria-label="Tin nhắn Vanh AI">
+      <div class="social-layout">
+        <aside class="social-rail">
+          <div class="social-heading"><div><strong>Vanh AI Connect</strong><small>Kết nối với người dùng Vanh AI</small></div><span class="social-online-dot"></span></div>
+          <div class="social-tabs">
+            <button id="socialTabContacts" class="social-tab active" onclick="showSocialTab('contacts')">Danh bạ</button>
+            <button id="socialTabRequests" class="social-tab" onclick="showSocialTab('requests')">Lời mời <b id="requestCount">0</b></button>
+            <button id="socialTabDiscover" class="social-tab" onclick="showSocialTab('discover')">Khám phá</button>
+          </div>
+          <div id="socialContactsView" class="social-list-view">
+            <div class="social-section-label">BẠN BÈ</div><div id="socialContactsList" class="social-list"></div>
+          </div>
+          <div id="socialRequestsView" class="social-list-view" hidden>
+            <div class="social-section-label">LỜI MỜI KẾT BẠN</div><div id="socialRequestsList" class="social-list"></div>
+          </div>
+          <div id="socialDiscoverView" class="social-list-view" hidden>
+            <div class="social-section-label">NGƯỜI DÙNG VANH AI</div><div id="socialDiscoverList" class="social-list"></div>
+          </div>
+          <div class="social-account-foot"><span id="socialAccountLabel">Đang đăng nhập</span><button onclick="refreshSocialData()">↻ Làm mới</button></div>
+        </aside>
+        <section class="social-conversation">
+          <div id="socialEmptyState" class="social-empty">
+            <div class="social-empty-icon">☏</div><strong>Trò chuyện cùng bạn bè</strong>
+            <span>Chọn một người trong danh bạ hoặc tìm người dùng Vanh AI để kết bạn.</span>
+          </div>
+          <div id="socialChatView" class="social-chat-view" hidden>
+            <header class="social-chat-head">
+              <button class="social-back" onclick="backToContacts()" aria-label="Quay lại danh bạ">‹</button>
+              <div id="socialChatAvatar" class="social-avatar large">V</div>
+              <div class="social-chat-person"><strong id="socialChatName">Người dùng</strong><small>Vanh AI Connect</small></div>
+            </header>
+            <div id="socialMessages" class="social-messages"></div>
+            <form id="socialSendForm" class="social-send-form">
+              <input id="socialMessageInput" maxlength="4000" autocomplete="off" placeholder="Nhập tin nhắn..." aria-label="Tin nhắn">
+              <button type="submit">Gửi ➤</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </section>
 
+    </div>
 
     <!-- Math Studio: calculator + geometry writeboard -->
     <section id="mathStudio" aria-hidden="true">
@@ -1295,118 +1341,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_P6upIRZoUWTWnwU12KPv6Q_B8OSH2Yp";
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
         let cloudSyncReady = false;
-
-        // VANH AI PLUS: paid status must come from Supabase, never localStorage/client-side toggles.
-        window.openPlusModal = async function() {
-            document.getElementById('plus-modal').classList.add('open');
-            document.body.style.overflow = 'hidden';
-            await refreshPlusStatus();
-        };
-        window.closePlusModal = function() {
-            document.getElementById('plus-modal').classList.remove('open');
-            document.body.style.overflow = '';
-        };
-        window.refreshPlusStatus = async function() {
-            const statusEl = document.getElementById('plus-current-status');
-            const buyBtn = document.getElementById('plus-buy-btn');
-            statusEl.className = 'plus-status';
-            statusEl.textContent = 'Đang kiểm tra trạng thái thành viên…';
-            try {
-                const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-                if (userError) throw userError;
-                const user = userData && userData.user;
-                if (!user) {
-                    statusEl.className = 'plus-status error';
-                    statusEl.textContent = 'Bạn cần đăng nhập để mua và đồng bộ Plus trên các thiết bị.';
-                    buyBtn.disabled = true;
-                    return;
-                }
-                buyBtn.disabled = false;
-                const { data, error } = await supabaseClient.from('user_entitlements')
-                    .select('plan,expires_at,status').eq('user_id', user.id).maybeSingle();
-                if (error) {
-                    if (error.code === 'PGRST116' || /relation .*user_entitlements.* does not exist/i.test(error.message || '')) throw new Error('Chưa cấu hình bảng user_entitlements trong Supabase. Xem hướng dẫn backend đi kèm file.');
-                    throw error;
-                }
-                const valid = data && data.plan === 'plus' && data.status === 'active' && (!data.expires_at || new Date(data.expires_at).getTime() > Date.now());
-                if (valid) {
-                    statusEl.className = 'plus-status success';
-                    statusEl.textContent = '✦ Bạn đang dùng Vanh AI Plus' + (data.expires_at ? ' đến ' + new Date(data.expires_at).toLocaleDateString('vi-VN') : '') + '. Quyền lợi được gắn với tài khoản này trên mọi thiết bị.';
-                    buyBtn.textContent = 'Bạn đã có Plus';
-                    buyBtn.disabled = true;
-                } else {
-                    statusEl.textContent = 'Tài khoản hiện chưa có Plus đang hoạt động. Gói năm: 49.000đ/năm.';
-                    buyBtn.textContent = 'Tạo đơn thanh toán · 49.000đ/năm';
-                    buyBtn.disabled = false;
-                }
-            } catch (err) {
-                statusEl.className = 'plus-status error';
-                statusEl.textContent = 'Chưa kiểm tra được trạng thái Plus: ' + (err.message || 'Lỗi kết nối Supabase.');
-                buyBtn.disabled = false;
-            }
-        };
-        window.createPlusOrder = async function() {
-            const btn = document.getElementById('plus-buy-btn');
-            const statusEl = document.getElementById('plus-current-status');
-            const paymentBox = document.getElementById('plus-payment-box');
-            btn.disabled = true;
-            btn.textContent = 'Đang tạo đơn…';
-            statusEl.className = 'plus-status';
-            statusEl.textContent = 'Đang yêu cầu backend tạo đơn thanh toán an toàn…';
-            try {
-                const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-                if (userError) throw userError;
-                if (!userData.user) throw new Error('Bạn cần đăng nhập trước khi mua Plus.');
-                const { data: responseData, error } = await supabaseClient.functions.invoke('create-plus-order', { body: { plan: 'plus_yearly', amount_vnd: 49000 } });
-                if (error) { let detail = error.message || 'Không gọi được Edge Function create-plus-order.'; try { if (error.context && typeof error.context.json === 'function') { const body = await error.context.json(); if (body && (body.error || body.message)) detail += ' — ' + (body.error || body.message); } } catch (_) {} throw new Error(detail); }
-                // Accept both backend formats: {order:{id, transfer_content}} and flat {order_id, transfer_content}.
-                const payload = responseData || {};
-                const order = payload.order || payload.data?.order || payload.data || payload;
-                const orderId = order.order_id || order.id || payload.order_id || payload.id;
-                const transferContent = order.transfer_content || order.transferContent || payload.transfer_content || payload.transferContent;
-                if (!orderId || !transferContent) {
-                    const backendMessage = payload.error || payload.message || payload.details;
-                    throw new Error(backendMessage ? String(backendMessage) : 'Backend đã phản hồi nhưng thiếu mã đơn hoặc nội dung chuyển khoản. Kiểm tra JSON trả về của Edge Function create-plus-order.');
-                }
-                document.getElementById('plus-payment-box').classList.add('show');
-                document.getElementById('plus-bank-name').textContent = order.bank_name || payload.bank_name || 'MoMo';
-                document.getElementById('plus-account-name').textContent = order.account_name || payload.account_name || 'DOAN PHUONG HONG HANH';
-                document.getElementById('plus-account-number').textContent = order.account_number || payload.account_number || '0941009129';
-                document.getElementById('plus-transfer-content').textContent = transferContent;
-                document.getElementById('plus-order-id').textContent = 'Mã đơn: ' + orderId;
-                const qr = document.getElementById('plus-qr-image');
-                const qrUrl = order.qr_url || payload.qr_url;
-                if (qrUrl && /^https:\/\//i.test(qrUrl)) { qr.src = qrUrl; qr.style.display = 'block'; document.getElementById('plus-qr-placeholder').style.display = 'none'; }
-                else { qr.style.display = 'none'; document.getElementById('plus-qr-placeholder').style.display = 'block'; document.getElementById('plus-qr-placeholder').textContent = 'Backend chưa trả QR HTTPS. Hãy cấu hình mã QR ở Edge Function trước khi chuyển khoản.'; }
-                statusEl.className = 'plus-status success';
-                statusEl.textContent = 'Đã tạo đơn. Chuyển đúng 49.000đ và ghi chính xác nội dung chuyển khoản. Gói năm chỉ được kích hoạt sau khi webhook xác minh giao dịch.';
-                btn.textContent = 'Đơn đã tạo';
-                btn.disabled = true;
-            } catch (err) {
-                statusEl.className = 'plus-status error';
-                statusEl.textContent = 'Chưa tạo được đơn: ' + (err.message || 'Backend chưa cấu hình.');
-                btn.textContent = 'Thử tạo lại đơn';
-                btn.disabled = false;
-            }
-        };
-        window.copyPlusPaymentField = async function(id) {
-            const el = document.getElementById(id);
-            const value = (el?.textContent || '').trim();
-            if (!value || value === '—' || value.includes('Chờ tạo đơn')) {
-                alert('Hãy tạo đơn thanh toán thành công trước.');
-                return;
-            }
-            try {
-                await navigator.clipboard.writeText(value);
-                alert('Đã sao chép: ' + value);
-            } catch (_) {
-                const ta = document.createElement('textarea');
-                ta.value = value; document.body.appendChild(ta); ta.select();
-                const ok = document.execCommand('copy'); ta.remove();
-                alert(ok ? 'Đã sao chép: ' + value : 'Không thể sao chép tự động.');
-            }
-        };
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.closePlusModal(); });
 
         // ================= PRIVATE CONVERSATION URLS =================
         // Each conversation gets a non-sequential, unguessable URL slug.
@@ -1600,6 +1534,149 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         let currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
         let activeSessionId = null;
 
+
+        // ================= VANH AI CONNECT =================
+        let socialUser = null, socialActiveFriend = null, socialRealtime = null, socialRefreshBusy = false;
+        let socialCurrentTab = 'contacts';
+        const socialEsc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const socialName = profile => profile?.display_name || profile?.username || 'Người dùng Vanh AI';
+        const socialAvatar = profile => profile?.avatar_url ? `<img src="${socialEsc(profile.avatar_url)}" alt="">` : socialEsc(socialName(profile).slice(0,1).toUpperCase());
+
+        window.switchMainMode = function(mode) {
+            const app = document.getElementById('app-main');
+            const social = mode === 'social';
+            app.classList.toggle('social-mode', social);
+            document.getElementById('modeChatBtn')?.classList.toggle('active', !social);
+            document.getElementById('modeSocialBtn')?.classList.toggle('active', social);
+            if (social && socialUser) refreshSocialData();
+        };
+        window.showSocialTab = function(tab) {
+            socialCurrentTab = tab;
+            ['contacts','requests','discover'].forEach(name => {
+                document.getElementById('socialTab'+name[0].toUpperCase()+name.slice(1))?.classList.toggle('active', name===tab);
+                document.getElementById('social'+name[0].toUpperCase()+name.slice(1)+'View').hidden = name!==tab;
+            });
+        };
+        window.backToContacts = function() {
+            socialActiveFriend = null;
+            document.getElementById('socialModePanel').classList.remove('chat-open');
+            document.getElementById('socialChatView').hidden = true;
+            document.getElementById('socialEmptyState').hidden = false;
+        };
+        window.refreshSocialData = async function() {
+            if (!socialUser || socialRefreshBusy) return;
+            socialRefreshBusy = true;
+            try {
+                const [profilesRes, friendsRes, requestsRes] = await Promise.all([
+                    supabaseClient.from('vanh_profiles').select('id,display_name,avatar_url').neq('id',socialUser.id).order('display_name').limit(30),
+                    supabaseClient.from('vanh_friendships').select('user_low,user_high').or(`user_low.eq.${socialUser.id},user_high.eq.${socialUser.id}`),
+                    supabaseClient.from('vanh_friend_requests').select('id,requester_id,addressee_id,status,created_at').eq('addressee_id',socialUser.id).eq('status','pending').order('created_at',{ascending:false})
+                ]);
+                for (const r of [profilesRes,friendsRes,requestsRes]) if (r.error) throw r.error;
+                const profiles = profilesRes.data || [], friendRows = friendsRes.data || [], requests = requestsRes.data || [];
+                const friendIds = friendRows.map(f => f.user_low===socialUser.id ? f.user_high : f.user_low);
+                // Load friend and incoming-request profiles even when outside discovery's first page.
+                const neededIds = [...new Set([...friendIds,...requests.map(r=>r.requester_id)])];
+                const missingIds = neededIds.filter(id=>!profiles.some(p=>p.id===id));
+                let missingProfiles = [];
+                if (missingIds.length) {
+                    const res = await supabaseClient.from('vanh_profiles').select('id,display_name,avatar_url').in('id',missingIds);
+                    if (!res.error) missingProfiles = res.data || [];
+                }
+                const byId = new Map([...profiles,...missingProfiles].map(p=>[p.id,p]));
+                const contacts = friendIds.map(id=>byId.get(id)).filter(Boolean);
+                document.getElementById('socialContactsList').innerHTML = contacts.length ? contacts.map(p=>`
+                  <button class="social-user-row" onclick="openSocialChat('${p.id}')"><span class="social-avatar">${socialAvatar(p)}</span><span class="social-user-meta"><strong>${socialEsc(socialName(p))}</strong><small>Bạn bè · Nhắn tin</small></span><span>›</span></button>`).join('') : '<div class="social-empty-list">Danh bạ đang trống.<br>Khám phá người dùng để gửi lời mời kết bạn.</div>';
+                document.getElementById('socialRequestsList').innerHTML = requests.length ? requests.map(r=>{
+                    const p=byId.get(r.requester_id)||profiles.find(x=>x.id===r.requester_id);
+                    return `<div class="social-user-row"><span class="social-avatar">${p?socialAvatar(p):'V'}</span><span class="social-user-meta"><strong>${socialEsc(p?socialName(p):'Người dùng Vanh AI')}</strong><small>Muốn kết bạn với bạn</small></span><button class="social-action accept" onclick="answerFriendRequest('${r.id}',true)">✓</button><button class="social-action reject" onclick="answerFriendRequest('${r.id}',false)">✕</button></div>`;
+                }).join('') : '<div class="social-empty-list">Bạn chưa có lời mời kết bạn nào.</div>';
+                const incomingCount = requests.length;
+                document.getElementById('requestCount').textContent = incomingCount;
+                document.getElementById('socialDiscoverList').innerHTML = profiles.length ? profiles.map(p=>{
+                    const isFriend=friendIds.includes(p.id);
+                    return `<div class="social-user-row"><span class="social-avatar">${socialAvatar(p)}</span><span class="social-user-meta"><strong>${socialEsc(socialName(p))}</strong><small>${isFriend?'Đã có trong danh bạ':'Người dùng Vanh AI'}</small></span>${isFriend?'<span class="social-action">Bạn bè</span>':`<button class="social-action" onclick="sendFriendRequest('${p.id}',this)">＋ Kết bạn</button>`}</div>`;
+                }).join('') : '<div class="social-empty-list">Chưa tìm thấy người dùng khác.</div>';
+            } catch (err) {
+                console.error('Vanh AI Connect load error:',err);
+                ['socialContactsList','socialRequestsList','socialDiscoverList'].forEach(id=>document.getElementById(id).innerHTML='<div class="social-empty-list">Chưa tải được dữ liệu. Hãy kiểm tra SQL và quyền truy cập Supabase.</div>');
+            } finally { socialRefreshBusy = false; }
+        };
+        window.sendFriendRequest = async function(targetId, btn) {
+            if (!socialUser || targetId===socialUser.id) return;
+            btn.disabled=true;
+            try {
+                const {data:existing,error:checkError}=await supabaseClient.from('vanh_friend_requests').select('id,status,requester_id,addressee_id').or(`and(requester_id.eq.${socialUser.id},addressee_id.eq.${targetId}),and(requester_id.eq.${targetId},addressee_id.eq.${socialUser.id})`).limit(1);
+                if(checkError) throw checkError;
+                if((existing||[]).some(x=>x.status==='pending'||x.status==='accepted')) throw new Error('Đã có lời mời hoặc hai người đã là bạn.');
+                const {error}=await supabaseClient.from('vanh_friend_requests').insert({requester_id:socialUser.id,addressee_id:targetId,status:'pending'});
+                if(error) throw error;
+                btn.textContent='Đã gửi'; btn.disabled=true;
+            } catch(err){alert(err.message||'Không gửi được lời mời.');btn.disabled=false;}
+        };
+        window.answerFriendRequest = async function(requestId, accepted) {
+            try {
+                const {error}=await supabaseClient.from('vanh_friend_requests').update({status:accepted?'accepted':'rejected'}).eq('id',requestId).eq('addressee_id',socialUser.id).eq('status','pending');
+                if(error) throw error;
+                await refreshSocialData();
+                if(accepted) showSocialTab('contacts');
+            } catch(err){alert('Không cập nhật được lời mời: '+err.message);}
+        };
+        window.openSocialChat = async function(friendId) {
+            try {
+                const {data:friend,error}=await supabaseClient.from('vanh_profiles').select('id,display_name,avatar_url').eq('id',friendId).single();
+                if(error) throw error;
+                socialActiveFriend=friend;
+                document.getElementById('socialChatName').textContent=socialName(friend);
+                document.getElementById('socialChatAvatar').innerHTML=socialAvatar(friend);
+                document.getElementById('socialEmptyState').hidden=true;
+                document.getElementById('socialChatView').hidden=false;
+                document.getElementById('socialModePanel').classList.add('chat-open');
+                await loadSocialMessages();
+                document.getElementById('socialMessageInput').focus();
+            } catch(err){alert('Không mở được cuộc trò chuyện: '+err.message);}
+        };
+        async function loadSocialMessages() {
+            if(!socialUser||!socialActiveFriend)return;
+            const other=socialActiveFriend.id;
+            const {data,error}=await supabaseClient.from('vanh_direct_messages').select('id,sender_id,receiver_id,body,created_at').or(`and(sender_id.eq.${socialUser.id},receiver_id.eq.${other}),and(sender_id.eq.${other},receiver_id.eq.${socialUser.id})`).order('created_at',{ascending:true}).limit(200);
+            if(error) throw error;
+            const box=document.getElementById('socialMessages');
+            box.innerHTML=(data||[]).map(m=>`<div class="social-msg ${m.sender_id===socialUser.id?'mine':''}">${socialEsc(m.body)}<time>${new Date(m.created_at).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</time></div>`).join('')||'<div class="social-empty-list">Hãy gửi lời chào đầu tiên!</div>';
+            box.scrollTop=box.scrollHeight;
+        }
+        document.getElementById('socialSendForm')?.addEventListener('submit',async e=>{
+            e.preventDefault();const input=document.getElementById('socialMessageInput'),body=input.value.trim();
+            if(!body||!socialActiveFriend)return;
+            input.value='';
+            try {
+                const {error}=await supabaseClient.from('vanh_direct_messages').insert({sender_id:socialUser.id,receiver_id:socialActiveFriend.id,body});
+                if(error) throw error;
+                await loadSocialMessages();
+            } catch(err){input.value=body;alert('Gửi tin nhắn thất bại: '+err.message);}
+        });
+        async function initSocialConnect() {
+            const {data:{user},error}=await supabaseClient.auth.getUser();
+            if(error||!user)return;
+            socialUser=user;
+            const meta=user.user_metadata||{};
+            const displayName=meta.full_name||meta.name||meta.user_name||user.email?.split('@')[0]||'Người dùng Vanh AI';
+            const avatarUrl=meta.avatar_url||meta.picture||meta.photo_url||null;
+            const {error:profileError}=await supabaseClient.from('vanh_profiles').upsert({id:user.id,display_name:displayName,avatar_url:avatarUrl,updated_at:new Date().toISOString()},{onConflict:'id'});
+            if(profileError) console.warn('Profile sync:',profileError.message);
+            document.getElementById('socialAccountLabel').textContent=displayName;
+            await refreshSocialData();
+            if(socialRealtime) await supabaseClient.removeChannel(socialRealtime);
+            socialRealtime=supabaseClient.channel('vanh-connect-'+user.id)
+              .on('postgres_changes',{event:'*',schema:'public',table:'vanh_friend_requests'},()=>refreshSocialData())
+              .on('postgres_changes',{event:'*',schema:'public',table:'vanh_friendships'},()=>refreshSocialData())
+              .on('postgres_changes',{event:'*',schema:'public',table:'vanh_direct_messages'},payload=>{
+                const m=payload.new||payload.old;
+                if(socialActiveFriend&&m&&(m.sender_id===socialActiveFriend.id||m.receiver_id===socialActiveFriend.id))loadSocialMessages();
+              }).subscribe();
+        }
+        // =======================================================
+
         window.onload = function() {
             setTimeout(async () => {
                 try {
@@ -1623,95 +1700,20 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             }, 500);
         };
 
-        window.switchTab = function(tab) {
-            if (tab === 'register') {
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('register-form').style.display = 'block';
-            } else {
-                document.getElementById('register-form').style.display = 'none';
-                document.getElementById('login-form').style.display = 'block';
-            }
-        };
-
-        // ================= GOOGLE SIGN-IN CONFIG =================
-        // 1. Tạo OAuth 2.0 Client ID loại Web application trong Google Cloud.
-        // 2. Thêm domain website vào Authorized JavaScript origins.
-        // 3. Dán Client ID vào biến bên dưới.
-        const GOOGLE_CLIENT_ID = "266226560778-8ghmsclflosn63jt232o2qv24gl3a4dn.apps.googleusercontent.com";
-
-        window.handleGoogleCredential = async function(response) {
+        // Provider-only authentication: Google, Apple and Facebook.
+        window.signInProvider = async function(provider = 'google') {
+            if (provider !== 'google') return;
             try {
-                if (!response || !response.credential) {
-                    throw new Error("Không nhận được thông tin đăng nhập Google.");
-                }
-
-                // Decode phần payload của JWT để lấy tên/email hiển thị.
-                // ID token vẫn cần được xác thực phía server nếu dùng cho hệ thống production.
-                const payload = JSON.parse(
-                    decodeURIComponent(
-                        atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
-                        .split('')
-                        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                        .join('')
-                    )
-                );
-
-                const email = payload.email || "";
-                const name = payload.name || email.split("@")[0] || "Google User";
-
-                if (!email) {
-                    throw new Error("Google không trả về email.");
-                }
-
-                // Xác thực Google token bằng Supabase Auth để có user ID an toàn cho RLS.
-                const { data: authData, error: authError } = await supabaseClient.auth.signInWithIdToken({
-                    provider: 'google', token: response.credential
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin + window.location.pathname }
                 });
-                if (authError) throw authError;
-                localStorage.setItem('vanh_ai_current_user', authData.user.email || email);
-                localStorage.setItem('vanh_ai_google_name', name);
-                localStorage.setItem('vanh_ai_google_picture', payload.picture || '');
-                openApp(authData.user.email || email);
+                if (error) throw error;
             } catch (err) {
-                console.error("Google Sign-In error:", err);
-                alert("Đăng nhập Google thất bại. Vui lòng thử lại.");
+                console.error('Google OAuth error:', err);
+                alert('Không thể đăng nhập Google. Hãy kiểm tra Google Provider trong Supabase. ' + (err.message || ''));
             }
         };
-
-        function initGoogleSignIn() {
-            if (!window.google || !google.accounts || !google.accounts.id) {
-                setTimeout(initGoogleSignIn, 300);
-                return;
-            }
-
-            if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith("YOUR_")) {
-                console.warn("Chưa cấu hình GOOGLE_CLIENT_ID.");
-                return;
-            }
-
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: handleGoogleCredential,
-                auto_select: false,
-                color_scheme: "dark"
-            });
-
-            google.accounts.id.renderButton(
-                document.getElementById("google-login-button"),
-                {
-                    type: "standard",
-                    theme: "outline",
-                    size: "large",
-                    text: "signin_with",
-                    shape: "rectangular",
-                    width: 300,
-                    logo_alignment: "left"
-                }
-            );
-        }
-
-        window.addEventListener("load", initGoogleSignIn);
-        // ==========================================================
 
         document.addEventListener('keydown', function(event) {
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -1720,42 +1722,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 document.getElementById('userInput')?.focus();
             }
         });
-
-        window.handleRegister = async function() {
-            const email = document.getElementById('reg-name').value.trim();
-            const pass = document.getElementById('reg-password').value;
-            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
-            if (pass.length < 6) { alert('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
-                if (error) throw error;
-                if (data.session) {
-                    localStorage.setItem('vanh_ai_current_user', data.user.email || email);
-                    openApp(data.user.email || email);
-                } else {
-                    alert('Đăng ký thành công! Hãy kiểm tra email để xác nhận tài khoản, sau đó đăng nhập.');
-                    switchTab('login');
-                }
-            } catch (err) {
-                alert('Đăng ký thất bại: ' + (err.message || 'Vui lòng thử lại.'));
-            }
-        };
-
-        window.handleLogin = async function() {
-            const email = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value;
-            if (!email || !pass) { alert('Vui lòng nhập email và mật khẩu!'); return; }
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-                if (error) throw error;
-                localStorage.setItem('vanh_ai_current_user', data.user.email || email);
-                localStorage.removeItem('vanh_ai_google_name');
-                localStorage.removeItem('vanh_ai_google_picture');
-                await openApp(data.user.email || email);
-            } catch (err) {
-                alert('Đăng nhập thất bại: ' + (err.message || 'Kiểm tra email và mật khẩu.'));
-            }
-        };
 
         async function openApp(username) {
             const googleName = localStorage.getItem('vanh_ai_google_name');
@@ -1774,10 +1740,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             currentChatSessions = JSON.parse(localStorage.getItem(getHistoryKey())) || [];
             loadHistory();
             await syncHistoryFromCloud();
+            await initSocialConnect();
         }
 
         window.handleLogout = async function() {
-            try { await supabaseClient.auth.signOut(); } catch (e) { console.warn(e); }
+            try { if (socialRealtime) await supabaseClient.removeChannel(socialRealtime); await supabaseClient.auth.signOut(); } catch (e) { console.warn(e); }
             localStorage.removeItem('vanh_ai_current_user');
             localStorage.removeItem('vanh_ai_google_name');
             localStorage.removeItem('vanh_ai_google_picture');

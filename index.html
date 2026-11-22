@@ -10,6 +10,7 @@
     
     <!-- Thư viện Marked.js để dịch Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
 
     <!-- Thư viện KaTeX để render công thức toán học -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -1091,7 +1092,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 .social-msg{max-width:min(72%,520px);padding:10px 13px;border-radius:13px;background:#11283b;border:1px solid #1c4058;color:#e4f4ff;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 .social-msg.mine{align-self:flex-end;background:linear-gradient(135deg,#164c70,#37356f);border-color:#326e91}
 .social-msg time{display:block;color:#86a3b8;font-size:8px;margin-top:5px;text-align:right}
-.social-send-form{display:flex;gap:8px;padding:13px 16px;border-top:1px solid #1c3449}
+.social-send-form{display:flex;gap:8px;padding:13px 16px;border-top:1px solid #1c3449;align-items:center}.social-attach-btn{width:40px;height:40px;flex:0 0 40px;border:1px solid #29475f!important;border-radius:11px!important;background:#10263a!important;color:#bfeeff!important;font-size:20px!important;padding:0!important}.social-file-card{display:flex;align-items:center;gap:10px;max-width:min(75%,520px);padding:10px 13px;border-radius:13px;background:#11283b;border:1px solid #32617b;color:#e4f4ff;font-size:12px}.social-file-card a{color:#8fe3ff;text-decoration:none;font-weight:700}.social-file-card img{display:block;max-width:220px;max-height:180px;border-radius:9px;object-fit:contain}.social-file-meta{min-width:0;overflow-wrap:anywhere}.social-file-card.mine{align-self:flex-end;background:#193858}
 .social-send-form input{flex:1;min-width:0;border:1px solid #29475f;border-radius:11px;background:#071625;color:#e9f8ff;padding:12px;outline:none;font:12px Inter,sans-serif}
 .social-send-form input:focus{border-color:#00cfff;box-shadow:0 0 14px #00cfff20}
 .social-send-form button{border:0;border-radius:10px;padding:0 17px;background:linear-gradient(120deg,#087aa6,#5143a7);color:white;font-weight:750;cursor:pointer}
@@ -1133,11 +1134,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             <div class="auth-divider"><span>WELCOME BACK</span></div>
             <div id="login-form">
                 <h2>Đăng nhập Vanh AI</h2>
-                <p>Đăng nhập bằng Google để đồng bộ trên mọi thiết bị</p>
-                <button class="provider-login google" onclick="signInProvider('google')">
-                    <span class="provider-icon">G</span> Tiếp tục với Google
-                </button>
-                <div class="auth-provider-note">Vanh AI chỉ hỗ trợ đăng nhập bằng Google.</div>
+                <p>Dùng tài khoản mạng xã hội để đồng bộ trên mọi thiết bị</p>
+                <div class="provider-login-list">
+                    <button class="provider-login google" onclick="signInProvider('google')"><span class="provider-icon">G</span> Tiếp tục với Google</button>
+                    <button class="provider-login apple" onclick="signInProvider('apple')"><span class="provider-icon">●</span> Tiếp tục với Apple</button>
+                    <button class="provider-login facebook" onclick="signInProvider('facebook')"><span class="provider-icon">f</span> Tiếp tục với Facebook</button>
+                </div>
+                <div class="auth-provider-note">Vanh AI không sử dụng đăng nhập hoặc đăng ký bằng username/mật khẩu.</div>
             </div>
         </div>
     </div>
@@ -1275,6 +1278,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             <div id="socialMessages" class="social-messages"></div>
             <form id="socialSendForm" class="social-send-form">
               <input id="socialMessageInput" maxlength="4000" autocomplete="off" placeholder="Nhập tin nhắn..." aria-label="Tin nhắn">
+              <button type="button" class="social-attach-btn" onclick="document.getElementById('socialFileInput').click()" title="Gửi ảnh hoặc tệp">＋</button>
+              <input id="socialFileInput" type="file" hidden accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
               <button type="submit">Gửi ➤</button>
             </form>
           </div>
@@ -1636,15 +1641,49 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 document.getElementById('socialMessageInput').focus();
             } catch(err){alert('Không mở được cuộc trò chuyện: '+err.message);}
         };
+        function socialParseFileBody(body){
+            if(typeof body==='string' && body.startsWith('VANHFILE:')){try{return JSON.parse(body.slice(9));}catch(e){}}
+            return null;
+        }
+        function socialPairFolder(a,b){return [a,b].sort().join('.');}
+        async function socialRenderMessage(m){
+            const mine=m.sender_id===socialUser.id, file=socialParseFileBody(m.body);
+            const time=new Date(m.created_at).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+            if(!file)return `<div class="social-msg ${mine?'mine':''}">${socialEsc(m.body)}<time>${time}</time></div>`;
+            const {data,error}=await supabaseClient.storage.from('vanh-chat-files').createSignedUrl(file.path,3600);
+            const url=!error&&data?.signedUrl?data.signedUrl:null;
+            let preview=url&&file.type?.startsWith('image/')?`<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="${socialEsc(file.name)}"></a>`:'';
+            return `<div class="social-file-card ${mine?'mine':''}"><div class="social-file-meta">${preview}<div>📎 ${socialEsc(file.name)}</div><small>${(file.size/1024/1024).toFixed(2)} MB</small><div>${url?`<a href="${url}" target="_blank" rel="noopener" download="${socialEsc(file.name)}">Mở / tải tệp</a>`:'Không tải được tệp'}</div><time>${time}</time></div></div>`;
+        }
         async function loadSocialMessages() {
             if(!socialUser||!socialActiveFriend)return;
             const other=socialActiveFriend.id;
             const {data,error}=await supabaseClient.from('vanh_direct_messages').select('id,sender_id,receiver_id,body,created_at').or(`and(sender_id.eq.${socialUser.id},receiver_id.eq.${other}),and(sender_id.eq.${other},receiver_id.eq.${socialUser.id})`).order('created_at',{ascending:true}).limit(200);
             if(error) throw error;
             const box=document.getElementById('socialMessages');
-            box.innerHTML=(data||[]).map(m=>`<div class="social-msg ${m.sender_id===socialUser.id?'mine':''}">${socialEsc(m.body)}<time>${new Date(m.created_at).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</time></div>`).join('')||'<div class="social-empty-list">Hãy gửi lời chào đầu tiên!</div>';
+            box.innerHTML=(data||[]).length?(await Promise.all(data.map(socialRenderMessage))).join(''):'<div class="social-empty-list">Hãy gửi lời chào đầu tiên!</div>';
             box.scrollTop=box.scrollHeight;
         }
+        document.getElementById('socialFileInput')?.addEventListener('change',async e=>{
+            const file=e.target.files?.[0]; if(!file||!socialUser||!socialActiveFriend)return;
+            if(file.size>15*1024*1024){alert('Mỗi tệp tối đa 15 MB.');e.target.value='';return;}
+            const allowed=file.type.startsWith('image/')||/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip)$/i.test(file.name);
+            if(!allowed){alert('Định dạng chưa được hỗ trợ.');e.target.value='';return;}
+            const sendBtn=document.querySelector('#socialSendForm button[type="submit"]');
+            try{
+                sendBtn.disabled=true;sendBtn.textContent='Đang tải...';
+                const folder=socialPairFolder(socialUser.id,socialActiveFriend.id);
+                const safeName=file.name.replace(/[^\w.() -]/g,'_').slice(-100);
+                const path=`${folder}/${crypto.randomUUID()}_${safeName}`;
+                const {error:upErr}=await supabaseClient.storage.from('vanh-chat-files').upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});
+                if(upErr)throw upErr;
+                const payload={name:file.name,type:file.type||'application/octet-stream',size:file.size,path};
+                const {error:msgErr}=await supabaseClient.from('vanh_direct_messages').insert({sender_id:socialUser.id,receiver_id:socialActiveFriend.id,body:'VANHFILE:'+JSON.stringify(payload)});
+                if(msgErr){await supabaseClient.storage.from('vanh-chat-files').remove([path]);throw msgErr;}
+                await loadSocialMessages();
+            }catch(err){alert('Gửi tệp thất bại: '+err.message);}
+            finally{sendBtn.disabled=false;sendBtn.textContent='Gửi ➤';e.target.value='';}
+        });
         document.getElementById('socialSendForm')?.addEventListener('submit',async e=>{
             e.preventDefault();const input=document.getElementById('socialMessageInput'),body=input.value.trim();
             if(!body||!socialActiveFriend)return;
@@ -1701,17 +1740,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         };
 
         // Provider-only authentication: Google, Apple and Facebook.
-        window.signInProvider = async function(provider = 'google') {
-            if (provider !== 'google') return;
+        window.signInProvider = async function(provider) {
+            const allowed = ['google','apple','facebook'];
+            if (!allowed.includes(provider)) return;
             try {
                 const { error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
+                    provider,
                     options: { redirectTo: window.location.origin + window.location.pathname }
                 });
                 if (error) throw error;
             } catch (err) {
-                console.error('Google OAuth error:', err);
-                alert('Không thể đăng nhập Google. Hãy kiểm tra Google Provider trong Supabase. ' + (err.message || ''));
+                console.error('OAuth sign-in error:', err);
+                alert('Không thể đăng nhập bằng ' + provider + '. Hãy kiểm tra provider đã được bật trong Supabase và cấu hình OAuth callback. Chi tiết: ' + (err.message || 'Lỗi không xác định'));
             }
         };
 

@@ -49,7 +49,6 @@
             justify-content: center;
             align-items: center;
             z-index: 2000;
-            animation: hideIntroScreen 0.1s ease 3.2s forwards;
         }
 
         @keyframes hideIntroScreen {
@@ -1109,8 +1108,21 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 }
 
 
+
+/* Cloudflare Turnstile gate shown midway through the Nitro intro */
+#turnstile-gate{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,8,20,.68);backdrop-filter:blur(8px)}
+#turnstile-gate.show{display:flex}
+.turnstile-card{width:min(390px,94vw);padding:24px 22px;border:1px solid rgba(106,190,255,.24);border-radius:18px;background:linear-gradient(145deg,#fff,#f4f7fb);color:#202b3b;box-shadow:0 24px 90px #0008;font-family:Inter,Arial,sans-serif;text-align:center}
+.turnstile-brand{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:18px;color:#1e293b;font-size:11px;font-weight:800;letter-spacing:1.2px}
+.turnstile-cloud{font-size:24px;color:#f48120}
+.turnstile-card h2{font-size:19px;margin:0 0 8px;color:#172033}
+.turnstile-card p{font-size:13px;line-height:1.55;color:#64748b;margin:0 0 18px}
+#turnstile-widget{display:flex;justify-content:center;min-height:66px}
+#turnstile-status{font-size:11px;color:#64748b;margin-top:10px;min-height:16px}
+body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,body.turnstile-wait #intro-screen::after{animation-play-state:paused!important}
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 
@@ -1118,6 +1130,17 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
     <div id="intro-screen">
         <div class="intro-title">Vanh AI Dev</div>
         <div class="intro-dot"></div>
+    </div>
+
+    <!-- Cloudflare Turnstile: tạm dừng Nitro cho đến khi xác minh xong -->
+    <div id="turnstile-gate" aria-hidden="true">
+        <div class="turnstile-card">
+            <div class="turnstile-brand"><span class="turnstile-cloud">☁</span><span>CLOUDFLARE</span></div>
+            <h2>Xác minh bảo mật</h2>
+            <p>Vui lòng xác minh bạn là người thật để tiếp tục vào Vanh AI.</p>
+            <div id="turnstile-widget"></div>
+            <div id="turnstile-status" role="status">Đang tải xác minh...</div>
+        </div>
     </div>
 
     <!-- Màn hình Đăng nhập -->
@@ -1713,7 +1736,65 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
         }
         // =======================================================
 
-        window.onload = function() {
+        // Turnstile site key is public. Replace this placeholder with the Site Key
+        // created in Cloudflare Dashboard > Turnstile. Never put the Secret Key here.
+        const VANH_TURNSTILE_SITE_KEY = '0x4AAAAAAGQQZIrT1sMdP41c';
+
+        function runIntroVerification() {
+            return new Promise((resolve) => {
+                const gate = document.getElementById('turnstile-gate');
+                const status = document.getElementById('turnstile-status');
+                const widget = document.getElementById('turnstile-widget');
+                // Let the Nitro title begin, then freeze it while verification is shown.
+                setTimeout(() => {
+                    document.body.classList.add('turnstile-wait');
+                    gate.classList.add('show');
+                    gate.setAttribute('aria-hidden','false');
+                    if (VANH_TURNSTILE_SITE_KEY === 'PASTE_TURNSTILE_SITE_KEY_HERE') {
+                        status.textContent = 'Chưa cấu hình Site Key Cloudflare Turnstile trong file.';
+                        return;
+                    }
+                    const renderWidget = () => {
+                        if (!window.turnstile || widget.dataset.rendered === '1') return;
+                        widget.dataset.rendered = '1';
+                        try {
+                            window.turnstile.render(widget, {
+                                sitekey: VANH_TURNSTILE_SITE_KEY,
+                                theme: 'light',
+                                callback: (token) => {
+                                    if (!token) return;
+                                    status.textContent = 'Xác minh thành công. Đang tiếp tục...';
+                                    gate.classList.remove('show');
+                                    gate.setAttribute('aria-hidden','true');
+                                    document.body.classList.remove('turnstile-wait');
+                                    resolve(token);
+                                },
+                                'expired-callback': () => { status.textContent = 'Mã xác minh đã hết hạn. Hãy xác minh lại.'; },
+                                'error-callback': () => { status.textContent = 'Không tải được xác minh. Hãy tải lại trang.'; widget.dataset.rendered = '0'; }
+                            });
+                            status.textContent = 'Hoàn tất ô xác minh bên trên để tiếp tục.';
+                        } catch (e) {
+                            console.error('Turnstile render error:', e);
+                            status.textContent = 'Lỗi tải Cloudflare Turnstile. Hãy tải lại trang.';
+                            widget.dataset.rendered = '0';
+                        }
+                    };
+                    if (window.turnstile) renderWidget();
+                    else {
+                        const started = Date.now();
+                        const waitForApi = () => {
+                            if (window.turnstile) renderWidget();
+                            else if (Date.now() - started < 15000) setTimeout(waitForApi, 150);
+                            else status.textContent = 'Cloudflare không phản hồi. Hãy kiểm tra mạng rồi tải lại.';
+                        };
+                        waitForApi();
+                    }
+                }, 1100);
+            });
+        }
+
+        window.onload = async function() {
+            await runIntroVerification();
             setTimeout(async () => {
                 try {
                     // Only restore the app if Supabase has a real session.

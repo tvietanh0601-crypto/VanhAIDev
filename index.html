@@ -1572,23 +1572,20 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             if (!socialUser || socialRefreshBusy) return;
             socialRefreshBusy = true;
             try {
-                const [profilesRes, friendsRes, requestsRes] = await Promise.all([
-                    supabaseClient.from('vanh_profiles').select('id,display_name,avatar_url').neq('id',socialUser.id).order('display_name').limit(30),
+                // Danh sach Kham pha lay truc tiep tu Supabase Authentication Users
+                // thong qua Edge Function (khong de service-role key trong trinh duyet).
+                const [authUsersRes, friendsRes, requestsRes] = await Promise.all([
+                    supabaseClient.functions.invoke('list-auth-users'),
                     supabaseClient.from('vanh_friendships').select('user_low,user_high').or(`user_low.eq.${socialUser.id},user_high.eq.${socialUser.id}`),
                     supabaseClient.from('vanh_friend_requests').select('id,requester_id,addressee_id,status,created_at').eq('addressee_id',socialUser.id).eq('status','pending').order('created_at',{ascending:false})
                 ]);
-                for (const r of [profilesRes,friendsRes,requestsRes]) if (r.error) throw r.error;
-                const profiles = profilesRes.data || [], friendRows = friendsRes.data || [], requests = requestsRes.data || [];
+                for (const r of [authUsersRes,friendsRes,requestsRes]) if (r.error) throw r.error;
+                const profiles = (authUsersRes.data?.users || []).filter(u=>u.id!==socialUser.id);
+                const friendRows = friendsRes.data || [], requests = requestsRes.data || [];
                 const friendIds = friendRows.map(f => f.user_low===socialUser.id ? f.user_high : f.user_low);
                 // Load friend and incoming-request profiles even when outside discovery's first page.
                 const neededIds = [...new Set([...friendIds,...requests.map(r=>r.requester_id)])];
-                const missingIds = neededIds.filter(id=>!profiles.some(p=>p.id===id));
-                let missingProfiles = [];
-                if (missingIds.length) {
-                    const res = await supabaseClient.from('vanh_profiles').select('id,display_name,avatar_url').in('id',missingIds);
-                    if (!res.error) missingProfiles = res.data || [];
-                }
-                const byId = new Map([...profiles,...missingProfiles].map(p=>[p.id,p]));
+                const byId = new Map(profiles.map(p=>[p.id,p]));
                 const contacts = friendIds.map(id=>byId.get(id)).filter(Boolean);
                 document.getElementById('socialContactsList').innerHTML = contacts.length ? contacts.map(p=>`
                   <button class="social-user-row" onclick="openSocialChat('${p.id}')"><span class="social-avatar">${socialAvatar(p)}</span><span class="social-user-meta"><strong>${socialEsc(socialName(p))}</strong><small>Bạn bè · Nhắn tin</small></span><span>›</span></button>`).join('') : '<div class="social-empty-list">Danh bạ đang trống.<br>Khám phá người dùng để gửi lời mời kết bạn.</div>';
@@ -1601,7 +1598,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 document.getElementById('socialDiscoverList').innerHTML = profiles.length ? profiles.map(p=>{
                     const isFriend=friendIds.includes(p.id);
                     return `<div class="social-user-row"><span class="social-avatar">${socialAvatar(p)}</span><span class="social-user-meta"><strong>${socialEsc(socialName(p))}</strong><small>${isFriend?'Đã có trong danh bạ':'Người dùng Vanh AI'}</small></span>${isFriend?'<span class="social-action">Bạn bè</span>':`<button class="social-action" onclick="sendFriendRequest('${p.id}',this)">＋ Kết bạn</button>`}</div>`;
-                }).join('') : '<div class="social-empty-list">Chưa tìm thấy người dùng khác.</div>';
+                }).join('') : '<div class="social-empty-list">Chưa có tài khoản nào khác trong Authentication Users.</div>';
             } catch (err) {
                 console.error('Vanh AI Connect load error:',err);
                 ['socialContactsList','socialRequestsList','socialDiscoverList'].forEach(id=>document.getElementById(id).innerHTML='<div class="social-empty-list">Chưa tải được dữ liệu. Hãy kiểm tra SQL và quyền truy cập Supabase.</div>');

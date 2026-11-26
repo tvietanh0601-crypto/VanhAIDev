@@ -647,6 +647,8 @@ sidebar{
 .model-pill{height:32px;display:flex;align-items:center;gap:7px;padding:0 11px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);font-size:9px;color:#aeb7ca}
 .model-pill i{width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 8px #52e7a1}
 .model-pill span{color:#667188}
+.model-pill select{max-width:105px;border:0;outline:0;background:transparent;color:#aeb7ca;font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none}
+.model-pill select option{background:#101b2c;color:#eaf4ff}
 .topbar-icon{width:32px;height:32px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.03);color:#78849a;cursor:pointer}
 .topbar-icon:hover{color:#fff;background:rgba(255,255,255,.07)}
 
@@ -1237,7 +1239,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     </div>
                     <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
                     <button class="code-launch" type="button" onclick="openCodePlace()">&lt;/&gt; Code Place</button>
-                    <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
+                    <label class="model-pill" title="Chọn mô hình AI"><i></i><select id="aiProviderSelect" aria-label="Chọn mô hình AI"><option value="ollama" selected>Qwen Local</option><option value="gemini">Gemini Flash</option></select><span>⌄</span></label>
                     <button class="topbar-icon" title="Giao diện">◐</button>
                     <button class="topbar-icon" title="Thông tin">ⓘ</button>
                 </div>
@@ -1601,6 +1603,14 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        // Remember the selected provider on this browser.
+        document.addEventListener('DOMContentLoaded', () => {
+            const picker = document.getElementById('aiProviderSelect');
+            if (!picker) return;
+            const saved = localStorage.getItem('vanh_ai_provider');
+            if (saved === 'ollama' || saved === 'gemini') picker.value = saved;
+            picker.addEventListener('change', () => localStorage.setItem('vanh_ai_provider', picker.value));
+        });
         let currentAttachedImage = null;
         let currentAttachedFileText = '';
 
@@ -2179,6 +2189,40 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             document.getElementById('anyInputFile').click();
         };
 
+        // ================= LOCAL AI: OLLAMA / QWEN =================
+        async function askOllama(promptText) {
+            const session = activeSessionId !== null ? currentChatSessions[activeSessionId] : null;
+            const priorMessages = (session?.messages || []).slice(-10)
+                .filter(item => item && (item.sender === 'user' || item.sender === 'ai') && item.text)
+                .map(item => ({ role: item.sender === 'ai' ? 'assistant' : 'user', content: String(item.text).slice(0, 6000) }));
+            priorMessages.push({ role: 'user', content: promptText });
+
+            let response;
+            try {
+                response = await fetch('http://localhost:11434/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'qwen2.5:1.5b',
+                        messages: priorMessages,
+                        stream: false,
+                        keep_alive: '10m',
+                        options: { num_ctx: 2048, num_predict: 512 }
+                    })
+                });
+            } catch (error) {
+                throw new Error('Không kết nối được Ollama trên máy này. Hãy mở Ollama và kiểm tra OLLAMA_ORIGINS. Chi tiết: ' + (error?.message || error));
+            }
+            if (!response.ok) {
+                const detail = await response.text().catch(() => '');
+                throw new Error('Ollama trả về lỗi ' + response.status + (detail ? ': ' + detail.slice(0, 300) : ''));
+            }
+            const data = await response.json();
+            const answer = data?.message?.content;
+            if (!answer) throw new Error('Ollama chưa trả về nội dung.');
+            return answer;
+        }
+
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
@@ -2250,13 +2294,21 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     contentsParam = text;
                 }
 
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3.6-flash',
-                    contents: contentsParam,
-                });
-                aiReply = response.text || "Không nhận được phản hồi.";
+                const provider = document.getElementById('aiProviderSelect')?.value || 'ollama';
+                if (provider === 'ollama') {
+                    if (attachedImg) {
+                        throw new Error('Qwen2.5:1.5b hiện là mô hình văn bản, chưa phân tích được ảnh. Hãy chuyển sang Gemini Flash để gửi ảnh.');
+                    }
+                    aiReply = await askOllama(promptText || text);
+                } else {
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-3.6-flash',
+                        contents: contentsParam,
+                    });
+                    aiReply = response.text || "Không nhận được phản hồi.";
+                }
             } catch (err) {
-                aiReply = "Lỗi kết nối API: " + err.message;
+                aiReply = "Lỗi AI: " + (err?.message || String(err));
             }
 
             const loadingElem = document.getElementById(loadingId);

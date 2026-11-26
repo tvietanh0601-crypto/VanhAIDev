@@ -2250,14 +2250,35 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                 throw new Error(data?.details || data?.error || ('Cloudflare Worker trả về lỗi HTTP ' + response.status));
             }
 
-            let answer = data?.response ?? data?.result?.response ?? data?.result;
-            if (answer && typeof answer === 'object') {
-                answer = answer.response ?? answer.output_text ?? answer.text ?? '';
+            // Cloudflare Workers AI có thể trả văn bản ở nhiều dạng JSON khác nhau.
+            const extractText = (value, depth = 0) => {
+                if (typeof value === 'string') return value.trim();
+                if (!value || typeof value !== 'object' || depth > 6) return '';
+                if (Array.isArray(value)) {
+                    for (const item of value) {
+                        const found = extractText(item, depth + 1);
+                        if (found) return found;
+                    }
+                    return '';
+                }
+                const preferredKeys = [
+                    'response', 'output_text', 'generated_text', 'text', 'content',
+                    'answer', 'completion', 'message', 'result', 'output', 'choices'
+                ];
+                for (const key of preferredKeys) {
+                    if (value[key] !== undefined && value[key] !== null) {
+                        const found = extractText(value[key], depth + 1);
+                        if (found) return found;
+                    }
+                }
+                return '';
+            };
+            const answer = extractText(data);
+            if (!answer) {
+                const preview = JSON.stringify(data).slice(0, 700);
+                throw new Error('Cloudflare đã phản hồi nhưng không tìm thấy văn bản. Dữ liệu nhận được: ' + preview);
             }
-            if (typeof answer !== 'string' || !answer.trim()) {
-                throw new Error('Cloudflare AI chưa trả về nội dung văn bản.');
-            }
-            return answer.trim();
+            return answer;
         }
 
         window.sendMessage = async function() {

@@ -1239,7 +1239,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     </div>
                     <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
                     <button class="code-launch" type="button" onclick="openCodePlace()">&lt;/&gt; Code Place</button>
-                    <label class="model-pill" title="Chọn mô hình AI"><i></i><select id="aiProviderSelect" aria-label="Chọn mô hình AI"><option value="ollama" selected>Qwen Local</option><option value="gemini">Gemini Flash</option></select><span>⌄</span></label>
+                    <label class="model-pill" title="Chọn mô hình AI"><i></i><select id="aiProviderSelect" aria-label="Chọn mô hình AI"><option value="cloudflare" selected>Qwen Cloud (Cloudflare)</option><option value="ollama">Qwen Local</option><option value="gemini">Gemini Flash</option></select><span>⌄</span></label>
                     <button class="topbar-icon" title="Giao diện">◐</button>
                     <button class="topbar-icon" title="Thông tin">ⓘ</button>
                 </div>
@@ -2223,6 +2223,43 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             return answer;
         }
 
+        // ================= CLOUDFLARE AI: QWEN CLOUD =================
+        async function askCloudflare(promptText) {
+            const session = activeSessionId !== null ? currentChatSessions[activeSessionId] : null;
+            const messages = (session?.messages || []).slice(-10)
+                .filter(item => item && (item.sender === 'user' || item.sender === 'ai') && item.text)
+                .map(item => ({
+                    role: item.sender === 'ai' ? 'assistant' : 'user',
+                    content: String(item.text).slice(0, 6000)
+                }));
+            messages.push({ role: 'user', content: String(promptText || '').slice(0, 8000) });
+
+            let response;
+            try {
+                response = await fetch('https://vanh-ai-worker.tvietanh0601.workers.dev/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages })
+                });
+            } catch (error) {
+                throw new Error('Không kết nối được Cloudflare AI Worker. Kiểm tra Worker đã Deploy và địa chỉ API. Chi tiết: ' + (error?.message || error));
+            }
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || data?.error) {
+                throw new Error(data?.details || data?.error || ('Cloudflare Worker trả về lỗi HTTP ' + response.status));
+            }
+
+            let answer = data?.response ?? data?.result?.response ?? data?.result;
+            if (answer && typeof answer === 'object') {
+                answer = answer.response ?? answer.output_text ?? answer.text ?? '';
+            }
+            if (typeof answer !== 'string' || !answer.trim()) {
+                throw new Error('Cloudflare AI chưa trả về nội dung văn bản.');
+            }
+            return answer.trim();
+        }
+
         window.sendMessage = async function() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
@@ -2294,8 +2331,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     contentsParam = text;
                 }
 
-                const provider = document.getElementById('aiProviderSelect')?.value || 'ollama';
-                if (provider === 'ollama') {
+                const provider = document.getElementById('aiProviderSelect')?.value || 'cloudflare';
+                if (provider === 'cloudflare') {
+                    if (attachedImg) {
+                        throw new Error('Qwen Cloud hiện đang được cấu hình dạng văn bản, chưa phân tích được ảnh. Hãy chuyển sang Gemini Flash để gửi ảnh.');
+                    }
+                    aiReply = await askCloudflare(promptText || text);
+                } else if (provider === 'ollama') {
                     if (attachedImg) {
                         throw new Error('Qwen2.5:1.5b hiện là mô hình văn bản, chưa phân tích được ảnh. Hãy chuyển sang Gemini Flash để gửi ảnh.');
                     }

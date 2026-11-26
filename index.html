@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
     <title>Vanh AI Desktop</title>
 <link rel="icon" type="image/jpeg" href="https://p19-flow-image-sign.ibyteimg.com/tos-mya-i-3rsxbfecgb/rc_gen_image/a58dffa89225417b94c3be8a2df0ab27.jpeg~tplv-0es2k971ck-downsize_wm_1_5_marc_b_3:RGwwMjExTkExRG8xMUFlVERLb0o=.png?rcl=202610251353401A4AEC40C254B1023401&rk3s=8e244e95&rrcfp=755f3169&x-expires=2108267638&x-signature=M8CKDbKCdtDmn5R3wZB5%2F3d3oPI%3D">
     
@@ -1042,6 +1058,23 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 @media(max-width:760px){.math-window{height:96vh;min-height:0}.board-layout{grid-template-columns:1fr;grid-template-rows:minmax(270px,1fr) auto}.board-side{max-height:230px}.calc-grid{gap:5px}.calc-key{min-height:43px;font-size:15px}.math-pane{padding:9px}}
 
 
+
+/* ===== VANH AI CODE PLACE ===== */
+.code-launch{border:1px solid rgba(65,225,180,.28)!important;background:linear-gradient(135deg,rgba(0,190,150,.13),rgba(0,135,210,.16))!important;color:#c9fff0!important;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:750;white-space:nowrap;box-shadow:0 0 15px rgba(0,220,170,.08)}
+.code-launch:hover{box-shadow:0 0 22px rgba(0,220,170,.28);transform:translateY(-1px)}
+#codePlace{position:fixed;inset:0;z-index:10060;display:none;background:rgba(1,6,15,.9);backdrop-filter:blur(16px);padding:clamp(7px,1.5vw,20px);overflow:auto;color:#e8f4ff}
+#codePlace.open{display:flex;align-items:center;justify-content:center;animation:mathFade .2s ease}
+.code-window{width:min(1250px,100%);height:min(900px,96vh);min-height:540px;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(0,220,190,.25);border-radius:18px;background:#111820;box-shadow:0 25px 90px #000b,0 0 40px #00d6bb12}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#151e29;border-bottom:1px solid #283746}
+.code-head strong{font-size:15px}.code-head small{display:block;color:#8195a9;font-size:11px;margin-top:3px}
+.code-head-actions{display:flex;align-items:center;gap:8px}.code-close{border:1px solid #34495c;background:#1b2937;color:#eaf6ff;border-radius:8px;width:36px;height:36px;font-size:20px;cursor:pointer}
+.code-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:10px 14px;background:#111a24;border-bottom:1px solid #263746}
+.code-toolbar label{font-size:11px;color:#9eb3c7;font-weight:700}.code-toolbar select{min-width:150px;border:1px solid #38536b;border-radius:8px;background:#1a2938;color:#e8f5ff;padding:8px 10px;outline:none}
+.code-file-name{margin-left:auto;color:#85a0b6;font:11px ui-monospace,monospace}
+.code-editor-wrap{flex:1;min-height:0;overflow:hidden;background:#1d252d}.code-editor-wrap .CodeMirror{height:100%;font:13px/1.65 Consolas,Monaco,monospace}.CodeMirror-gutters{background:#161e27!important;border-right:1px solid #2c3946!important}.CodeMirror-linenumber{color:#667b8f!important}.CodeMirror-cursor{border-left:2px solid #65e6d0!important}
+.code-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:#151e29;border-top:1px solid #283746}.code-hint{color:#8297aa;font-size:10px;line-height:1.5}.code-send{border:1px solid #168c86;border-radius:9px;padding:10px 18px;background:linear-gradient(120deg,#087e78,#225ba5);color:#fff;font-weight:800;cursor:pointer}.code-send:hover{filter:brightness(1.15);box-shadow:0 0 18px #00d6bb38}.code-send:disabled{opacity:.55;cursor:wait}
+@media(max-width:760px){.code-window{height:96vh;min-height:0}.code-head{padding:10px}.code-toolbar{padding:8px}.code-file-name{width:100%;margin-left:0}.code-foot{align-items:flex-start;flex-direction:column}.code-send{width:100%}.code-launch{padding:7px 8px;font-size:10px}.code-toolbar select{min-width:125px}}
+
 /* Provider-only sign-in */
 .provider-login-list{display:grid;gap:11px;margin:22px 0 14px}
 .provider-login{height:48px;border-radius:12px;border:1px solid rgba(150,170,210,.22);background:#111a2b;color:#f5f7ff;font:650 13px Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:.2s}
@@ -1109,20 +1142,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
 
 
-/* Cloudflare Turnstile gate shown midway through the Nitro intro */
-#turnstile-gate{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,8,20,.68);backdrop-filter:blur(8px)}
-#turnstile-gate.show{display:flex}
-.turnstile-card{width:min(390px,94vw);padding:24px 22px;border:1px solid rgba(106,190,255,.24);border-radius:18px;background:linear-gradient(145deg,#fff,#f4f7fb);color:#202b3b;box-shadow:0 24px 90px #0008;font-family:Inter,Arial,sans-serif;text-align:center}
-.turnstile-brand{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:18px;color:#1e293b;font-size:11px;font-weight:800;letter-spacing:1.2px}
-.turnstile-cloud{font-size:24px;color:#f48120}
-.turnstile-card h2{font-size:19px;margin:0 0 8px;color:#172033}
-.turnstile-card p{font-size:13px;line-height:1.55;color:#64748b;margin:0 0 18px}
-#turnstile-widget{display:flex;justify-content:center;min-height:66px}
-#turnstile-status{font-size:11px;color:#64748b;margin-top:10px;min-height:16px}
-body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,body.turnstile-wait #intro-screen::after{animation-play-state:paused!important}
 </style>
     <!-- Lịch sử chat đồng bộ qua Supabase Auth + Row Level Security -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 
@@ -1130,17 +1151,6 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
     <div id="intro-screen">
         <div class="intro-title">Vanh AI Dev</div>
         <div class="intro-dot"></div>
-    </div>
-
-    <!-- Cloudflare Turnstile: tạm dừng Nitro cho đến khi xác minh xong -->
-    <div id="turnstile-gate" aria-hidden="true">
-        <div class="turnstile-card">
-            <div class="turnstile-brand"><span class="turnstile-cloud">☁</span><span>CLOUDFLARE</span></div>
-            <h2>Xác minh bảo mật</h2>
-            <p>Vui lòng xác minh bạn là người thật để tiếp tục vào Vanh AI.</p>
-            <div id="turnstile-widget"></div>
-            <div id="turnstile-status" role="status">Đang tải xác minh...</div>
-        </div>
     </div>
 
     <!-- Màn hình Đăng nhập -->
@@ -1221,6 +1231,7 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
                         <button id="modeSocialBtn" class="mode-switch-btn" onclick="switchMainMode('social')">☏ Tin nhắn</button>
                     </div>
                     <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
+                    <button class="code-launch" type="button" onclick="openCodePlace()">&lt;/&gt; Code Place</button>
                     <div class="model-pill"><i></i> Gemini Flash <span>⌄</span></div>
                     <button class="topbar-icon" title="Giao diện">◐</button>
                     <button class="topbar-icon" title="Thông tin">ⓘ</button>
@@ -1353,6 +1364,40 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
             <div class="board-note">Đo góc: chạm lần lượt điểm trên cạnh thứ nhất, đỉnh góc, điểm trên cạnh thứ hai. Thước đo độ và góc vuông là công cụ hỗ trợ dựng hình. AI sẽ phân tích hình và đề bài; hãy kiểm tra lại kết quả nếu nét vẽ chưa rõ.</div>
           </aside></div>
         </div>
+      </div>
+    </section>
+
+
+    <section id="codePlace" aria-hidden="true">
+      <div class="code-window">
+        <header class="code-head">
+          <div><strong>⌘ Code Place</strong><small>Trình soạn thảo mã nguồn · Vanh AI</small></div>
+          <div class="code-head-actions"><button class="code-close" type="button" onclick="closeCodePlace()" aria-label="Đóng">×</button></div>
+        </header>
+        <div class="code-toolbar">
+          <label for="codeLanguage">Ngôn ngữ</label>
+          <select id="codeLanguage" onchange="changeCodeLanguage(this.value)">
+            <option value="html">HTML</option><option value="javascript">JavaScript</option><option value="css">CSS</option>
+            <option value="python">Python</option><option value="cpp">C++</option><option value="java">Java</option>
+            <option value="csharp">C#</option><option value="php">PHP</option><option value="sql">SQL</option>
+            <option value="json">JSON</option><option value="typescript">TypeScript</option>
+          </select>
+          <span class="code-file-name" id="codeFileName">index.html</span>
+        </div>
+        <div class="code-editor-wrap"><textarea id="codeEditorSource" spellcheck="false"><!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trang web của tôi</title>
+</head>
+<body>
+  <h1>Xin chào!</h1>
+</body>
+</html></textarea></div>
+        <footer class="code-foot">
+          <span class="code-hint">Tự đánh số dòng · Tự thụt lề · Đóng ngoặc/thẻ · Gợi ý mã bằng Ctrl + Space</span>
+          <button class="code-send" id="codeSendBtn" type="button" onclick="sendCodeToAI()">Gửi code cho AI ↗</button>
+        </footer>
       </div>
     </section>
 
@@ -1553,6 +1598,71 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         let currentAttachedImage = null;
         let currentAttachedFileText = '';
+
+        let codeEditorInstance = null;
+        const codeLanguageConfig = {
+          html:{mode:'htmlmixed',ext:'html',mime:'text/html'}, javascript:{mode:'javascript',ext:'js',mime:'text/javascript'},
+          css:{mode:'css',ext:'css',mime:'text/css'}, python:{mode:'python',ext:'py',mime:'text/x-python'},
+          cpp:{mode:'text/x-c++src',ext:'cpp',mime:'text/x-c++src'}, java:{mode:'text/x-java',ext:'java',mime:'text/x-java'},
+          csharp:{mode:'text/x-csharp',ext:'cs',mime:'text/x-csharp'}, php:{mode:'application/x-httpd-php',ext:'php',mime:'application/x-httpd-php'},
+          sql:{mode:'text/x-sql',ext:'sql',mime:'text/x-sql'}, json:{mode:{name:'javascript',json:true},ext:'json',mime:'application/json'},
+          typescript:{mode:{name:'javascript',typescript:true},ext:'ts',mime:'text/typescript'}
+        };
+        const codeSuggestions = {
+          html:['<!DOCTYPE html>','<html>','<head>','<body>','<div>','<span>','<section>','<header>','<footer>','<main>','<article>','<button>','<input>','<form>','<script>','<style>','<meta>','<title>','<h1>','<p>','<a>','<img>'],
+          javascript:['const','let','var','function','async','await','return','document','window','console.log','addEventListener','querySelector','getElementById','fetch','try','catch','class','export','import'],
+          css:['display','flex','grid','position','background','color','padding','margin','border','border-radius','width','height','font-size','box-shadow','transform','transition','@media'],
+          python:['def','class','import','from','return','if','elif','else','for','while','in','print','input','range','list','dict','try','except','with','async','await'],
+          cpp:['#include <iostream>','using namespace std;','int main()','std::cout','std::cin','return 0;','int','double','float','char','string','bool','vector','if','else','for','while','class','public:','private:'],
+          java:['public class','public static void main','System.out.println','String','int','double','boolean','if','else','for','while','return','import','new','class'],
+          csharp:['using System;','namespace','class','static void Main','Console.WriteLine','string','int','bool','if','else','foreach','return','public','private'],
+          php:['<?php','echo','print','function','class','public','private','$this','$_GET','$_POST','foreach','if','else','return'],
+          sql:['SELECT','FROM','WHERE','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','PRIMARY KEY','JOIN','ORDER BY','GROUP BY','LIMIT'],
+          json:['"name"','"value"','true','false','null'], typescript:['interface','type','const','let','function','async','await','Promise','string','number','boolean','export','import']
+        };
+        function getCodeLanguage(){return document.getElementById('codeLanguage')?.value||'html';}
+        function updateCodeFileName(){const c=codeLanguageConfig[getCodeLanguage()];document.getElementById('codeFileName').textContent='index.'+c.ext;}
+        function initCodeEditor(){
+          const ta=document.getElementById('codeEditorSource');
+          if(!ta||codeEditorInstance||!window.CodeMirror)return;
+          codeEditorInstance=CodeMirror.fromTextArea(ta,{theme:'material-darker',lineNumbers:true,mode:'htmlmixed',indentUnit:2,tabSize:2,indentWithTabs:false,smartIndent:true,matchBrackets:true,autoCloseBrackets:true,autoCloseTags:true,lineWrapping:false,styleActiveLine:true,extraKeys:{'Ctrl-Space':cm=>cm.showHint({hint:editorHintProvider,completeSingle:false}),'Tab':cm=>cm.execCommand('insertSoftTab'),'Ctrl-/':'toggleComment'}});
+          codeEditorInstance.setSize('100%','100%');
+          codeEditorInstance.on('inputRead',(cm,change)=>{
+            if(change.origin==='complete')return;
+            const cur=cm.getCursor(),token=cm.getTokenAt(cur),lang=getCodeLanguage();
+            if(token.string.length>=2 || (lang==='html'&&token.string.startsWith('<'))){
+              cm.showHint({completeSingle:false,hint:editorHintProvider});
+            }
+          });
+          codeEditorInstance.on('keydown',(cm,e)=>{if(e.key==='Tab'&&!e.shiftKey){cm.execCommand('indentMore');}});
+        }
+        function editorHintProvider(cm){
+          const cur=cm.getCursor(),token=cm.getTokenAt(cur),lang=getCodeLanguage(),list=codeSuggestions[lang]||[];
+          const word=token.string||'';let from=CodeMirror.Pos(cur.line,token.start),to=CodeMirror.Pos(cur.line,token.end);
+          let candidates=list.filter(x=>x.toLowerCase().includes(word.replace(/^</,'').toLowerCase())||x.toLowerCase().startsWith(word.toLowerCase()));
+          if(lang==='html'&&word.startsWith('<')) candidates=list.filter(x=>x.toLowerCase().startsWith(word.toLowerCase()));
+          if(!candidates.length)candidates=list.slice(0,10);
+          return {list:candidates.slice(0,18),from,to};
+        }
+        window.openCodePlace=function(){const panel=document.getElementById('codePlace');panel.classList.add('open');panel.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>{initCodeEditor();if(codeEditorInstance){codeEditorInstance.refresh();codeEditorInstance.focus();}},80);};
+        window.closeCodePlace=function(){const panel=document.getElementById('codePlace');panel.classList.remove('open');panel.setAttribute('aria-hidden','true');document.body.style.overflow='';};
+        window.changeCodeLanguage=function(value){if(!codeLanguageConfig[value])return;updateCodeFileName();if(codeEditorInstance){codeEditorInstance.setOption('mode',codeLanguageConfig[value].mode);codeEditorInstance.focus();}};
+        window.sendCodeToAI=async function(){
+          initCodeEditor();
+          if(!codeEditorInstance){alert('Trình soạn thảo chưa tải xong. Hãy kiểm tra kết nối rồi thử lại.');return;}
+          const code=codeEditorInstance.getValue();
+          if(!code.trim()){alert('M chưa nhập code.');return;}
+          const lang=getCodeLanguage(),cfg=codeLanguageConfig[lang],filename='index.'+cfg.ext;
+          const codeFile=new File([code],filename,{type:cfg.mime});
+          currentAttachedFileText=await codeFile.text();
+          currentAttachedFileName=codeFile.name;
+          const languageNames={html:'HTML',javascript:'JavaScript',css:'CSS',python:'Python',cpp:'C++',java:'Java',csharp:'C#',php:'PHP',sql:'SQL',json:'JSON',typescript:'TypeScript'};
+          document.getElementById('userInput').value='Hãy phân tích file '+filename+' ('+languageNames[lang]+'). Kiểm tra lỗi cú pháp, lỗi logic và vấn đề có thể khiến chương trình không chạy. Nếu có lỗi, hãy giải thích ngắn gọn rồi gửi lại TOÀN BỘ mã nguồn đã sửa trong một khối code đúng ngôn ngữ. Nếu code đã ổn, hãy nêu điều cần cải thiện và gửi lại phiên bản hoàn chỉnh nếu phù hợp.';
+          const btn=document.getElementById('codeSendBtn');btn.disabled=true;btn.textContent='Đang gửi…';
+          closeCodePlace();
+          try{await window.sendMessage();}finally{btn.disabled=false;btn.textContent='Gửi code cho AI ↗';}
+        };
+
         let currentAttachedFileName = '';
 
         function getHistoryKey() {
@@ -1736,65 +1846,7 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
         }
         // =======================================================
 
-        // Turnstile site key is public. Replace this placeholder with the Site Key
-        // created in Cloudflare Dashboard > Turnstile. Never put the Secret Key here.
-        const VANH_TURNSTILE_SITE_KEY = '0x4AAAAAAGQQZIrT1sMdP41c';
-
-        function runIntroVerification() {
-            return new Promise((resolve) => {
-                const gate = document.getElementById('turnstile-gate');
-                const status = document.getElementById('turnstile-status');
-                const widget = document.getElementById('turnstile-widget');
-                // Let the Nitro title begin, then freeze it while verification is shown.
-                setTimeout(() => {
-                    document.body.classList.add('turnstile-wait');
-                    gate.classList.add('show');
-                    gate.setAttribute('aria-hidden','false');
-                    if (VANH_TURNSTILE_SITE_KEY === 'PASTE_TURNSTILE_SITE_KEY_HERE') {
-                        status.textContent = 'Chưa cấu hình Site Key Cloudflare Turnstile trong file.';
-                        return;
-                    }
-                    const renderWidget = () => {
-                        if (!window.turnstile || widget.dataset.rendered === '1') return;
-                        widget.dataset.rendered = '1';
-                        try {
-                            window.turnstile.render(widget, {
-                                sitekey: VANH_TURNSTILE_SITE_KEY,
-                                theme: 'light',
-                                callback: (token) => {
-                                    if (!token) return;
-                                    status.textContent = 'Xác minh thành công. Đang tiếp tục...';
-                                    gate.classList.remove('show');
-                                    gate.setAttribute('aria-hidden','true');
-                                    document.body.classList.remove('turnstile-wait');
-                                    resolve(token);
-                                },
-                                'expired-callback': () => { status.textContent = 'Mã xác minh đã hết hạn. Hãy xác minh lại.'; },
-                                'error-callback': () => { status.textContent = 'Không tải được xác minh. Hãy tải lại trang.'; widget.dataset.rendered = '0'; }
-                            });
-                            status.textContent = 'Hoàn tất ô xác minh bên trên để tiếp tục.';
-                        } catch (e) {
-                            console.error('Turnstile render error:', e);
-                            status.textContent = 'Lỗi tải Cloudflare Turnstile. Hãy tải lại trang.';
-                            widget.dataset.rendered = '0';
-                        }
-                    };
-                    if (window.turnstile) renderWidget();
-                    else {
-                        const started = Date.now();
-                        const waitForApi = () => {
-                            if (window.turnstile) renderWidget();
-                            else if (Date.now() - started < 15000) setTimeout(waitForApi, 150);
-                            else status.textContent = 'Cloudflare không phản hồi. Hãy kiểm tra mạng rồi tải lại.';
-                        };
-                        waitForApi();
-                    }
-                }, 1100);
-            });
-        }
-
         window.onload = async function() {
-            await runIntroVerification();
             setTimeout(async () => {
                 try {
                     // Only restore the app if Supabase has a real session.
@@ -1834,6 +1886,7 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
         };
 
         document.addEventListener('keydown', function(event) {
+            if(event.key==='Escape' && document.getElementById('codePlace')?.classList.contains('open')) window.closeCodePlace();
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
                 startNewChat();
@@ -2144,6 +2197,7 @@ body.turnstile-wait #intro-screen *,body.turnstile-wait #intro-screen::before,bo
             if (text) {
                 userMsgHtml += `<div>${escapeHtml(text)}</div>`;
             }
+            if (attachedFileText) userMsgHtml += `<div style="font-size:11px;color:#9fe9d7;margin-top:5px">Đã đính kèm nội dung ${escapeHtml(attachedFileName || 'tệp')}</div>`;
             userMsgHtml += `</div>`;
 
             chatMsgs.innerHTML += userMsgHtml;

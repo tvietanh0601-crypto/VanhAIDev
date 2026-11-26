@@ -65,10 +65,15 @@
             justify-content: center;
             align-items: center;
             z-index: 2000;
+            opacity: 1;
+            visibility: visible;
+            animation: hideIntroScreen 0.45s ease 3.2s forwards;
         }
 
         @keyframes hideIntroScreen {
-            to { display: none; visibility: hidden; opacity: 0; pointer-events: none; }
+            0% { opacity: 1; visibility: visible; }
+            99% { opacity: 0; visibility: visible; pointer-events: none; }
+            100% { opacity: 0; visibility: hidden; pointer-events: none; }
         }
 
         .intro-title {
@@ -966,7 +971,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 .sidebar{animation:panelSlideIn .75s cubic-bezier(.2,.8,.2,1) 2.85s both;}
 .main-chat{animation:panelSlideIn .8s cubic-bezier(.2,.8,.2,1) 2.95s both;}
 @keyframes panelSlideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){body::before,body::after,#intro-screen::before,#intro-screen::after,.app-container,.sidebar,.main-chat{animation:none!important}}
+@media(prefers-reduced-motion:reduce){body::before,body::after,#intro-screen::before,#intro-screen::after,.app-container,.sidebar,.main-chat{animation:none!important}#intro-screen{animation:hideIntroScreen .01s linear .1s forwards!important}}
 
 
 

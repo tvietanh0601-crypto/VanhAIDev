@@ -646,7 +646,7 @@ sidebar{
 .topbar-actions{display:flex;align-items:center;gap:8px}
 .model-pill{height:32px;display:flex;align-items:center;gap:7px;padding:0 11px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);font-size:9px;color:#aeb7ca}
 .model-pill i{width:5px;height:5px;border-radius:50%;background:#52e7a1;box-shadow:0 0 8px #52e7a1}
-.model-pill span{color:#667188}
+.model-pill span{color:#aeb7ca}
 .model-pill select{max-width:105px;border:0;outline:0;background:transparent;color:#aeb7ca;font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none}
 .model-pill select option{background:#101b2c;color:#eaf4ff}
 .topbar-icon{width:32px;height:32px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.03);color:#78849a;cursor:pointer}
@@ -1239,7 +1239,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     </div>
                     <button class="math-launch" type="button" onclick="openMathStudio()">∠ Toán học</button>
                     <button class="code-launch" type="button" onclick="openCodePlace()">&lt;/&gt; Code Place</button>
-                    <label class="model-pill" title="Chọn mô hình AI"><i></i><select id="aiProviderSelect" aria-label="Chọn mô hình AI"><option value="cloudflare" selected>Qwen Cloud (Cloudflare)</option><option value="ollama">Qwen Local</option><option value="gemini">Gemini Flash</option></select><span>⌄</span></label>
+                    <div class="model-pill" title="Tự động: Qwen Cloud cho văn bản, Gemini Flash phân tích ảnh"><i></i><span style="color:#aeb7ca">Auto · Qwen Cloud</span></div>
                     <button class="topbar-icon" title="Giao diện">◐</button>
                     <button class="topbar-icon" title="Thông tin">ⓘ</button>
                 </div>
@@ -1603,14 +1603,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
         
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-        // Remember the selected provider on this browser.
-        document.addEventListener('DOMContentLoaded', () => {
-            const picker = document.getElementById('aiProviderSelect');
-            if (!picker) return;
-            const saved = localStorage.getItem('vanh_ai_provider');
-            if (saved === 'ollama' || saved === 'gemini') picker.value = saved;
-            picker.addEventListener('change', () => localStorage.setItem('vanh_ai_provider', picker.value));
-        });
         let currentAttachedImage = null;
         let currentAttachedFileText = '';
 
@@ -2189,38 +2181,50 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             document.getElementById('anyInputFile').click();
         };
 
-        // ================= LOCAL AI: OLLAMA / QWEN =================
-        async function askOllama(promptText) {
-            const session = activeSessionId !== null ? currentChatSessions[activeSessionId] : null;
-            const priorMessages = (session?.messages || []).slice(-10)
-                .filter(item => item && (item.sender === 'user' || item.sender === 'ai') && item.text)
-                .map(item => ({ role: item.sender === 'ai' ? 'assistant' : 'user', content: String(item.text).slice(0, 6000) }));
-            priorMessages.push({ role: 'user', content: promptText });
+        // ================= GEMINI FLASH: PHÂN TÍCH ẢNH =================
+        async function analyzeImageWithGemini(dataUrl, userPrompt) {
+            if (!dataUrl || !dataUrl.includes(',')) {
+                throw new Error('Ảnh đính kèm không hợp lệ. Hãy thử gửi lại ảnh.');
+            }
+            const mimeType = dataUrl.slice(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';')) || 'image/jpeg';
+            const base64Data = dataUrl.split(',')[1];
+            if (!base64Data) throw new Error('Không đọc được dữ liệu ảnh.');
+
+            const instruction = [
+                'Bạn là bộ phận thị giác của Vanh AI.',
+                'Hãy quan sát kỹ hình ảnh và chuyển những thông tin nhìn thấy thành mô tả văn bản rõ ràng, chính xác để một AI khác có thể phân tích tiếp.',
+                'Nếu ảnh có chữ, hãy chép lại chữ đọc được. Nếu là bài tập, giữ nguyên đề bài, số liệu, ký hiệu và yêu cầu. Nếu là biểu đồ/bảng, mô tả cấu trúc và dữ liệu. Không tự bịa chi tiết không nhìn thấy.',
+                'Chỉ trả về phần mô tả và nội dung trích xuất từ ảnh, không trả lời thay cho câu hỏi cuối cùng của người dùng.',
+                'Yêu cầu của người dùng: ' + (userPrompt || 'Hãy mô tả và phân tích nội dung hình ảnh này.')
+            ].join('\n');
 
             let response;
             try {
-                response = await fetch('http://localhost:11434/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'qwen2.5:1.5b',
-                        messages: priorMessages,
-                        stream: false,
-                        keep_alive: '10m',
-                        options: { num_ctx: 2048, num_predict: 512 }
-                    })
+                response = await ai.models.generateContent({
+                    model: 'gemini-3.6-flash',
+                    contents: [{
+                        role: 'user',
+                        parts: [
+                            { text: instruction },
+                            { inlineData: { mimeType, data: base64Data } }
+                        ]
+                    }]
                 });
             } catch (error) {
-                throw new Error('Không kết nối được Ollama trên máy này. Hãy mở Ollama và kiểm tra OLLAMA_ORIGINS. Chi tiết: ' + (error?.message || error));
+                throw new Error('Gemini Flash không phân tích được ảnh: ' + (error?.message || error));
             }
-            if (!response.ok) {
-                const detail = await response.text().catch(() => '');
-                throw new Error('Ollama trả về lỗi ' + response.status + (detail ? ': ' + detail.slice(0, 300) : ''));
+
+            let imageText = '';
+            try { imageText = response?.text || ''; } catch (_) {}
+            if (!imageText && response?.candidates?.[0]?.content?.parts) {
+                imageText = response.candidates[0].content.parts
+                    .filter(part => typeof part.text === 'string' && !part.thought)
+                    .map(part => part.text).join('\n').trim();
             }
-            const data = await response.json();
-            const answer = data?.message?.content;
-            if (!answer) throw new Error('Ollama chưa trả về nội dung.');
-            return answer;
+            if (!imageText.trim()) {
+                throw new Error('Gemini Flash đã nhận ảnh nhưng không trả về nội dung phân tích.');
+            }
+            return imageText.trim();
         }
 
         // ================= CLOUDFLARE AI: QWEN CLOUD =================
@@ -2337,38 +2341,21 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 
             let aiReply = "";
             try {
-                let contentsParam = [];
-                if (attachedFileText) {
-                    contentsParam = promptText;
-                } else if (attachedImg) {
-                    const base64Data = attachedImg.split(',')[1];
-                    const mimeType = attachedImg.substring(attachedImg.indexOf(':') + 1, attachedImg.indexOf(';'));
-                    
-                    contentsParam = [
-                        { inlineData: { data: base64Data, mimeType: mimeType } },
-                        text ? text : "Hãy mô tả hoặc phân tích hình ảnh này giúp tôi."
-                    ];
+                if (attachedImg) {
+                    const status = document.querySelector(`#${loadingId} .typewriter-content`);
+                    if (status) status.innerHTML = '<span style="color:#9c94ff">Gemini Flash đang đọc và phân tích ảnh...</span><span class="thinking-dots"><i></i><i></i><i></i></span>';
+                    const imageAnalysis = await analyzeImageWithGemini(attachedImg, text);
+                    if (status) status.innerHTML = '<span style="color:#9c94ff">Gemini đã đọc ảnh. Qwen Cloud đang phân tích và trả lời...</span><span class="thinking-dots"><i></i><i></i><i></i></span>';
+                    const qwenPrompt = [
+                        text ? 'Yêu cầu của người dùng: ' + text : 'Người dùng gửi ảnh và muốn bạn phân tích nội dung.',
+                        'Nội dung hình ảnh do Gemini Flash quan sát và chuyển thành văn bản:',
+                        imageAnalysis,
+                        'Hãy tự phân tích nội dung trên, giải quyết yêu cầu của người dùng và đưa ra câu trả lời hoàn chỉnh. Không cần nhắc đến quy trình chuyển ảnh thành văn bản.'
+                    ].join('\n\n');
+                    aiReply = await askCloudflare(qwenPrompt);
                 } else {
-                    contentsParam = text;
-                }
-
-                const provider = document.getElementById('aiProviderSelect')?.value || 'cloudflare';
-                if (provider === 'cloudflare') {
-                    if (attachedImg) {
-                        throw new Error('Qwen Cloud hiện đang được cấu hình dạng văn bản, chưa phân tích được ảnh. Hãy chuyển sang Gemini Flash để gửi ảnh.');
-                    }
+                    // Văn bản và nội dung tài liệu đã trích xuất luôn được gửi thẳng tới Qwen Cloud.
                     aiReply = await askCloudflare(promptText || text);
-                } else if (provider === 'ollama') {
-                    if (attachedImg) {
-                        throw new Error('Qwen2.5:1.5b hiện là mô hình văn bản, chưa phân tích được ảnh. Hãy chuyển sang Gemini Flash để gửi ảnh.');
-                    }
-                    aiReply = await askOllama(promptText || text);
-                } else {
-                    const response = await ai.models.generateContent({
-                        model: 'gemini-3.6-flash',
-                        contents: contentsParam,
-                    });
-                    aiReply = response.text || "Không nhận được phản hồi.";
                 }
             } catch (err) {
                 aiReply = "Lỗi AI: " + (err?.message || String(err));

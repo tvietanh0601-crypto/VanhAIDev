@@ -2231,6 +2231,45 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
             return imageText.trim();
         }
 
+        // ================= OLLAMA LOCAL: ƯU TIÊN TỐC ĐỘ =================
+        // Khi máy tính bật và Ollama đang chạy, văn bản được xử lý trực tiếp trên máy.
+        // Nếu máy tắt/Ollama không truy cập được, tự động chuyển sang Qwen Cloud.
+        async function askOllamaLocal(promptText) {
+            const session = activeSessionId !== null ? currentChatSessions[activeSessionId] : null;
+            const messages = (session?.messages || []).slice(-10)
+                .filter(item => item && (item.sender === 'user' || item.sender === 'ai') && item.text)
+                .map(item => ({
+                    role: item.sender === 'ai' ? 'assistant' : 'user',
+                    content: String(item.text).slice(0, 6000)
+                }));
+            messages.push({ role: 'user', content: String(promptText || '').slice(0, 8000) });
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 4500);
+            try {
+                const response = await fetch('http://localhost:11434/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'qwen2.5:1.5b',
+                        messages,
+                        stream: false,
+                        options: { temperature: 0.6 }
+                    }),
+                    signal: controller.signal
+                });
+                if (!response.ok) throw new Error('Ollama HTTP ' + response.status);
+                const data = await response.json();
+                const answer = data?.message?.content || data?.response || '';
+                if (typeof answer !== 'string' || !answer.trim()) {
+                    throw new Error('Ollama không trả về nội dung văn bản.');
+                }
+                return answer.trim();
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
         // ================= CLOUDFLARE AI: QWEN CLOUD =================
         async function askCloudflare(promptText) {
             const session = activeSessionId !== null ? currentChatSessions[activeSessionId] : null;
@@ -2358,8 +2397,17 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
                     ].join('\n\n');
                     aiReply = await askCloudflare(qwenPrompt);
                 } else {
-                    // Văn bản và nội dung tài liệu đã trích xuất luôn được gửi thẳng tới Qwen Cloud.
-                    aiReply = await askCloudflare(promptText || text);
+                    // Ưu tiên Ollama trên máy để có độ trễ thấp. Nếu PC tắt hoặc Ollama
+                    // không truy cập được, tự động dùng Cloudflare để người dùng vẫn chat được.
+                    const status = document.querySelector(`#${loadingId} .typewriter-content`);
+                    try {
+                        if (status) status.innerHTML = '<span style="color:#9c94ff">Đang kết nối Ollama trên máy...</span><span class="thinking-dots"><i></i><i></i><i></i></span>';
+                        aiReply = await askOllamaLocal(promptText || text);
+                    } catch (localError) {
+                        console.info('Ollama không khả dụng, tự chuyển sang Qwen Cloud:', localError?.message || localError);
+                        if (status) status.innerHTML = '<span style="color:#9c94ff">Ollama không khả dụng. Đang chuyển sang Qwen Cloud...</span><span class="thinking-dots"><i></i><i></i><i></i></span>';
+                        aiReply = await askCloudflare(promptText || text);
+                    }
                 }
             } catch (err) {
                 aiReply = "Lỗi AI: " + (err?.message || String(err));
